@@ -6,7 +6,7 @@
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "/Volumes/project/go/main.go",
+            "program": "/Volumes/project/notebook/main.go",
         }
     ]
 }

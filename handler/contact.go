@@ -21,7 +21,7 @@ func CreateContact(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
 	}
 
-	result, e := db.Exec("insert into t_contacts(realname, phone, address,createTime,createUser) values(?,?,?,?,?)",
+	result, e := db.Exec("insert into t_contact(realname, phone, address,createTime,createUser) values(?,?,?,?,?)",
 		contact.Name, contact.Phone, contact.Address, time.Now().Format("2006-01-02"), userId)
 
 	if e != nil {
@@ -77,7 +77,7 @@ func QueryContactList(c *fiber.Ctx) error {
 
 	if e != nil {
 		fmt.Println("err=", e)
-		return c.JSON(fiber.Map{"status": "error", "message": "参数格式错误"})
+		return c.JSON(fiber.Map{"status": "error", "message": e.Error()})
 	}
 
 	db.Get(&count, "select count(1) from t_contacts where "+strings.Join(paramKeys, " and ")+pageSql, paramValues...)
@@ -91,7 +91,7 @@ func DeleteContact(c *fiber.Ctx) error {
 	token := c.Get("Authorization")
 	userId := utils.GetFromToken(token, "user_id")
 
-	result, e := db.Exec("delete from t_contacts where 1=1 and createUser=? and id=?", userId, id)
+	result, e := db.Exec("delete from t_contact where 1=1 and createUser=? and id=?", userId, id)
 
 	if e != nil {
 		fmt.Println("err=", e)
@@ -108,7 +108,7 @@ func GetContactById(c *fiber.Ctx) error {
 	userId := utils.GetFromToken(token, "user_id")
 	var contact model.Contact
 
-	e := db.Get(&contact, "select * from t_contacts where 1=1 and createUser=? and id=?", userId, id)
+	e := db.Get(&contact, "select * from t_contact where 1=1 and createUser=? and id=?", userId, id)
 
 	if e != nil {
 		fmt.Println("err=", e)
