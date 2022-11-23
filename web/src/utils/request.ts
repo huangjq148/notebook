@@ -47,8 +47,10 @@ axios.interceptors.response.use(
         message.error(response.data.message)
         return Promise.reject(new Error(response.data.message));
     },
-    async (error: AxiosError) => {
-
+    async (error: AxiosError<{ code: number }>) => {
+        if (error?.response?.data.code === 401) {
+            window.location.href = "/login"
+        }
         return Promise.reject(error?.response?.data || error);
     },
 );
