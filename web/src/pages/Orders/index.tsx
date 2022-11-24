@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import { Table, Form, Input, Button, Space, Modal, message } from 'antd'
-import { SearchForm } from "@/components"
+import { SearchForm, TextButton } from "@/components"
 import { useTable } from '@/hooks'
-import { queryOrder, deleteOrder } from "@/services/order"
+import { deleteOrder, queryOrder } from "@/services/order"
+import { Button, Form, Input, message, Modal, Space, Table } from 'antd'
+import { useState } from 'react'
 import EditPage from "./Edit"
 import styles from "./index.module.less"
 
@@ -45,12 +45,13 @@ export default () => {
         {
             title: '操作',
             key: "operation",
+            width: "240px",
             render: (record: Order) => (
-                <Space>
-                    <Button type="text" onClick={() => handleEditClick(record.id as string)}>编辑</Button>
-                    <Button type="text" onClick={() => handleEditClick(record.id as string)}>已完成</Button>
-                    <Button type="text" onClick={() => handleEditClick(record.id as string)}>未完成</Button>
-                    <Button type="text" onClick={() => handleOrderDelete(record.id as string)}>删除</Button>
+                <Space size="middle">
+                    <TextButton onClick={() => handleEditClick(record.id as string)}>编辑</TextButton>
+                    <TextButton onClick={() => handleEditClick(record.id as string)}>已完成</TextButton>
+                    <TextButton onClick={() => handleEditClick(record.id as string)}>未完成</TextButton>
+                    <TextButton onClick={() => handleOrderDelete(record.id as string)}>删除</TextButton>
                 </Space>
             )
         },
@@ -74,7 +75,7 @@ export default () => {
     return <div>
         <SearchForm>
             <Form onFinish={handleFormSearch} layout="inline">
-                <Form.Item label="商品名" name="name">
+                <Form.Item label="品名" name="name">
                     <Input />
                 </Form.Item>
                 <Form.Item>

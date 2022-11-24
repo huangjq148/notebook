@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Table, Form, Input, Button, Space, Modal, message } from "antd";
-import { SearchForm } from "@/components";
+import { SearchForm, TextButton } from "@/components";
 import { useTable } from "@/hooks";
-import { queryContact, deleteContact } from "@/services/contact";
+import { deleteContact, queryContact } from "@/services/contact";
+import { Button, Form, Input, message, Modal, Space, Table } from "antd";
+import { useState } from "react";
 import EditPage from "./Edit";
 import styles from "./index.module.less";
 
@@ -40,14 +40,11 @@ export default () => {
     {
       title: "操作",
       key: "operation",
+      width: "140px",
       render: (record: Contact) => (
-        <Space>
-          <Button type="link" onClick={() => handleEditClick(record.id as string)}>
-            编辑
-          </Button>
-          <Button type="link" onClick={() => handleContactDelete(record.id as string)}>
-            删除
-          </Button>
+        <Space size="middle">
+          <TextButton onClick={() => handleEditClick(record.id as string)}>编辑</TextButton>
+          <TextButton onClick={() => handleContactDelete(record.id as string)}>删除</TextButton>
         </Space>
       ),
     },

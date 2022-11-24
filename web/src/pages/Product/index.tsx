@@ -3,6 +3,7 @@ import { useTable } from '@/hooks'
 import { deleteProduct, queryProduct } from "@/services/product"
 import { Button, Form, Input, message, Modal, Space, Table } from 'antd'
 import { useState } from 'react'
+import { TextButton } from "@/components"
 import EditPage from "./Edit"
 import styles from "./index.module.less"
 
@@ -33,10 +34,11 @@ export default () => {
         {
             title: '操作',
             key: "operation",
+            width: "160px",
             render: (record: Product) => (
-                <Space>
-                    <Button type="link" onClick={() => handleEditClick(record.id as string)}>编辑</Button>
-                    <Button type="link" onClick={() => handleProductDelete(record.id as string)}>删除</Button>
+                <Space size="middle">
+                    <TextButton onClick={() => handleEditClick(record.id as string)}>编辑</TextButton>
+                    <TextButton onClick={() => handleProductDelete(record.id as string)}>删除</TextButton>
                 </Space>
             )
         },
@@ -59,7 +61,7 @@ export default () => {
     return <div>
         <SearchForm>
             <Form onFinish={handleFormSearch} layout="inline">
-                <Form.Item label="商品名" name="name">
+                <Form.Item label="品名" name="name">
                     <Input allowClear />
                 </Form.Item>
                 <Form.Item>

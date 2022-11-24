@@ -33,7 +33,7 @@ export default () => {
     return <div>
         <SearchForm>
             <Form onFinish={handleFormSearch} layout="inline">
-                <Form.Item label="商品名" name="goodsName">
+                <Form.Item label="品名" name="goodsName">
                     <Input />
                 </Form.Item>
                 <Form.Item label="客户名字" name="contaceName">
