@@ -1,30 +1,33 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react";
+import { TablePaginationConfig } from "antd/es/table";
 
-export default <T>(props: { request: any, conditions: Record<string, any> }) => {
-    const { request, conditions } = props;
-    const [loading, setLoading] = useState(false)
-    const [dataSource, setDataSource] = useState<T[]>([
-        {
-            key: '1',
-            name: '胡彦斌',
-            age: 32,
-            address: '西湖区湖底公园1号',
-        },
-        {
-            key: '2',
-            name: '胡彦祖',
-            age: 42,
-            address: '西湖区湖底公园1号',
-        },] as any)
+type Pagination = TablePaginationConfig;
 
-    const loadData = async () => {
-        const result = await request(conditions);
-        setDataSource(result)
-    }
+export default <T>(props: { request: any; conditions: Record<string, any> }) => {
+  const { request, conditions } = props;
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState<Pagination>({
+    pageSize: 10,
+    current: 1,
+    total: 30,
+  });
+  const [dataSource, setDataSource] = useState<T[]>([] as any);
 
-    useEffect(() => {
-        loadData()
-    }, [])
+  const loadData = async (params?: any) => {
+    const { current, pageSize } = pagination;
+    setLoading(true);
+    const result = await request({ ...conditions, current, pageSize });
+    setLoading(false);
+    setDataSource(result);
+  };
 
-    return { dataSource, loading, searchForm: loadData }
-}
+  const handlePageChange = (newPagination: Pagination) => {
+    setPagination(newPagination);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [pagination.current, pagination.pageSize, conditions]);
+
+  return { dataSource, loading, searchForm: loadData, pagination, handlePageChange };
+};
