@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import { Table, Form, Input, Button, Space, Modal, message } from 'antd'
 import { SearchForm } from "@/components"
 import { useTable } from '@/hooks'
-import { queryProduct, deleteProduct } from "@/services/product"
+import { deleteProduct, queryProduct } from "@/services/product"
+import { Button, Form, Input, message, Modal, Space, Table } from 'antd'
+import { useState } from 'react'
 import EditPage from "./Edit"
 import styles from "./index.module.less"
 

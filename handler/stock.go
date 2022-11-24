@@ -5,6 +5,7 @@ import (
 	"api-fiber-gorm/model"
 	"api-fiber-gorm/utils"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -32,24 +33,36 @@ func CreateStock(c *fiber.Ctx) error {
 }
 
 func QueryStockList(c *fiber.Ctx) error {
+	var paramKeys []string
+	var paramValues []interface{}
+	var queryResult []model.Stock
+	var count int
 	db := database.DBConn
-	// var product model.Stock
+	pageSql := utils.GeneratePageSql(c)
+	orderSql := " order by createTime desc"
 	token := c.Get("Authorization")
 	userId := utils.GetFromToken(token, "user_id")
-	var queryResult []model.Stock
 
-	// if err := c.BodyParser(&product); err != nil {
-	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
-	// }
+	paramKeys = append(paramKeys, "createUser=?")
+	paramValues = append(paramValues, userId)
 
-	e := db.Select(&queryResult, "select * from t_stock where 1=1 and createUser=?", userId)
+	paramKeys = append(paramKeys, "name like ?")
+	paramValues = append(paramValues, "%"+c.Query("name")+"%")
+
+	whereSql := " where " + strings.Join(paramKeys, " and ")
+
+	finalSql := "select * from t_stock " + whereSql + orderSql + pageSql
+
+	e := db.Select(&queryResult, finalSql, paramValues...)
 
 	if e != nil {
 		fmt.Println("err=", e)
 		return c.JSON(fiber.Map{"status": "error", "message": "参数格式错误"})
 	}
 
-	return c.JSON(fiber.Map{"status": "success", "message": "保存成功", "data": queryResult})
+	db.Get(&count, "select count(1) from t_stock where "+whereSql, paramValues...)
+
+	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": fiber.Map{"content": queryResult, "total": count}})
 }
 
 func DeleteStock(c *fiber.Ctx) error {

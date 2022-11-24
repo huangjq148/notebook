@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Form, Input, message } from "antd"
-import { createStock } from "@/services/stock"
+import { createStock, updateStock, queryStockById } from "@/services/stock"
 
 type Props = {
     id?: string
@@ -8,18 +8,34 @@ type Props = {
 }
 
 export default (props: Props) => {
+    const [oldData, setOldData] = useState<Partial<Product>>({})
+    const [formRef] = Form.useForm()
 
     const handleFormSubmit = async (values: Stock) => {
-        await createStock(values)
+        if (props.id) {
+            await updateStock({ ...oldData, ...values })
+        } else {
+            await createStock(values)
+        }
         message.success("保存成功")
         props?.onSubmit?.();
     }
 
+
+    const loadData = async () => {
+        if (props.id) {
+            const data = await queryStockById(props.id)
+            formRef.setFieldsValue(data)
+            setOldData(data)
+        }
+    }
+
     useEffect(() => {
-        console.log(props.id);
+        loadData()
     }, [props.id])
 
-    return <Form onFinish={handleFormSubmit}>
+
+    return <Form onFinish={handleFormSubmit} form={formRef}>
         <Form.Item label="品名" name="name">
             <Input />
         </Form.Item>

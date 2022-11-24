@@ -37,13 +37,18 @@ export default () => {
         {
             title: '操作',
             key: "operation",
-            render: (record: Product) => <Button type="text" onClick={() => handleProductDelete(record.id as string)}>删除</Button>
+            render: (record: Product) => (
+                <Space>
+                    <Button type="text" onClick={() => handleProductDelete(record.id as string)}>出货</Button>
+                    <Button type="text" onClick={() => handleEditClick(record.id as string)}>编辑</Button>
+                    <Button type="text" onClick={() => handleProductDelete(record.id as string)}>删除</Button>
+                </Space>
+            )
         },
     ];
 
     const handleFormSearch = (values: any) => {
-        console.log(values);
-        searchForm()
+        setConditions(values);
     }
 
     const handleAfterCreate = () => {
@@ -51,12 +56,15 @@ export default () => {
         searchForm()
     }
 
+    const handleEditClick = (id: string) => {
+        setModalOptions({ id, open: true });
+    }
 
     return <div>
         <SearchForm>
             <Form onFinish={handleFormSearch} layout="inline">
                 <Form.Item label="商品名" name="name">
-                    <Input />
+                    <Input allowClear />
                 </Form.Item>
                 <Form.Item>
                     <Space>
