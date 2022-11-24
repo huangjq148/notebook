@@ -3,10 +3,11 @@ import { Table, Form, Input, Button, Space } from 'antd'
 import { SearchForm } from "@/components"
 import { useTable } from '@/hooks'
 import styles from "./index.module.less"
+import { queryOrder } from '@/services/order'
 
 export default () => {
     const [conditions, setConditions] = useState({})
-    const { dataSource, loading } = useTable({ conditions })
+    const { dataSource, loading } = useTable<Order>({ conditions, request: queryOrder })
 
     const columns = [
         {

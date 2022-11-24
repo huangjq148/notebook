@@ -14,8 +14,12 @@ export interface UserInfoModel {
 export default create(
     (set: (params: Partial<UserInfoModel>) => void, get: () => Required<UserInfoModel>): UserInfoModel => ({
         userInfo: {
-            Id: "",
-            Name: '-',
+            id: "",
+            name: '-',
+            createUser: "",
+            updateUser: "",
+            createTime: "",
+            updateTime: "",
         },
 
         getUserInfo: async () => {
