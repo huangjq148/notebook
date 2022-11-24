@@ -8,12 +8,12 @@ export const queryProduct = async (conditions: Record<string, unknown>): Promise
     return request(`/product`, { method: "GET", params: conditions })
 }
 
-export const queryProductById = async (id: string): Promise<Product[]> => {
+export const queryProductById = async (id: string): Promise<Product> => {
     return request(`/product/${id}`, { method: "GET" })
 }
 
-export const updateProduct = async (id: string): Promise<Product[]> => {
-    return request(`/product`, { method: "PATCH" })
+export const updateProduct = async (data: Product): Promise<void> => {
+    return request(`/product`, { method: "PATCH", data })
 }
 
 export const deleteProduct = async (id: string): Promise<Product[]> => {

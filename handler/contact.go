@@ -72,8 +72,6 @@ func QueryContactList(c *fiber.Ctx) error {
 	paramKeys = append(paramKeys, "address like ?")
 	paramValues = append(paramValues, "%"+c.Query("address")+"%")
 
-	fmt.Println(paramKeys, paramValues)
-
 	e := db.Select(&queryResult, "select * from t_contact where "+strings.Join(paramKeys, " and ")+orderSql+pageSql, paramValues...)
 
 	if e != nil {
