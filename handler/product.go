@@ -113,7 +113,7 @@ func UpdateProduct(c *fiber.Ctx) error {
 
 	if e != nil {
 		fmt.Println("err=", e)
-		return c.JSON(fiber.Map{"status": "error", "message": "修改失败", "data": e})
+		return c.JSON(fiber.Map{"status": "error", "message": "修改失败", "data": e.Error()})
 	}
 
 	return c.JSON(fiber.Map{"status": "success", "message": "修改成功", "data": result})

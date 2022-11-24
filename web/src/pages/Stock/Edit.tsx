@@ -21,7 +21,6 @@ export default (props: Props) => {
         props?.onSubmit?.();
     }
 
-
     const loadData = async () => {
         if (props.id) {
             const data = await queryStockById(props.id)
@@ -33,7 +32,6 @@ export default (props: Props) => {
     useEffect(() => {
         loadData()
     }, [props.id])
-
 
     return <Form onFinish={handleFormSubmit} form={formRef}>
         <Form.Item label="品名" name="name">

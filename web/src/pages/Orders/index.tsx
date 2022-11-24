@@ -45,7 +45,14 @@ export default () => {
         {
             title: '操作',
             key: "operation",
-            render: (record: Order) => <Button type="text" onClick={() => handleOrderDelete(record.id as string)}>删除</Button>
+            render: (record: Order) => (
+                <Space>
+                    <Button type="text" onClick={() => handleEditClick(record.id as string)}>编辑</Button>
+                    <Button type="text" onClick={() => handleEditClick(record.id as string)}>已完成</Button>
+                    <Button type="text" onClick={() => handleEditClick(record.id as string)}>未完成</Button>
+                    <Button type="text" onClick={() => handleOrderDelete(record.id as string)}>删除</Button>
+                </Space>
+            )
         },
     ];
 
@@ -57,6 +64,10 @@ export default () => {
     const handleAfterCreate = () => {
         setModalOptions({ id: "", open: false })
         searchForm()
+    }
+
+    const handleEditClick = (id: string) => {
+        setModalOptions({ id, open: true });
     }
 
 
@@ -77,7 +88,7 @@ export default () => {
             </Form>
         </SearchForm>
         <div className={styles.tableWrapper}>
-            <Table loading={loading} dataSource={dataSource} columns={columns} />
+            <Table rowKey="id" loading={loading} dataSource={dataSource} columns={columns} />
         </div>
 
         <Modal destroyOnClose footer={null} title={modalOptions.id ? "编辑" : "新增"} open={modalOptions.open} onCancel={() => setModalOptions({ id: "", open: false })} >

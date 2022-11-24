@@ -5,6 +5,7 @@ import (
 	"api-fiber-gorm/model"
 	"api-fiber-gorm/utils"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -32,24 +33,37 @@ func CreateOrder(c *fiber.Ctx) error {
 }
 
 func QueryOrderList(c *fiber.Ctx) error {
+	var paramKeys []string
+	var paramValues []interface{}
+	var queryResult []model.Order
+	var count int
 	db := database.DBConn
-	// var product model.Product
+	pageSql := utils.GeneratePageSql(c)
+	orderSql := " order by createTime desc"
 	token := c.Get("Authorization")
 	userId := utils.GetFromToken(token, "user_id")
-	var queryResult []model.Order
 
-	// if err := c.BodyParser(&product); err != nil {
-	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
-	// }
+	paramKeys = append(paramKeys, "createUser=?")
+	paramValues = append(paramValues, userId)
 
-	e := db.Select(&queryResult, "select * from t_order where 1=1 and createUser=?", userId)
+	paramKeys = append(paramKeys, "name like ?")
+	paramValues = append(paramValues, "%"+c.Query("name")+"%")
+
+	whereSql := " where " + strings.Join(paramKeys, " and ")
+
+	finalSql := "select * from t_order " + whereSql + orderSql + pageSql
+
+	e := db.Select(&queryResult, finalSql, paramValues...)
+	fmt.Println("sql=", finalSql, "params", paramValues)
 
 	if e != nil {
 		fmt.Println("err=", e)
 		return c.JSON(fiber.Map{"status": "error", "message": e.Error()})
 	}
 
-	return c.JSON(fiber.Map{"status": "success", "message": "保存成功", "data": queryResult})
+	db.Get(&count, "select count(1) from t_order where "+whereSql, paramValues...)
+
+	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": fiber.Map{"content": queryResult, "total": count}})
 }
 
 func DeleteOrder(c *fiber.Ctx) error {
@@ -95,11 +109,12 @@ func UpdateOrder(c *fiber.Ctx) error {
 
 	database.GetById(order)
 
-	result, e := db.Exec("update t_order set realname=?, phone=?, address=? where id=?", order.Name, order.Phone, order.Address, order.Id)
+	result, e := db.Exec("update t_order set name=?, contact=?, phone=?, address=?, buyPrice=?, sellPrice=?, number=?, remark=? where id=?",
+		order.Name, order.Contact, order.Phone, order.Address, order.BuyPrice, order.SellPrice, order.Number, order.Remark, order.Id)
 
 	if e != nil {
 		fmt.Println("err=", e)
-		return c.JSON(fiber.Map{"status": "error", "message": "修改失败", "data": e})
+		return c.JSON(fiber.Map{"status": "error", "message": "修改失败", "data": e.Error()})
 	}
 
 	return c.JSON(fiber.Map{"status": "success", "message": "修改成功", "data": result})

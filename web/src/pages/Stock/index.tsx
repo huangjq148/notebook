@@ -77,7 +77,7 @@ export default () => {
             </Form>
         </SearchForm>
         <div className={styles.tableWrapper}>
-            <Table loading={loading} dataSource={dataSource} columns={columns} />
+            <Table rowKey="id" loading={loading} dataSource={dataSource} columns={columns} />
         </div>
 
         <Modal destroyOnClose footer={null} title={modalOptions.id ? "编辑" : "新增"} open={modalOptions.open} onCancel={() => setModalOptions({ id: "", open: false })} >
