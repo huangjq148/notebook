@@ -49,6 +49,14 @@ func QueryOrderList(c *fiber.Ctx) error {
 	paramKeys = append(paramKeys, "name like ?")
 	paramValues = append(paramValues, "%"+c.Query("name")+"%")
 
+	if c.Query("createTime") != "" {
+		paramKeys = append(paramKeys, "createTime = ?")
+		paramValues = append(paramValues, c.Query("createTime"))
+	}
+
+	paramKeys = append(paramKeys, "status like ?")
+	paramValues = append(paramValues, "%"+c.Query("status")+"%")
+
 	whereSql := " where " + strings.Join(paramKeys, " and ")
 
 	finalSql := "select * from t_order " + whereSql + orderSql + pageSql
@@ -111,6 +119,21 @@ func UpdateOrder(c *fiber.Ctx) error {
 
 	result, e := db.Exec("update t_order set name=?, contact=?, phone=?, address=?, buyPrice=?, sellPrice=?, number=?, remark=? where id=?",
 		order.Name, order.Contact, order.Phone, order.Address, order.BuyPrice, order.SellPrice, order.Number, order.Remark, order.Id)
+
+	if e != nil {
+		fmt.Println("err=", e)
+		return c.JSON(fiber.Map{"status": "error", "message": "修改失败", "data": e.Error()})
+	}
+
+	return c.JSON(fiber.Map{"status": "success", "message": "修改成功", "data": result})
+}
+
+func ChangeStatus(c *fiber.Ctx) error {
+	db := database.DBConn
+	status := c.Params("status")
+	id := c.Params("id")
+
+	result, e := db.Exec("update t_order set status=? where id=?", status, id)
 
 	if e != nil {
 		fmt.Println("err=", e)

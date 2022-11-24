@@ -17,6 +17,7 @@ type Order struct {
 	SellPrice string `db:"sellPrice" json:"sellPrice"`
 	Number    string `db:"number" json:"number"`
 	Remark    string `db:"remark" json:"remark"`
+	Status    string `db:"status" json:"status"`
 	*CreateInfo
 }
 

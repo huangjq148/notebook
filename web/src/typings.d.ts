@@ -28,6 +28,7 @@ declare interface Order extends CreateInfo {
     sellPrice: string
     number: number
     remark: string
+    status: string
 }
 
 declare interface Contact extends CreateInfo {

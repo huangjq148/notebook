@@ -19,3 +19,7 @@ export const updateOrder = async (data: Order): Promise<void> => {
 export const deleteOrder = async (id: string): Promise<void> => {
     return request(`/order/${id}`, { method: "DELETE" })
 }
+
+export const changeOrderStatus = async (id: string, status: string): Promise<void> => {
+    return request(`/order/${id}/status/${status}`, { method: "PATCH" })
+}

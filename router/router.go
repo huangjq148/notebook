@@ -45,6 +45,7 @@ func SetupRoutes(app *fiber.App) {
 	order.Get("/:id", middleware.Protected(), handler.GetOrderById)
 	order.Delete("/:id", middleware.Protected(), handler.DeleteOrder)
 	order.Patch("", middleware.Protected(), handler.UpdateOrder)
+	order.Patch("/:id/status/:status", middleware.Protected(), handler.ChangeStatus)
 
 	// Auth
 	user := api.Group("/user")

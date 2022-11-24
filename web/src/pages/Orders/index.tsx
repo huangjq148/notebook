@@ -1,9 +1,11 @@
 import { SearchForm, TextButton } from "@/components"
 import { useTable } from '@/hooks'
-import { deleteOrder, queryOrder } from "@/services/order"
-import { Button, Form, Input, message, Modal, Space, Table } from 'antd'
+import { deleteOrder, queryOrder, changeOrderStatus } from "@/services/order"
+import { Button, Form, Input, message, Modal, Space, Table, DatePicker, Select } from 'antd'
 import { useState } from 'react'
 import EditPage from "./Edit"
+import { STATUS, translateToArray } from "@/data"
+import dayjs from "dayjs"
 import styles from "./index.module.less"
 
 export default () => {
@@ -15,6 +17,29 @@ export default () => {
         await deleteOrder(id)
         message.success("删除成功")
         searchForm()
+    }
+
+    const handleOrderStatusChange = async (id: string, status: string) => {
+        await changeOrderStatus(id, status)
+        message.success("修改成功")
+        searchForm()
+    }
+
+    const handleFormSearch = (values: any) => {
+        values = {
+            ...values,
+            createTime: dayjs(values.createTime).format("YYYY-MM-DD")
+        }
+        setConditions(values);
+    }
+
+    const handleAfterCreate = () => {
+        setModalOptions({ id: "", open: false })
+        searchForm()
+    }
+
+    const handleEditClick = (id: string) => {
+        setModalOptions({ id, open: true });
     }
 
     const columns = [
@@ -43,40 +68,50 @@ export default () => {
             dataIndex: 'remark',
         },
         {
+            title: '日期',
+            dataIndex: 'createTime',
+        },
+        {
+            title: '状态',
+            dataIndex: 'status',
+            render(status: string) {
+                return <span className={styles.status} data-status={status}>{translateToArray("STATUS")[status]}</span>
+            }
+        },
+        {
             title: '操作',
             key: "operation",
-            width: "240px",
+            width: "200px",
             render: (record: Order) => (
                 <Space size="middle">
                     <TextButton onClick={() => handleEditClick(record.id as string)}>编辑</TextButton>
-                    <TextButton onClick={() => handleEditClick(record.id as string)}>已完成</TextButton>
-                    <TextButton onClick={() => handleEditClick(record.id as string)}>未完成</TextButton>
+                    {
+                        record.status == "1" ?
+                            <TextButton onClick={() => handleOrderStatusChange(record.id as string, "2")}>已完成</TextButton> :
+                            <TextButton onClick={() => handleOrderStatusChange(record.id as string, "1")}>未完成</TextButton>
+                    }
                     <TextButton onClick={() => handleOrderDelete(record.id as string)}>删除</TextButton>
                 </Space>
             )
         },
     ];
 
-    const handleFormSearch = (values: any) => {
-        console.log(values);
-        searchForm()
-    }
-
-    const handleAfterCreate = () => {
-        setModalOptions({ id: "", open: false })
-        searchForm()
-    }
-
-    const handleEditClick = (id: string) => {
-        setModalOptions({ id, open: true });
-    }
-
 
     return <div>
         <SearchForm>
             <Form onFinish={handleFormSearch} layout="inline">
                 <Form.Item label="品名" name="name">
-                    <Input />
+                    <Input allowClear />
+                </Form.Item>
+                <Form.Item label="姓名" name="contact">
+                    <Input allowClear />
+                </Form.Item>
+                <Form.Item label="日期" name="createTime">
+                    {/* <DatePicker.RangePicker allowClear placeholder={["起始日期", "结束日期"]} /> */}
+                    <DatePicker placeholder="订单日期" allowClear />
+                </Form.Item>
+                <Form.Item label="状态" name="status">
+                    <Select allowClear options={STATUS} placeholder="订单状态" />
                 </Form.Item>
                 <Form.Item>
                     <Space>
@@ -87,7 +122,7 @@ export default () => {
                     </Space>
                 </Form.Item>
             </Form>
-        </SearchForm>
+        </SearchForm >
         <div className={styles.tableWrapper}>
             <Table rowKey="id" loading={loading} dataSource={dataSource} columns={columns} />
         </div>
@@ -97,3 +132,4 @@ export default () => {
         </Modal>
     </div >
 }
+
