@@ -8,12 +8,12 @@ export const queryContact = async (conditions: Record<string, unknown>): Promise
     return request(`/contact`, { method: "GET", params: conditions })
 }
 
-export const queryContactById = async (id: string): Promise<Contact[]> => {
+export const queryContactById = async (id: string): Promise<Contact> => {
     return request(`/contact/${id}`, { method: "GET" })
 }
 
-export const updateContact = async (id: string): Promise<Contact[]> => {
-    return request(`/contact`, { method: "PATCH" })
+export const updateContact = async (data: Contact): Promise<Contact[]> => {
+    return request(`/contact`, { method: "PATCH", data })
 }
 
 export const deleteContact = async (id: string): Promise<Contact[]> => {

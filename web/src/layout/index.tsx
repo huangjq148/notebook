@@ -6,13 +6,14 @@ import {
 import type { MenuProps } from 'antd';
 import { Layout, Menu } from "antd";
 import { useEffect } from 'react';
-import { useNavigate, Outlet } from "react-router-dom";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import styles from "./index.module.less";
 
 const { Header, Sider, Content } = Layout;
 
 export default () => {
     const navigate = useNavigate()
+    const location = useLocation()
     const {
         userInfo,
         getUserInfo
@@ -21,8 +22,8 @@ export default () => {
         userInfo: state.userInfo
     }))
 
-    const handleMenuItemClick = (key: string) => {
-        navigate(key)
+    const handleMenuItemClick = (val: { key: string }) => {
+        navigate(val.key)
     }
 
     const items: MenuProps['items'] = [
@@ -60,28 +61,22 @@ export default () => {
     return <Layout style={{ width: "100vw", height: "100vh" }}>
         <Header className={styles.header}>
             <div className={styles.logo} >Recorder</div>
-            <div className={styles.action}>{userInfo.Name} </div>
+            <div className={styles.action}>{userInfo.name ?? "-"} </div>
         </Header>
         <Layout>
-            <Sider width={200} className="site-layout-background">
+            <Sider width={180} className="site-layout-background">
                 <Menu
                     mode="inline"
                     style={{ height: '100%', borderRight: 0 }}
+                    selectedKeys={[location.pathname]}
                     key={"key"}
                     items={items}
-                    onClick={(val: { key: string }) => {
-                        navigate(val.key)
-                    }}
+                    onClick={handleMenuItemClick}
                 />
             </Sider>
-            <Layout style={{ padding: '0 24px 24px' }}>
+            <Layout >
                 <Content
-                    className="site-layout-background"
-                    style={{
-                        padding: 24,
-                        margin: 0,
-                        minHeight: 280,
-                    }}
+                    className={styles.content}
                 >
                     <Outlet />
                 </Content>

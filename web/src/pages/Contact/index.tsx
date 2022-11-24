@@ -34,12 +34,21 @@ export default () => {
       dataIndex: "address",
     },
     {
+      title: "创建时间",
+      dataIndex: "createTime",
+    },
+    {
       title: "操作",
       key: "operation",
       render: (record: Contact) => (
-        <Button type="text" onClick={() => handleContactDelete(record.id as string)}>
-          删除
-        </Button>
+        <Space>
+          <Button type="link" onClick={() => handleEditClick(record.id as string)}>
+            编辑
+          </Button>
+          <Button type="link" onClick={() => handleContactDelete(record.id as string)}>
+            删除
+          </Button>
+        </Space>
       ),
     },
   ];
@@ -53,18 +62,22 @@ export default () => {
     searchForm();
   };
 
+  const handleEditClick = (id: string) => {
+    setModalOptions({ id, open: true });
+  }
+
   return (
     <div>
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
           <Form.Item label="姓名" name="name">
-            <Input />
+            <Input allowClear />
           </Form.Item>
           <Form.Item label="电话" name="phone">
-            <Input />
+            <Input allowClear />
           </Form.Item>
           <Form.Item label="地址" name="address">
-            <Input />
+            <Input allowClear />
           </Form.Item>
           <Form.Item>
             <Space>
@@ -84,7 +97,9 @@ export default () => {
       </SearchForm>
       <div className={styles.tableWrapper}>
         <Table
+          rowKey="id"
           pagination={pagination}
+
           onChange={handlePageChange}
           loading={loading}
           dataSource={dataSource}

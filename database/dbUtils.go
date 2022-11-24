@@ -39,7 +39,7 @@ func QueryPage(c *fiber.Ctx, queryResult, data interface{}) {
 	typeOfData := reflect.TypeOf(data)
 	fieldLen := typeOfData.NumField()
 	conditions := make([]interface{}, 0)
-	sql := "select * from t_contacts where 1=1"
+	sql := "select * from t_contact where 1=1"
 	conditionNames := ""
 
 	for i := 0; i < fieldLen; i++ {

@@ -52,6 +52,7 @@ func QueryContactList(c *fiber.Ctx) error {
 	var count int
 	db := database.DBConn
 	pageSql := utils.GeneratePageSql(c)
+	orderSql := " order by createTime desc"
 	token := c.Get("Authorization")
 	userId := utils.GetFromToken(token, "user_id")
 	c.QueryParser(&queryParams)
@@ -73,16 +74,16 @@ func QueryContactList(c *fiber.Ctx) error {
 
 	fmt.Println(paramKeys, paramValues)
 
-	e := db.Select(&queryResult, "select * from t_contacts where "+strings.Join(paramKeys, " and ")+pageSql, paramValues...)
+	e := db.Select(&queryResult, "select * from t_contact where "+strings.Join(paramKeys, " and ")+orderSql+pageSql, paramValues...)
 
 	if e != nil {
 		fmt.Println("err=", e)
 		return c.JSON(fiber.Map{"status": "error", "message": e.Error()})
 	}
 
-	db.Get(&count, "select count(1) from t_contacts where "+strings.Join(paramKeys, " and ")+pageSql, paramValues...)
+	db.Get(&count, "select count(1) from t_contact where "+strings.Join(paramKeys, " and "), paramValues...)
 
-	return c.JSON(fiber.Map{"status": "success", "message": "查询", "data": fiber.Map{"content": queryResult, "total": count}})
+	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": fiber.Map{"content": queryResult, "total": count}})
 }
 
 func DeleteContact(c *fiber.Ctx) error {
@@ -126,7 +127,7 @@ func UpdateContact(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
 	}
 
-	result, e := db.Exec("update t_contacts set realname=?, phone=?, address=? where id=?", contact.Name, contact.Phone, contact.Address, contact.Id)
+	result, e := db.Exec("update t_contact set realname=?, phone=?, address=? where id=?", contact.Name, contact.Phone, contact.Address, contact.Id)
 
 	if e != nil {
 		fmt.Println("err=", e)
