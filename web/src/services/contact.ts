@@ -19,3 +19,7 @@ export const updateContact = async (data: Contact): Promise<Contact[]> => {
 export const deleteContact = async (id: string): Promise<Contact[]> => {
     return request(`/contact/${id}`, { method: "DELETE" })
 }
+
+export const queryContactByName = async (name: string): Promise<Contact[]> => {
+    return request(`/contact/search`, { method: "GET", params: { name } })
+}

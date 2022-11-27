@@ -11,6 +11,23 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func SearchConcact(c *fiber.Ctx) error {
+	db := database.DBConn
+	name := c.Query("name")
+	token := c.Get("Authorization")
+	userId := utils.GetFromToken(token, "user_id")
+	queryResult := []model.Contact{}
+
+	e := db.Select(&queryResult, "select * from t_contact where createUser=? and realname like ?", userId, "%"+name+"%")
+
+	if e != nil {
+		fmt.Println("err=", e)
+		return c.JSON(fiber.Map{"status": "error", "message": e.Error()})
+	}
+
+	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": queryResult})
+}
+
 func CreateContact(c *fiber.Ctx) error {
 	db := database.DBConn
 	var contact model.Contact
@@ -48,15 +65,12 @@ func QueryContactList(c *fiber.Ctx) error {
 	var paramKeys []string
 	var paramValues []interface{}
 	var queryResult []model.Contact
-	var queryParams model.Contact
 	var count int
 	db := database.DBConn
 	pageSql := utils.GeneratePageSql(c)
 	orderSql := " order by createTime desc"
 	token := c.Get("Authorization")
 	userId := utils.GetFromToken(token, "user_id")
-	c.QueryParser(&queryParams)
-	fmt.Println(queryParams, "hahaha")
 
 	// database.QueryPage(c, &queryResult, model.Contact{})
 

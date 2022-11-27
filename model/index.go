@@ -1,8 +1,8 @@
 package model
 
 type CreateInfo struct {
-	CreateUser *string `db:"createUser" json:"createUser"`
-	UpdateUser *string `db:"updateUser" json:"updateUser"`
+	CreateUser int     `db:"createUser" json:"createUser"`
+	UpdateUser int     `db:"updateUser" json:"updateUser"`
 	CreateTime *string `db:"createTime" json:"createTime"`
 	UpdateTime *string `db:"updateTime" json:"updateTime"`
 }

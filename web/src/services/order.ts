@@ -4,6 +4,10 @@ export const createOrder = async (data: Order): Promise<void> => {
     return request(`/order`, { method: "POST", data })
 }
 
+export const statistics = async (conditions: Record<string, unknown>): Promise<any> => {
+    return request(`/order/statistics`, { method: "GET", params: conditions })
+}
+
 export const queryOrder = async (conditions: Record<string, unknown>): Promise<Order[]> => {
     return request(`/order`, { method: "GET", params: conditions })
 }

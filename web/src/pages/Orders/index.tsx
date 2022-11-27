@@ -1,22 +1,37 @@
 import { SearchForm, TextButton } from "@/components"
 import { useTable } from '@/hooks'
-import { deleteOrder, queryOrder, changeOrderStatus } from "@/services/order"
-import { Button, Form, Input, message, Modal, Space, Table, DatePicker, Select } from 'antd'
-import { useState } from 'react'
+import { deleteOrder, queryOrder, changeOrderStatus, statistics } from "@/services/order"
+import { Button, Form, Input, message, Modal, Space, Table, DatePicker, Select, Descriptions } from 'antd'
+import { useEffect, useState } from 'react'
 import EditPage from "./Edit"
 import { STATUS, translateToArray } from "@/data"
 import dayjs from "dayjs"
 import styles from "./index.module.less"
 
+interface ContactInfo { contact?: string, phone?: string, address?: string }
+
+interface Statistics { buyPrice: number, sellPrice: number, number: number }
+
 export default () => {
     const [conditions, setConditions] = useState({})
     const { dataSource, loading, searchForm } = useTable<Order>({ request: queryOrder, conditions })
     const [modalOptions, setModalOptions] = useState({ id: "", open: false })
+    const [contactOptions, setContactOptions] = useState<{ data: ContactInfo, open: boolean }>({ data: {}, open: false })
+    const [statisticsInfo, setStatisticsInfo] = useState<Partial<Statistics>>({})
 
+    const queryStatistics = async () => {
+        const result = await statistics(conditions)
+        setStatisticsInfo(result as Statistics)
+    }
+
+    const handleSearchForm = () => {
+        searchForm()
+        queryStatistics()
+    }
     const handleOrderDelete = async (id: string) => {
         await deleteOrder(id)
         message.success("删除成功")
-        searchForm()
+        handleSearchForm()
     }
 
     const handleOrderStatusChange = async (id: string, status: string) => {
@@ -31,11 +46,12 @@ export default () => {
             createTime: dayjs(values.createTime).format("YYYY-MM-DD")
         }
         setConditions(values);
+        queryStatistics()
     }
 
     const handleAfterCreate = () => {
         setModalOptions({ id: "", open: false })
-        searchForm()
+        handleSearchForm()
     }
 
     const handleEditClick = (id: string) => {
@@ -50,6 +66,7 @@ export default () => {
         {
             title: '姓名',
             dataIndex: 'contact',
+            render: (text: string, record: ContactInfo) => <TextButton onClick={() => setContactOptions({ open: true, data: record })}>{text}</TextButton>
         },
         {
             title: '进价',
@@ -66,6 +83,7 @@ export default () => {
         {
             title: '备注',
             dataIndex: 'remark',
+            render: (text: string) => text || "-"
         },
         {
             title: '日期',
@@ -96,6 +114,9 @@ export default () => {
         },
     ];
 
+    useEffect(() => {
+        queryStatistics()
+    }, [])
 
     return <div>
         <SearchForm>
@@ -111,7 +132,7 @@ export default () => {
                     <DatePicker placeholder="订单日期" allowClear />
                 </Form.Item>
                 <Form.Item label="状态" name="status">
-                    <Select allowClear options={STATUS} placeholder="订单状态" />
+                    <Select allowClear options={STATUS} placeholder="请选择" />
                 </Form.Item>
                 <Form.Item>
                     <Space>
@@ -123,12 +144,22 @@ export default () => {
                 </Form.Item>
             </Form>
         </SearchForm >
+        <SearchForm>
+            <div>汇总：总金额：{statisticsInfo.buyPrice}，总成本：{statisticsInfo.sellPrice}，总利润：{statisticsInfo.sellPrice - statisticsInfo.buyPrice}，总数量：{statisticsInfo.number}</div>
+        </SearchForm>
         <div className={styles.tableWrapper}>
             <Table rowKey="id" loading={loading} dataSource={dataSource} columns={columns} />
         </div>
-
         <Modal destroyOnClose footer={null} title={modalOptions.id ? "编辑" : "新增"} open={modalOptions.open} onCancel={() => setModalOptions({ id: "", open: false })} >
             <EditPage onSubmit={handleAfterCreate} id={modalOptions.id} />
+        </Modal>
+        <Modal open={contactOptions.open} footer={null} cancelText="asd" onCancel={() => setContactOptions({ open: false, data: {} })} destroyOnClose title="客户信息">
+            <Descriptions column={1}>
+                <Descriptions.Item label="姓名">{contactOptions.data.contact}</Descriptions.Item>
+                <Descriptions.Item label="电话">{contactOptions.data.phone}</Descriptions.Item>
+                <Descriptions.Item label="地址">{contactOptions.data.address}</Descriptions.Item>
+            </Descriptions>
+            <Button onClick={() => setContactOptions({ open: false, data: {} })}>确定</Button>
         </Modal>
     </div >
 }
