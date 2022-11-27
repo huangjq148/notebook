@@ -30,9 +30,14 @@ func handleSearchCondition(c *fiber.Ctx) (string, []interface{}) {
 		paramValues = append(paramValues, "%"+c.Query("contact")+"%")
 	}
 
-	if c.Query("createTime") != "" {
-		paramKeys = append(paramKeys, "createTime = ?")
-		paramValues = append(paramValues, c.Query("createTime"))
+	if c.Query("startCreateDate") != "" {
+		paramKeys = append(paramKeys, "createTime >= ?")
+		paramValues = append(paramValues, c.Query("startCreateDate"))
+	}
+
+	if c.Query("endCreateDate") != "" {
+		paramKeys = append(paramKeys, "createTime <= ?")
+		paramValues = append(paramValues, c.Query("endCreateDate"))
 	}
 
 	fmt.Println(c.Query("status"))
@@ -47,9 +52,9 @@ func handleSearchCondition(c *fiber.Ctx) (string, []interface{}) {
 }
 
 type StatisticsInfo struct {
-	BuyMoney  int `db:"buyMoney" json:"buyMoney"`
-	SellMoney int `db:"sellMoney" json:"sellMoney"`
-	Number    int `db:"number" json:"number"`
+	BuyMoney  float32 `db:"buyMoney" json:"buyMoney"`
+	SellMoney float32 `db:"sellMoney" json:"sellMoney"`
+	Number    float32 `db:"number" json:"number"`
 }
 
 func Statistics(c *fiber.Ctx) error {
@@ -57,11 +62,11 @@ func Statistics(c *fiber.Ctx) error {
 	whereSql, paramValues := handleSearchCondition(c)
 	db := database.DBConn
 
-	fmt.Println(paramValues)
-	fmt.Println("select sum(t.buyPrice*t.number) buyMoney,sum(t.sellPrice*t.number) sellMoney,sum(t.number) number from t_order t " + whereSql)
-	db.Get(&result, "select sum(t.buyPrice*t.number) buyMoney,sum(t.sellPrice*t.number) sellMoney,sum(t.number) number from t_order t "+whereSql, paramValues...)
-	// db.Get(&result, "select sum(t.buyPrice*t.number) buyMoney,sum(t.sellPrice*t.number) sellMoney,sum(t.number) number from t_order t ")
-	fmt.Println(result)
+	finalSql := "select sum(t.buyPrice*t.number) buyMoney,sum(t.sellPrice*t.number) sellMoney,sum(t.number) number from t_order t " + whereSql
+
+	fmt.Println(finalSql)
+	db.Get(&result, finalSql, paramValues...)
+
 	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": result})
 }
 
