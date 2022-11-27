@@ -4,6 +4,7 @@ import (
 	"api-fiber-gorm/database"
 	"api-fiber-gorm/model"
 	"api-fiber-gorm/utils"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -116,4 +117,22 @@ func UpdateStock(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{"status": "success", "message": "修改成功", "data": result})
+}
+
+func OutStock(id int, number string) error {
+	db := database.DBConn
+
+	sql := "update t_stock set number = number-? where id=? "
+
+	fmt.Println(sql, number, id)
+
+	result, e := db.Exec(sql, number, id)
+
+	if e != nil {
+		fmt.Println("err=", e)
+		return errors.New("库存修改失败")
+	}
+
+	fmt.Println(result)
+	return nil
 }

@@ -3,7 +3,7 @@ import { Button, Form, Input, message } from "antd"
 import { createProduct, updateProduct, queryProductById } from "@/services/product"
 
 type Props = {
-    id?: string
+    id?: number
     onSubmit?: () => void
 }
 

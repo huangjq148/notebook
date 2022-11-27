@@ -3,7 +3,7 @@ import { Button, Form, Input, message } from "antd"
 import { createStock, updateStock, queryStockById } from "@/services/stock"
 
 type Props = {
-    id?: string
+    id?: number
     onSubmit?: () => void
 }
 

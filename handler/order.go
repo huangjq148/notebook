@@ -3,8 +3,10 @@ package handler
 import (
 	"api-fiber-gorm/database"
 	"api-fiber-gorm/model"
+	"api-fiber-gorm/services"
 	"api-fiber-gorm/utils"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -52,9 +54,9 @@ func handleSearchCondition(c *fiber.Ctx) (string, []interface{}) {
 }
 
 type StatisticsInfo struct {
-	BuyMoney  float32 `db:"buyMoney" json:"buyMoney"`
-	SellMoney float32 `db:"sellMoney" json:"sellMoney"`
-	Number    float32 `db:"number" json:"number"`
+	BuyMoney  string `db:"buyMoney" json:"buyMoney"`
+	SellMoney string `db:"sellMoney" json:"sellMoney"`
+	Number    string `db:"number" json:"number"`
 }
 
 func Statistics(c *fiber.Ctx) error {
@@ -64,7 +66,6 @@ func Statistics(c *fiber.Ctx) error {
 
 	finalSql := "select sum(t.buyPrice*t.number) buyMoney,sum(t.sellPrice*t.number) sellMoney,sum(t.number) number from t_order t " + whereSql
 
-	fmt.Println(finalSql)
 	db.Get(&result, finalSql, paramValues...)
 
 	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": result})
@@ -80,8 +81,14 @@ func CreateOrder(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
 	}
 
-	result, e := db.Exec("insert into t_order(name, contact, phone, address, buyPrice, sellPrice , number, status, remark, createTime, createUser) values(?,?,?,?,?,?,?,?,?,?,?)",
-		order.Name, order.Contact, order.Phone, order.Address, order.BuyPrice, order.SellPrice, order.Number, order.Status, order.Remark, time.Now().Format("2006-01-02"), userId)
+	err := OutStock(order.StockId, order.Number)
+
+	if err != nil {
+		return c.JSON(fiber.Map{"status": "error", "message": err.Error()})
+	}
+
+	result, e := db.Exec("insert into t_order(name, contact, phone, address, buyPrice, sellPrice , number, status, remark,stockId, createTime, createUser) values(?,?,?,?,?,?,?,?,?,?,?,?)",
+		order.Name, order.Contact, order.Phone, order.Address, order.BuyPrice, order.SellPrice, order.Number, order.Status, order.Remark, order.StockId, time.Now().Format("2006-01-02"), userId)
 
 	if e != nil {
 		fmt.Println("err=", e)
@@ -89,6 +96,35 @@ func CreateOrder(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{"status": "success", "message": "保存成功", "data": result})
+}
+
+func RevokeStockOrder(c *fiber.Ctx) error {
+	var oldOrder model.Order
+	id := c.Params("id")
+	token := c.Get("Authorization")
+	userId := utils.GetFromToken(token, "user_id")
+
+	if id != "" {
+		intId, err := strconv.Atoi(id)
+		if err != nil {
+			return c.JSON(fiber.Map{"status": "error", "message": "id 错误"})
+		}
+		oldOrder, err = services.GetOrderById(intId)
+	}
+
+	err := OutStock(oldOrder.StockId, "-"+oldOrder.Number)
+
+	if err != nil {
+		return c.JSON(fiber.Map{"status": "error", "message": "更新库存失败"})
+	}
+
+	err = services.DeleteOrder(userId, id)
+
+	if err != nil {
+		return c.JSON(fiber.Map{"status": "error", "message": "删除订单数据失败", "id": id})
+	}
+
+	return c.JSON(fiber.Map{"status": "success", "message": "修改成功"})
 }
 
 func QueryOrderList(c *fiber.Ctx) error {
@@ -114,19 +150,17 @@ func QueryOrderList(c *fiber.Ctx) error {
 }
 
 func DeleteOrder(c *fiber.Ctx) error {
-	db := database.DBConn
 	id := c.Params("id")
 	token := c.Get("Authorization")
 	userId := utils.GetFromToken(token, "user_id")
 
-	result, e := db.Exec("delete from t_order where 1=1 and createUser=? and id=?", userId, id)
+	error := services.DeleteOrder(userId, id)
 
-	if e != nil {
-		fmt.Println("err=", e)
-		return c.JSON(fiber.Map{"status": "error", "message": "参数格式错误"})
+	if error != nil {
+		return c.JSON(fiber.Map{"status": "error", "message": error.Error()})
 	}
 
-	return c.JSON(fiber.Map{"status": "success", "message": "删除成功", "data": result})
+	return c.JSON(fiber.Map{"status": "success", "message": "删除成功"})
 }
 
 func GetOrderById(c *fiber.Ctx) error {

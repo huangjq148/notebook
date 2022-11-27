@@ -41,6 +41,7 @@ func SetupRoutes(app *fiber.App) {
 	stock.Patch("", middleware.Protected(), handler.UpdateStock)
 
 	order := app.Group("/order")
+	order.Delete("/revoke/stock/:id", middleware.Protected(), handler.RevokeStockOrder)
 	order.Get("/statistics", middleware.Protected(), handler.Statistics)
 	order.Post("", middleware.Protected(), handler.CreateOrder)
 	order.Get("", middleware.Protected(), handler.QueryOrderList)

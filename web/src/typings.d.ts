@@ -11,7 +11,7 @@ declare interface UserInfo extends CreateInfo {
 }
 
 declare interface Product extends CreateInfo {
-    id?: string;
+    id?: number;
     name: string;
     buyPrice: string;
     sellPrice: string;
@@ -19,7 +19,7 @@ declare interface Product extends CreateInfo {
 
 
 declare interface Order extends CreateInfo {
-    id?: string
+    id?: number
     goodsName: string
     contace: string
     address: string
@@ -29,6 +29,7 @@ declare interface Order extends CreateInfo {
     number: number
     remark: string
     status: string
+    stockId: number
 }
 
 declare interface Contact extends CreateInfo {
@@ -38,7 +39,7 @@ declare interface Contact extends CreateInfo {
     address: string
 }
 declare interface Stock extends CreateInfo {
-    id?: string;
+    id?: number;
     name: string;
     buyPrice: string;
     sellPrice: string;

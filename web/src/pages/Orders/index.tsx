@@ -1,6 +1,6 @@
 import { SearchForm, TextButton } from "@/components"
 import { useTable } from '@/hooks'
-import { deleteOrder, queryOrder, changeOrderStatus, statistics } from "@/services/order"
+import { deleteOrder, queryOrder, changeOrderStatus, statistics, revokeStockOrder } from "@/services/order"
 import { Button, Form, Input, message, Modal, Space, Table, DatePicker, Select, Descriptions } from 'antd'
 import { useEffect, useState } from 'react'
 import EditPage from "./Edit"
@@ -15,7 +15,7 @@ interface Statistics { buyMoney: number, sellMoney: number, number: number }
 export default () => {
     const [conditions, setConditions] = useState({})
     const { dataSource, loading, searchForm } = useTable<Order>({ request: queryOrder, conditions })
-    const [modalOptions, setModalOptions] = useState({ id: "", open: false })
+    const [modalOptions, setModalOptions] = useState({ id: 0, open: false })
     const [contactOptions, setContactOptions] = useState<{ data: ContactInfo, open: boolean }>({ data: {}, open: false })
     const [statisticsInfo, setStatisticsInfo] = useState<Statistics>({ sellMoney: 0, buyMoney: 0, number: 0 })
 
@@ -29,13 +29,13 @@ export default () => {
         queryStatistics()
     }
 
-    const handleOrderDelete = async (id: string) => {
+    const handleOrderDelete = async (id = 0) => {
         await deleteOrder(id)
         message.success("删除成功")
         handleSearchForm()
     }
 
-    const handleOrderStatusChange = async (id: string, status: string) => {
+    const handleOrderStatusChange = async (id: number = 0, status: string) => {
         await changeOrderStatus(id, status)
         message.success("修改成功")
         searchForm()
@@ -52,23 +52,25 @@ export default () => {
                 endCreateDate: dayjs(createTime[1]).format("YYYY-MM-DD")
             }
         }
-        // if (values.createTime) {
-        //     values.createTime = dayjs(values.createTime).format("YYYY-MM-DD")
-        // }
+
         setConditions(newConditions);
         queryStatistics(newConditions)
     }
 
     const handleAfterCreate = () => {
-        setModalOptions({ id: "", open: false })
+        setModalOptions({ id: 0, open: false })
         handleSearchForm()
     }
 
-    const handleEditClick = (id: string) => {
+    const handleEditClick = (id = 0) => {
         setModalOptions({ id, open: true });
     }
 
-    useEffect(() => { }, [])
+    const handleRevokeOutStock = async (order: Order) => {
+        await revokeStockOrder(order.id ?? 0)
+        handleSearchForm()
+        message.success("撤销库存订单成功")
+    }
 
     const columns = [
         {
@@ -114,13 +116,18 @@ export default () => {
             width: "200px",
             render: (record: Order) => (
                 <Space size="middle">
-                    <TextButton onClick={() => handleEditClick(record.id as string)}>编辑</TextButton>
+                    <TextButton onClick={() => handleEditClick(record.id)}>编辑</TextButton>
                     {
                         record.status == "1" ?
-                            <TextButton onClick={() => handleOrderStatusChange(record.id as string, "2")}>已完成</TextButton> :
-                            <TextButton onClick={() => handleOrderStatusChange(record.id as string, "1")}>未完成</TextButton>
+                            <TextButton onClick={() => handleOrderStatusChange(record.id, "2")}>已完成</TextButton> :
+                            <TextButton onClick={() => handleOrderStatusChange(record.id, "1")}>未完成</TextButton>
                     }
-                    <TextButton onClick={() => handleOrderDelete(record.id as string)}>删除</TextButton>
+                    {
+                        record.stockId ?
+                            <TextButton onClick={() => handleRevokeOutStock(record)}>撤销出库</TextButton> :
+                            <TextButton onClick={() => handleOrderDelete(record.id)}>删除</TextButton>
+                    }
+
                 </Space>
             )
         },
@@ -156,7 +163,7 @@ export default () => {
                     <Space>
                         <Button htmlType='submit' type="primary">查询</Button>
                         <Button onClick={() => {
-                            setModalOptions({ id: "", open: true })
+                            setModalOptions({ id: 0, open: true })
                         }}>新增</Button>
                     </Space>
                 </Form.Item>
@@ -177,7 +184,7 @@ export default () => {
             <Table rowKey="id" loading={loading} dataSource={dataSource} columns={columns} />
         </div>
 
-        <Modal destroyOnClose footer={null} title={modalOptions.id ? "编辑" : "新增"} open={modalOptions.open} onCancel={() => setModalOptions({ id: "", open: false })} >
+        <Modal destroyOnClose footer={null} title={modalOptions.id ? "编辑" : "新增"} open={modalOptions.open} onCancel={() => setModalOptions({ id: 0, open: false })} >
             <EditPage onSubmit={handleAfterCreate} id={modalOptions.id} />
         </Modal>
 

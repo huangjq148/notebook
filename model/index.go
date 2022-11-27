@@ -18,6 +18,7 @@ type Order struct {
 	Number    string `db:"number" json:"number"`
 	Remark    string `db:"remark" json:"remark"`
 	Status    string `db:"status" json:"status"`
+	StockId   int    `db:"stockId" json:"stockId"`
 	*CreateInfo
 }
 

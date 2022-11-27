@@ -14,9 +14,9 @@ type Props = {
 export default (props: Props) => {
     const [conditions, setConditions] = useState({})
     const { dataSource, loading, searchForm } = useTable<Product>({ request: queryProduct, conditions })
-    const [modalOptions, setModalOptions] = useState({ id: "", open: false })
+    const [modalOptions, setModalOptions] = useState({ id: 0, open: false })
 
-    const handleProductDelete = async (id: string) => {
+    const handleProductDelete = async (id = 0) => {
         await deleteProduct(id)
         message.success("删除成功")
         searchForm()
@@ -46,8 +46,8 @@ export default (props: Props) => {
             render: (record: Product) => (
                 <Space size="middle">
                     <TextButton onClick={() => handleRowSelect(record)}>选中</TextButton>
-                    <TextButton onClick={() => handleEditClick(record.id as string)}>编辑</TextButton>
-                    <TextButton onClick={() => handleProductDelete(record.id as string)}>删除</TextButton>
+                    <TextButton onClick={() => handleEditClick(record.id)}>编辑</TextButton>
+                    <TextButton onClick={() => handleProductDelete(record.id)}>删除</TextButton>
                 </Space>
             )
         },
@@ -58,11 +58,11 @@ export default (props: Props) => {
     }
 
     const handleAfterCreate = () => {
-        setModalOptions({ id: "", open: false })
+        setModalOptions({ id: 0, open: false })
         searchForm()
     }
 
-    const handleEditClick = (id: string) => {
+    const handleEditClick = (id = 0) => {
         setModalOptions({ id, open: true });
     }
 
@@ -77,7 +77,7 @@ export default (props: Props) => {
                     <Space>
                         <Button htmlType='submit' type="primary">查询</Button>
                         <Button onClick={() => {
-                            setModalOptions({ id: "", open: true })
+                            setModalOptions({ id: 0, open: true })
                         }}>新增</Button>
                     </Space>
                 </Form.Item>
@@ -88,7 +88,7 @@ export default (props: Props) => {
                 size="small" loading={loading} dataSource={dataSource} columns={columns} />
         </div>
 
-        <Modal destroyOnClose footer={null} title={modalOptions.id ? "编辑" : "新增"} open={modalOptions.open} onCancel={() => setModalOptions({ id: "", open: false })} >
+        <Modal destroyOnClose footer={null} title={modalOptions.id ? "编辑" : "新增"} open={modalOptions.open} onCancel={() => setModalOptions({ id: 0, open: false })} >
             <EditPage onSubmit={handleAfterCreate} id={modalOptions.id} />
         </Modal>
     </div >
