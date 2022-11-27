@@ -10,17 +10,17 @@ import styles from "./index.module.less"
 
 interface ContactInfo { contact?: string, phone?: string, address?: string }
 
-interface Statistics { buyPrice: number, sellPrice: number, number: number }
+interface Statistics { buyMoney: number, sellMoney: number, number: number }
 
 export default () => {
     const [conditions, setConditions] = useState({})
     const { dataSource, loading, searchForm } = useTable<Order>({ request: queryOrder, conditions })
     const [modalOptions, setModalOptions] = useState({ id: "", open: false })
     const [contactOptions, setContactOptions] = useState<{ data: ContactInfo, open: boolean }>({ data: {}, open: false })
-    const [statisticsInfo, setStatisticsInfo] = useState<Partial<Statistics>>({})
+    const [statisticsInfo, setStatisticsInfo] = useState<Statistics>({ sellMoney: 0, buyMoney: 0, number: 0 })
 
-    const queryStatistics = async () => {
-        const result = await statistics(conditions)
+    const queryStatistics = async (innerConditions?: any) => {
+        const result = await statistics(innerConditions ?? conditions)
         setStatisticsInfo(result as Statistics)
     }
 
@@ -28,6 +28,7 @@ export default () => {
         searchForm()
         queryStatistics()
     }
+
     const handleOrderDelete = async (id: string) => {
         await deleteOrder(id)
         message.success("删除成功")
@@ -41,12 +42,21 @@ export default () => {
     }
 
     const handleFormSearch = (values: any) => {
-        values = {
-            ...values,
-            createTime: dayjs(values.createTime).format("YYYY-MM-DD")
+        const { createTime, ...restValues } = values
+        let newConditions = restValues
+
+        if (createTime) {
+            newConditions = {
+                ...restValues,
+                startCreateDate: dayjs(createTime[0]).format("YYYY-MM-DD"),
+                endCreateDate: dayjs(createTime[1]).format("YYYY-MM-DD")
+            }
         }
-        setConditions(values);
-        queryStatistics()
+        // if (values.createTime) {
+        //     values.createTime = dayjs(values.createTime).format("YYYY-MM-DD")
+        // }
+        setConditions(newConditions);
+        queryStatistics(newConditions)
     }
 
     const handleAfterCreate = () => {
@@ -57,6 +67,8 @@ export default () => {
     const handleEditClick = (id: string) => {
         setModalOptions({ id, open: true });
     }
+
+    useEffect(() => { }, [])
 
     const columns = [
         {
@@ -128,8 +140,14 @@ export default () => {
                     <Input allowClear />
                 </Form.Item>
                 <Form.Item label="日期" name="createTime">
-                    {/* <DatePicker.RangePicker allowClear placeholder={["起始日期", "结束日期"]} /> */}
-                    <DatePicker placeholder="订单日期" allowClear />
+                    <DatePicker.RangePicker
+                        presets={[
+                            { label: "今天", value: [dayjs(), dayjs()] },
+                            { label: "上周", value: [dayjs().add(-7, "day").day(1), dayjs().add(-7, "day").day(7)] },
+                            { label: "本周", value: [dayjs().day(1), dayjs().day(7)] },
+                            { label: "上月", value: [dayjs().add(-1, "month").startOf("month"), dayjs().add(-1, "month").endOf("month")] },
+                            { label: "本月", value: [dayjs().startOf("month"), dayjs().endOf("month")] },
+                        ]} format={val => dayjs(val).format("YYYY-MM-DD")} allowClear placeholder={["起始日期", "结束日期"]} />
                 </Form.Item>
                 <Form.Item label="状态" name="status">
                     <Select allowClear options={STATUS} placeholder="请选择" />
@@ -145,14 +163,24 @@ export default () => {
             </Form>
         </SearchForm >
         <SearchForm>
-            <div>汇总：总金额：{statisticsInfo.buyPrice}，总成本：{statisticsInfo.sellPrice}，总利润：{statisticsInfo.sellPrice - statisticsInfo.buyPrice}，总数量：{statisticsInfo.number}</div>
+            <div>汇总：
+                <Space size="large">
+                    <span>总金额：{statisticsInfo.buyMoney}</span>
+                    <span>总成本：{statisticsInfo.sellMoney}</span>
+                    <span>总利润：{statisticsInfo.sellMoney - statisticsInfo.buyMoney}</span>
+                    <span>总数量：{statisticsInfo.number}</span>
+                </Space>
+            </div>
         </SearchForm>
+
         <div className={styles.tableWrapper}>
             <Table rowKey="id" loading={loading} dataSource={dataSource} columns={columns} />
         </div>
+
         <Modal destroyOnClose footer={null} title={modalOptions.id ? "编辑" : "新增"} open={modalOptions.open} onCancel={() => setModalOptions({ id: "", open: false })} >
             <EditPage onSubmit={handleAfterCreate} id={modalOptions.id} />
         </Modal>
+
         <Modal open={contactOptions.open} footer={null} cancelText="asd" onCancel={() => setContactOptions({ open: false, data: {} })} destroyOnClose title="客户信息">
             <Descriptions column={1}>
                 <Descriptions.Item label="姓名">{contactOptions.data.contact}</Descriptions.Item>
