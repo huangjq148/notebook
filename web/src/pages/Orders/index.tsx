@@ -95,6 +95,13 @@ export default () => {
             dataIndex: 'number',
         },
         {
+            title: '利润',
+            dataIndex: 'number',
+            render:(text:string,record:any)=>{
+                return <>{parseFloat(`${record.sellPrice*record.number - record.buyPrice*record.number}`).toFixed(2)}</>
+            }
+        },
+        {
             title: '备注',
             dataIndex: 'remark',
             render: (text: string) => text || "-"
@@ -172,9 +179,9 @@ export default () => {
         <SearchForm>
             <div>汇总：
                 <Space size="large">
-                    <span>总金额：{statisticsInfo.buyMoney}</span>
-                    <span>总成本：{statisticsInfo.sellMoney}</span>
-                    <span>总利润：{statisticsInfo.sellMoney - statisticsInfo.buyMoney}</span>
+                    <span>总成本：{statisticsInfo.buyMoney}</span>
+                    <span>总售价：{statisticsInfo.sellMoney}</span>
+                    <span>总利润：{parseFloat(`${statisticsInfo.sellMoney - statisticsInfo.buyMoney}`).toFixed(2)}</span>
                     <span>总数量：{statisticsInfo.number}</span>
                 </Space>
             </div>

@@ -13,7 +13,7 @@ axios.defaults.timeout = 30000;
 
 // 指定请求地址
 
-axios.defaults.baseURL = process.env.NODE_ENV === 'development' ? "/api" : '';
+axios.defaults.baseURL = process.env.NODE_ENV === 'development' ? "/api" : '/server';
 
 // 添加请求拦截器
 axios.interceptors.request.use(
@@ -49,7 +49,7 @@ axios.interceptors.response.use(
     },
     async (error: AxiosError<{ code: number }>) => {
         if (error?.response?.data.code === 401) {
-            window.location.href = "/login"
+            window.location.href = "/#/login"
         }
         return Promise.reject(error?.response?.data || error);
     },
