@@ -16,6 +16,7 @@ type Order struct {
 	BuyPrice  string `db:"buyPrice" json:"buyPrice"`
 	SellPrice string `db:"sellPrice" json:"sellPrice"`
 	Number    string `db:"number" json:"number"`
+	OtherCost string `db:"otherCost" json:"otherCost"`
 	Remark    string `db:"remark" json:"remark"`
 	Status    string `db:"status" json:"status"`
 	StockId   int    `db:"stockId" json:"stockId"`

@@ -10,14 +10,14 @@ import styles from "./index.module.less"
 
 interface ContactInfo { contact?: string, phone?: string, address?: string }
 
-interface Statistics { buyMoney: number, sellMoney: number, number: number }
+interface Statistics { buyMoney: number, sellMoney: number, number: number, otherCost: number }
 
 export default () => {
     const [conditions, setConditions] = useState({})
     const { dataSource, loading, searchForm } = useTable<Order>({ request: queryOrder, conditions })
     const [modalOptions, setModalOptions] = useState({ id: 0, open: false })
     const [contactOptions, setContactOptions] = useState<{ data: ContactInfo, open: boolean }>({ data: {}, open: false })
-    const [statisticsInfo, setStatisticsInfo] = useState<Statistics>({ sellMoney: 0, buyMoney: 0, number: 0 })
+    const [statisticsInfo, setStatisticsInfo] = useState<Statistics>({ sellMoney: 0, buyMoney: 0, number: 0, otherCost: 0 })
 
     const queryStatistics = async (innerConditions?: any) => {
         const result = await statistics(innerConditions ?? conditions)
@@ -95,10 +95,14 @@ export default () => {
             dataIndex: 'number',
         },
         {
+            title: '其他费用',
+            dataIndex: 'otherCost',
+        },
+        {
             title: '利润',
             dataIndex: 'number',
-            render:(text:string,record:any)=>{
-                return <>{parseFloat(`${record.sellPrice*record.number - record.buyPrice*record.number}`).toFixed(2)}</>
+            render: (text: string, record: any) => {
+                return <>{parseFloat(`${record.sellPrice * record.number - record.buyPrice * record.number - record.otherCost}`).toFixed(2)}</>
             }
         },
         {
@@ -181,7 +185,8 @@ export default () => {
                 <Space size="large">
                     <span>总成本：{statisticsInfo.buyMoney}</span>
                     <span>总售价：{statisticsInfo.sellMoney}</span>
-                    <span>总利润：{parseFloat(`${statisticsInfo.sellMoney - statisticsInfo.buyMoney}`).toFixed(2)}</span>
+                    <span>其他费用：{statisticsInfo.otherCost}</span>
+                    <span>总利润：{parseFloat(`${statisticsInfo.sellMoney - statisticsInfo.buyMoney - statisticsInfo.otherCost}`).toFixed(2)}</span>
                     <span>总数量：{statisticsInfo.number}</span>
                 </Space>
             </div>

@@ -106,6 +106,9 @@ export default (props: Props) => {
             }]}>
                 <Input />
             </Form.Item>
+            <Form.Item label="其他费用" name="otherCost">
+                <Input />
+            </Form.Item>
             <Form.Item label="备注" name="remark">
                 <Input />
             </Form.Item>

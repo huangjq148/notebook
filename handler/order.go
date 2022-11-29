@@ -57,6 +57,7 @@ type StatisticsInfo struct {
 	BuyMoney  string `db:"buyMoney" json:"buyMoney"`
 	SellMoney string `db:"sellMoney" json:"sellMoney"`
 	Number    string `db:"number" json:"number"`
+	OtherCost string `db:"otherCost" json:"otherCost"`
 }
 
 func Statistics(c *fiber.Ctx) error {
@@ -64,7 +65,7 @@ func Statistics(c *fiber.Ctx) error {
 	whereSql, paramValues := handleSearchCondition(c)
 	db := database.DBConn
 
-	finalSql := "select sum(t.buyPrice*t.number) buyMoney,sum(t.sellPrice*t.number) sellMoney,sum(t.number) number from t_order t " + whereSql
+	finalSql := "select sum(t.buyPrice*t.number) buyMoney,sum(t.sellPrice*t.number) sellMoney,sum(t.number) number, sum(t.otherCost) otherCost from t_order t " + whereSql
 
 	db.Get(&result, finalSql, paramValues...)
 
@@ -87,8 +88,8 @@ func CreateOrder(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
-	result, e := db.Exec("insert into t_order(name, contact, phone, address, buyPrice, sellPrice , number, status, remark,stockId, createTime, createUser) values(?,?,?,?,?,?,?,?,?,?,?,?)",
-		order.Name, order.Contact, order.Phone, order.Address, order.BuyPrice, order.SellPrice, order.Number, order.Status, order.Remark, order.StockId, time.Now().Format("2006-01-02"), userId)
+	result, e := db.Exec("insert into t_order(name, contact, phone, address, buyPrice, sellPrice , number, otherCost, status, remark, stockId, createTime, createUser) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+		order.Name, order.Contact, order.Phone, order.Address, order.BuyPrice, order.SellPrice, order.Number, order.OtherCost, order.Status, order.Remark, order.StockId, time.Now().Format("2006-01-02"), userId)
 
 	if e != nil {
 		fmt.Println("err=", e)
