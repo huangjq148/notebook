@@ -183,11 +183,11 @@ export default () => {
         <SearchForm>
             <div>汇总：
                 <Space size="large">
-                    <span>总成本：{statisticsInfo.buyMoney}</span>
-                    <span>总售价：{statisticsInfo.sellMoney}</span>
-                    <span>其他费用：{statisticsInfo.otherCost}</span>
+                    <span>总成本：{parseFloat(`${statisticsInfo.buyMoney}`).toFixed(2)}</span>
+                    <span>总售价：{parseFloat(`${statisticsInfo.sellMoney}`)}</span>
+                    <span>其他费用：{parseFloat(`${statisticsInfo.otherCost}`)}</span>
                     <span>总利润：{parseFloat(`${statisticsInfo.sellMoney - statisticsInfo.buyMoney - statisticsInfo.otherCost}`).toFixed(2)}</span>
-                    <span>总数量：{statisticsInfo.number}</span>
+                    <span>总数量：{parseFloat(`${statisticsInfo.number}`)}</span>
                 </Space>
             </div>
         </SearchForm>
