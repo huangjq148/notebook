@@ -9,7 +9,7 @@ import StockSell from "@/pages/Orders/Edit"
 
 export default () => {
     const [conditions, setConditions] = useState({})
-    const { dataSource, loading, searchForm } = useTable<Product>({ request: queryStock, conditions })
+    const { dataSource, loading, pagination, searchForm } = useTable<Product>({ request: queryStock, conditions })
     const [modalOptions, setModalOptions] = useState({ id: 0, open: false })
     const [outStockModal, setOutStockModal] = useState<{ open: boolean, data: Partial<Stock> }>({ open: false, data: {} })
 
@@ -89,7 +89,7 @@ export default () => {
             </Form>
         </SearchForm>
         <div className={styles.tableWrapper}>
-            <Table rowKey="id" loading={loading} dataSource={dataSource} columns={columns} />
+            <Table rowKey="id" loading={loading} pagination={pagination} dataSource={dataSource} columns={columns} />
         </div>
 
         <Modal destroyOnClose footer={null} title={modalOptions.id ? "编辑" : "新增"} open={modalOptions.open} onCancel={() => setModalOptions({ id: 0, open: false })} >

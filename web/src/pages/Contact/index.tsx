@@ -96,7 +96,6 @@ export default () => {
         <Table
           rowKey="id"
           pagination={pagination}
-
           onChange={handlePageChange}
           loading={loading}
           dataSource={dataSource}
