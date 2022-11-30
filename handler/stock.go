@@ -61,7 +61,7 @@ func QueryStockList(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "error", "message": "参数格式错误"})
 	}
 
-	db.Get(&count, "select count(1) from t_stock where "+whereSql, paramValues...)
+	db.Get(&count, "select count(1) from t_stock "+whereSql, paramValues...)
 
 	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": fiber.Map{"content": queryResult, "total": count}})
 }

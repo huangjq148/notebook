@@ -18,6 +18,16 @@ func SetupRoutes(app *fiber.App) {
 	auth := app.Group("/auth")
 	auth.Post("/login", handler.Login)
 
+	order := app.Group("/order")
+	order.Delete("/revoke/stock/:id", middleware.Protected(), handler.RevokeStockOrder)
+	order.Get("/statistics", middleware.Protected(), handler.Statistics)
+	order.Post("", middleware.Protected(), handler.CreateOrder)
+	order.Get("", middleware.Protected(), handler.QueryOrderList)
+	order.Get("/:id", middleware.Protected(), handler.GetOrderById)
+	order.Delete("/:id", middleware.Protected(), handler.DeleteOrder)
+	order.Patch("", middleware.Protected(), handler.UpdateOrder)
+	order.Patch("/:id/status/:status", middleware.Protected(), handler.ChangeStatus)
+
 	product := app.Group("/product")
 	product.Post("", middleware.Protected(), handler.CreateProduct)
 	product.Get("", middleware.Protected(), handler.QueryProductList)
@@ -40,31 +50,7 @@ func SetupRoutes(app *fiber.App) {
 	stock.Delete("/:id", middleware.Protected(), handler.DeleteStock)
 	stock.Patch("", middleware.Protected(), handler.UpdateStock)
 
-	order := app.Group("/order")
-	order.Delete("/revoke/stock/:id", middleware.Protected(), handler.RevokeStockOrder)
-	order.Get("/statistics", middleware.Protected(), handler.Statistics)
-	order.Post("", middleware.Protected(), handler.CreateOrder)
-	order.Get("", middleware.Protected(), handler.QueryOrderList)
-	order.Get("/:id", middleware.Protected(), handler.GetOrderById)
-	order.Delete("/:id", middleware.Protected(), handler.DeleteOrder)
-	order.Patch("", middleware.Protected(), handler.UpdateOrder)
-	order.Patch("/:id/status/:status", middleware.Protected(), handler.ChangeStatus)
-
 	// Auth
 	user := api.Group("/user")
 	user.Get("/info", middleware.Protected(), handler.UserInfo)
-
-	// // User
-	// user := api.Group("/user")
-	// user.Get("/:id", handler.GetUser)
-	// user.Post("/", handler.CreateUser)
-	// user.Patch("/:id", middleware.Protected(), handler.UpdateUser)
-	// user.Delete("/:id", middleware.Protected(), handler.DeleteUser)
-
-	// // Product
-	// product := api.Group("/product")
-	// product.Get("/", handler.GetAllProducts)
-	// product.Get("/:id", handler.GetProduct)
-	// product.Post("/", middleware.Protected(), handler.CreateProduct)
-	// product.Delete("/:id", middleware.Protected(), handler.DeleteProduct)
 }

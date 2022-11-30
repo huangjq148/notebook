@@ -93,7 +93,7 @@ func QueryContactList(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "error", "message": e.Error()})
 	}
 
-	db.Get(&count, "select count(1) from t_contact where "+strings.Join(paramKeys, " and "), paramValues...)
+	db.Get(&count, "select count(1) from t_contact "+strings.Join(paramKeys, " and "), paramValues...)
 
 	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": fiber.Map{"content": queryResult, "total": count}})
 }
