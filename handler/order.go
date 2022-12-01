@@ -128,6 +128,15 @@ func RevokeStockOrder(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"status": "success", "message": "修改成功"})
 }
 
+type OrderQueryCondition struct {
+	Table           string `table:"t_order"`
+	Name            string `db:"name" json:"name" op:"like"`
+	Contact         string `db:"contact" json:"contact" op:"like"`
+	StartCreateDate string `db:"createDate" json:"startCreateDate" op:">="`
+	EndCreateDate   string `db:"createDate" json:"endCreateDate" op:"<="`
+	Status          string `db:"status" json:"status" op:"="`
+}
+
 func QueryOrderList(c *fiber.Ctx) error {
 	var queryResult []model.Order
 	var count int
@@ -137,6 +146,8 @@ func QueryOrderList(c *fiber.Ctx) error {
 	whereSql, paramValues := handleSearchCondition(c)
 
 	finalSql := "select * from t_order " + whereSql + orderSql + pageSql
+
+	database.QueryPage(c, &queryResult, OrderQueryCondition{})
 
 	e := db.Select(&queryResult, finalSql, paramValues...)
 
@@ -191,8 +202,8 @@ func UpdateOrder(c *fiber.Ctx) error {
 
 	database.GetById(order)
 
-	result, e := db.Exec("update t_order set name=?, contact=?, phone=?, address=?, buyPrice=?, sellPrice=?, number=?, remark=? where id=?",
-		order.Name, order.Contact, order.Phone, order.Address, order.BuyPrice, order.SellPrice, order.Number, order.Remark, order.Id)
+	result, e := db.Exec("update t_order set name=?, contact=?, phone=?, address=?, buyPrice=?, sellPrice=?, otherCost=?, number=?, remark=? where id=?",
+		order.Name, order.Contact, order.Phone, order.Address, order.BuyPrice, order.SellPrice, order.OtherCost, order.Number, order.Remark, order.Id)
 
 	if e != nil {
 		fmt.Println("err=", e)

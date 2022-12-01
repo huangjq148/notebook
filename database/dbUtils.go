@@ -27,8 +27,41 @@ func AddCondition(obj GenerateWhereSql, key string, value string) GenerateWhereS
 	return obj
 }
 
-func GetConditions(obj GenerateWhereSql) (string, []interface{}) {
-	return obj.getData()
+func generateSql(c *fiber.Ctx, data interface{}) (string, []interface{}) {
+	whereSql := "select * from "
+	typeOfData := reflect.TypeOf(data)
+	fieldLen := typeOfData.NumField()
+	conditions := make([]interface{}, 0)
+	conditionNames := make([]string, 0)
+
+	for i := 0; i < fieldLen; i++ {
+		tag := typeOfData.Field(i).Tag
+
+		if tag.Get("table") != "" {
+			whereSql += tag.Get("table") + " where 1 = 1"
+		} else if c.Query(tag.Get("json")) != "" {
+			switch tag.Get("op") {
+			case "like":
+				conditionNames = append(conditionNames, " "+tag.Get("db")+" like ? ")
+				conditions = append(conditions, "%"+c.Query(tag.Get("json"))+"%")
+				break
+			case "=":
+				conditions = append(conditions, c.Query(tag.Get("json")))
+				conditionNames = append(conditionNames, " "+tag.Get("db")+" "+tag.Get("op")+"?")
+				break
+			case "<=":
+				conditions = append(conditions, c.Query(tag.Get("json")))
+				conditionNames = append(conditionNames, " "+tag.Get("db")+" "+tag.Get("op")+"?")
+				break
+			case ">=":
+				conditions = append(conditions, c.Query(tag.Get("json")))
+				conditionNames = append(conditionNames, " "+tag.Get("db")+" "+tag.Get("op")+"?")
+				break
+			}
+		}
+	}
+	whereSql = whereSql + " and " + strings.Join(conditionNames, " and ")
+	return whereSql, conditions
 }
 
 // Example
@@ -36,30 +69,11 @@ func GetConditions(obj GenerateWhereSql) (string, []interface{}) {
 // database.QueryPage(c, &queryResult, model.Contact{})
 func QueryPage(c *fiber.Ctx, queryResult, data interface{}) {
 	db := DBConn
-	typeOfData := reflect.TypeOf(data)
-	fieldLen := typeOfData.NumField()
-	conditions := make([]interface{}, 0)
-	sql := "select * from t_contact where 1=1"
-	conditionNames := ""
 
-	for i := 0; i < fieldLen; i++ {
-		tag := typeOfData.Field(i).Tag
-		needAdd := false
-
-		if c.Query(tag.Get("json")) != "" {
-			needAdd = true
-			conditions = append(conditions, c.Query(tag.Get("json")))
-		}
-
-		if needAdd {
-			conditionNames = conditionNames + " and " + tag.Get("db") + "=?"
-		}
-	}
-
-	sql = sql + conditionNames
+	sql, conditions := generateSql(c, data)
 
 	e := db.Select(queryResult, sql, conditions...)
-
+	//
 	if e != nil {
 		fmt.Println("err=", e)
 	}
