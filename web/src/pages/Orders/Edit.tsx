@@ -117,11 +117,11 @@ export default (props: Props) => {
             </Form.Item>
         </Form>
 
-        <Modal footer={null} width={1000} open={contactModal.open} onCancel={() => setContactModal({ open: false })}>
+        <Modal destroyOnClose footer={null} width={1000} open={contactModal.open} onCancel={() => setContactModal({ open: false })}>
             <ContactList onRowSelect={handleContactSelect} />
         </Modal>
 
-        <Modal footer={null} width={1000} open={productModal.open} onCancel={() => setProductModal({ open: false })}>
+        <Modal destroyOnClose footer={null} width={1000} open={productModal.open} onCancel={() => setProductModal({ open: false })}>
             <ProductList onRowSelect={handleProductSelect} />
         </Modal>
     </>
