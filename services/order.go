@@ -22,7 +22,7 @@ func GetOrderById(id int) (model.Order, error) {
 }
 
 func DeleteOrder(userId string, id string) error {
-	_, e := database.DBConn.Exec("delete from t_order where 1=1 and createUser=? and id=?", userId, id)
+	e := database.DeleteById("t_order", userId, id)
 
 	if e != nil {
 		return errors.New("删除订单失败")
