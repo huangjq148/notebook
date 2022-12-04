@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Form, Input, InputNumber, message, Modal } from "antd"
+import { Button, DatePicker, Form, Input, InputNumber, message, Modal } from "antd"
 import { createOrder, updateOrder, queryOrderById } from "@/services/order"
 import ContactList from "./ContactList"
 import ProductList from "./ProductList"
+import dayjs from "dayjs"
 
 type Props = {
     id?: number
@@ -37,6 +38,7 @@ export default (props: Props) => {
     }
 
     const handleFormSubmit = async (values: Order) => {
+        values.orderTime = dayjs(values.orderTime).format("YYYY-MM-DD")
         if (props.id) {
             await updateOrder({ ...oldData, ...values })
         } else {
@@ -49,8 +51,9 @@ export default (props: Props) => {
     const loadData = async () => {
         if (props.id) {
             const data = await queryOrderById(props.id)
-            formRef.setFieldsValue(data)
-            setOldData(data)
+            const showDate = dayjs(dayjs(data.orderTime), "YYYY-MM-DD")
+            formRef.setFieldsValue({ ...data, orderTime: showDate })
+            setOldData({ ...data, orderTime: showDate as any })
         }
     }
 
@@ -70,7 +73,10 @@ export default (props: Props) => {
     }, [])
 
     return <>
-        <Form onFinish={handleFormSubmit} form={formRef}>
+        <Form onFinish={handleFormSubmit} form={formRef} initialValues={{}}>
+            <Form.Item name="orderTime" label="日期">
+                <DatePicker defaultValue={dayjs(dayjs(), 'YYYY-MM-DD')} />
+            </Form.Item>
             <div style={{ display: "flex", width: "100%" }}>
                 <Form.Item label="产品名" name="name" style={{ width: "100%", marginRight: "10px" }} rules={[{ required: true, message: '请输入产品名' }]}>
                     <Input disabled={!!props.stockInfo} />

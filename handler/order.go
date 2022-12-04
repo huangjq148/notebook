@@ -3,14 +3,13 @@ package handler
 import (
 	"api-fiber-gorm/database"
 	"api-fiber-gorm/model"
+	"api-fiber-gorm/model/response"
 	"api-fiber-gorm/services"
 	"api-fiber-gorm/utils"
 	"fmt"
+	"github.com/gofiber/fiber/v2"
 	"strconv"
 	"strings"
-	"time"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 func handleSearchCondition(c *fiber.Ctx) (string, []interface{}) {
@@ -73,8 +72,8 @@ func Statistics(c *fiber.Ctx) error {
 }
 
 func CreateOrder(c *fiber.Ctx) error {
-	db := database.DBConn
 	var order model.Order
+	db := database.DBConn
 	token := c.Get("Authorization")
 	userId := utils.GetFromToken(token, "user_id")
 
@@ -82,14 +81,16 @@ func CreateOrder(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
 	}
 
+	//database.Create(c, "t_order", order)
+
 	err := OutStock(order.StockId, order.Number)
 
 	if err != nil {
 		return c.JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
-	result, e := db.Exec("insert into t_order(name, contact, phone, address, buyPrice, sellPrice , number, otherCost, status, remark, stockId, createTime, createUser) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
-		order.Name, order.Contact, order.Phone, order.Address, order.BuyPrice, order.SellPrice, order.Number, order.OtherCost, order.Status, order.Remark, order.StockId, time.Now().Format("2006-01-02"), userId)
+	result, e := db.Exec("insert into t_order(name, contact, phone, address, buyPrice, sellPrice , number, otherCost, status, remark, orderTime, stockId, createTime, createUser) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+		order.Name, order.Contact, order.Phone, order.Address, order.BuyPrice, order.SellPrice, order.Number, order.OtherCost, order.Status, order.Remark, order.OrderTime, order.StockId, utils.GetNow(), userId)
 
 	if e != nil {
 		fmt.Println("err=", e)
@@ -97,6 +98,7 @@ func CreateOrder(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{"status": "success", "message": "保存成功", "data": result})
+	//return c.JSON("")
 }
 
 func RevokeStockOrder(c *fiber.Ctx) error {
@@ -139,26 +141,14 @@ type OrderQueryCondition struct {
 
 func QueryOrderList(c *fiber.Ctx) error {
 	var queryResult []model.Order
-	var count int
-	db := database.DBConn
-	pageSql := utils.GeneratePageSql(c)
-	orderSql := " order by createTime desc"
-	whereSql, paramValues := handleSearchCondition(c)
 
-	finalSql := "select * from t_order " + whereSql + orderSql + pageSql
-
-	database.QueryPage(c, &queryResult, OrderQueryCondition{})
-
-	e := db.Select(&queryResult, finalSql, paramValues...)
+	result, e := database.QueryPage(c, &queryResult, OrderQueryCondition{})
 
 	if e != nil {
-		fmt.Println("err=", e)
-		return c.JSON(fiber.Map{"status": "error", "message": e.Error()})
+		return c.JSON(response.Error(nil, e.Error()))
 	}
 
-	db.Get(&count, "select count(1) from t_order "+whereSql, paramValues...)
-
-	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": fiber.Map{"content": queryResult, "total": count}})
+	return c.JSON(response.Success(result, "查询成功"))
 }
 
 func DeleteOrder(c *fiber.Ctx) error {

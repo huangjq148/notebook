@@ -14,7 +14,7 @@ interface Statistics { buyMoney: number, sellMoney: number, number: number, othe
 
 export default () => {
     const [conditions, setConditions] = useState({})
-    const { dataSource, loading, searchForm, pagination } = useTable<Order>({ request: queryOrder, conditions })
+    const { dataSource, loading, searchForm, pagination, handlePageChange } = useTable<Order>({ request: queryOrder, conditions })
     const [modalOptions, setModalOptions] = useState({ id: 0, open: false })
     const [contactOptions, setContactOptions] = useState<{ data: ContactInfo, open: boolean }>({ data: {}, open: false })
     const [statisticsInfo, setStatisticsInfo] = useState<Statistics>({ sellMoney: 0, buyMoney: 0, number: 0, otherCost: 0 })
@@ -113,7 +113,8 @@ export default () => {
         },
         {
             title: '日期',
-            dataIndex: 'createTime',
+            dataIndex: 'orderTime',
+            render: (text: string) => dayjs(text).format("YYYY-MM-DD")
         },
         {
             title: '状态',
@@ -194,7 +195,7 @@ export default () => {
         </SearchForm>
 
         <div className={styles.tableWrapper}>
-            <Table rowKey="id" loading={loading} pagination={pagination} dataSource={dataSource} columns={columns} />
+            <Table rowKey="id" loading={loading} pagination={pagination} onChange={handlePageChange} dataSource={dataSource} columns={columns} />
         </div>
 
         <Modal destroyOnClose footer={null} title={modalOptions.id ? "编辑" : "新增"} open={modalOptions.open} onCancel={() => setModalOptions({ id: 0, open: false })} >

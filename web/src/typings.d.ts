@@ -30,6 +30,7 @@ declare interface Order extends CreateInfo {
     remark: string
     status: string
     stockId: number
+    orderTime: string
 }
 
 declare interface Contact extends CreateInfo {
