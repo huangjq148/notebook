@@ -116,13 +116,13 @@ export default () => {
             dataIndex: 'orderTime',
             render: (text: string, record: Order) => dayjs(text || record.createTime).format("YYYY-MM-DD")
         },
-        {
-            title: '状态',
-            dataIndex: 'status',
-            render(status: string) {
-                return <span className={styles.status} data-status={status}>{translateToArray("STATUS")[status]}</span>
-            }
-        },
+        // {
+        //     title: '状态',
+        //     dataIndex: 'status',
+        //     render(status: string) {
+        //         return <span className={styles.status} data-status={status}>{translateToArray("STATUS")[status]}</span>
+        //     }
+        // },
         {
             title: '操作',
             key: "operation",
@@ -130,11 +130,11 @@ export default () => {
             render: (record: Order) => (
                 <Space size="middle">
                     <TextButton onClick={() => handleEditClick(record.id)}>编辑</TextButton>
-                    {
+                    {/* {
                         record.status == "1" ?
                             <TextButton onClick={() => handleOrderStatusChange(record.id, "2")}>已完成</TextButton> :
                             <TextButton onClick={() => handleOrderStatusChange(record.id, "1")}>未完成</TextButton>
-                    }
+                    } */}
                     {
                         record.stockId ?
                             <TextButton onClick={() => handleRevokeOutStock(record)}>撤销出库</TextButton> :
