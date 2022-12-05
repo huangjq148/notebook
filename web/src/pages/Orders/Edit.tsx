@@ -75,7 +75,10 @@ export default (props: Props) => {
     return <>
         <Form onFinish={handleFormSubmit} form={formRef} initialValues={{}}>
             <Form.Item name="orderTime" label="日期">
-                <DatePicker defaultValue={dayjs(dayjs(), 'YYYY-MM-DD')} />
+                <DatePicker presets={[
+                    { label: "昨天", value: dayjs().add(-1, "day") },
+                    { label: "今天", value: dayjs() }
+                ]} defaultValue={dayjs(dayjs(), 'YYYY-MM-DD')} />
             </Form.Item>
             <div style={{ display: "flex", width: "100%" }}>
                 <Form.Item label="产品名" name="name" style={{ width: "100%", marginRight: "10px" }} rules={[{ required: true, message: '请输入产品名' }]}>
