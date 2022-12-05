@@ -114,7 +114,7 @@ export default () => {
         {
             title: '日期',
             dataIndex: 'orderTime',
-            render: (text: string) => dayjs(text).format("YYYY-MM-DD")
+            render: (text: string, record: Order) => dayjs(text || record.createTime).format("YYYY-MM-DD")
         },
         {
             title: '状态',
