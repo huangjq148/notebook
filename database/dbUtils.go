@@ -2,6 +2,7 @@ package database
 
 import (
 	"api-fiber-gorm/utils"
+	"errors"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"reflect"
@@ -41,30 +42,47 @@ func AddCondition(obj GenerateWhereSql, key string, value string) GenerateWhereS
 // }
 
 func Create(c *fiber.Ctx, tableName string, data interface{}) error {
-	//db := DBConn
+	data1 := data
+	typeOfData := reflect.TypeOf(data)
+	fieldLen := typeOfData.NumField()
+	db := DBConn
 	//token := c.Get("Authorization")
 	//userId := utils.GetFromToken(token, "user_id")
-	if err := c.BodyParser(&data); err != nil {
+	if err := c.BodyParser(&data1); err != nil {
 		return err
 	}
 
-	v := reflect.ValueOf(data)
+	data2, ok := data1.(map[string]interface{})
+	if !ok {
+		return errors.New("转换错误")
+	}
+	v := reflect.ValueOf(data2)
 	fmt.Println(v)
-	typeOfData := reflect.TypeOf(data)
-	fieldLen := typeOfData.NumField()
-	conditions := make([]interface{}, 0)
-	conditionNames := make([]string, 0)
 
+	m1 := make(map[string]string)
 	for i := 0; i < fieldLen; i++ {
 		tag := typeOfData.Field(i).Tag
-		if c.Query(tag.Get("json")) != "" {
-			conditions = append(conditions, c.Query(tag.Get("json")))
-			conditionNames = append(conditionNames, " and "+tag.Get("db")+" "+tag.Get("op")+"?")
-		}
+		m1[tag.Get("json")] = tag.Get("db")
 	}
 
-	sql := "insert into " + tableName + "(" + ") values(" + ")"
+	conditions := make([]interface{}, 0)
+	conditionNames := make([]string, 0)
+	placeholders := make([]string, 0)
+
+	for key, value := range data2 {
+		placeholders = append(placeholders, "?")
+		conditionNames = append(conditionNames, m1[key])
+		fmt.Println(value)
+		conditions = append(conditions, value)
+	}
+
+	sql := "insert into " + tableName + "(" + strings.Join(conditionNames, ",") + ") values(" + strings.Join(placeholders, ",") + ") "
 	fmt.Println(sql)
+	_, e := db.Exec(sql, conditions...)
+
+	if e != nil {
+		return errors.New("插入失败")
+	}
 	//result, e := db.Exec("insert into t_order(name, contact, phone, address, buyPrice, sellPrice , number, otherCost, status, remark, stockId, createTime, createUser) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
 	//	order.Name, order.Contact, order.Phone, order.Address, order.BuyPrice, order.SellPrice, order.Number, order.OtherCost, order.Status, order.Remark, order.StockId, time.Now().Format("2006-01-02"), userId)
 
