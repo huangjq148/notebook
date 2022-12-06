@@ -64,7 +64,7 @@ func Statistics(c *fiber.Ctx) error {
 	whereSql, paramValues := handleSearchCondition(c)
 	db := database.DBConn
 
-	finalSql := "select sum(t.buyPrice*t.number) buyMoney,sum(t.sellPrice*t.number) sellMoney,sum(t.number) number, sum(t.otherCost) otherCost from t_order t " + whereSql
+	finalSql := "select IFNULL(sum(t.buyPrice*t.number),0) buyMoney,IFNULL(sum(t.sellPrice*t.number),0) sellMoney,IFNULL(sum(t.number),0) number, IFNULL(sum(t.otherCost),0) otherCost from t_order t " + whereSql
 
 	db.Get(&result, finalSql, paramValues...)
 
