@@ -1,6 +1,7 @@
 import create from 'zustand';
 import { message } from "antd"
 import { fetchUserInfo } from "@/services/user"
+import { removeToken } from "@/utils"
 
 export interface UserInfoModel {
     /** 用户信息 */
@@ -9,6 +10,8 @@ export interface UserInfoModel {
     getUserInfo: () => Promise<void>;
     /** 更新用户信息 */
     updateUserInfo: (params: UserInfo) => Promise<void>;
+    /** 登出 */
+    logout: () => void
 }
 
 export default create(
@@ -31,5 +34,10 @@ export default create(
             console.log(params);
             message.success("保存成功")
         },
+
+        logout: () => {
+            removeToken()
+            window.location.reload()
+        }
     }),
 );

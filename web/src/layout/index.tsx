@@ -3,10 +3,11 @@ import {
     DesktopOutlined,
     FileOutlined, PieChartOutlined, UserOutlined
 } from '@ant-design/icons';
-import type { MenuProps } from 'antd';
+import { Dropdown, MenuProps } from 'antd';
 import { Layout, Menu } from "antd";
 import { useEffect } from 'react';
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
+
 import styles from "./index.module.less";
 
 const { Header, Sider, Content } = Layout;
@@ -16,10 +17,12 @@ export default () => {
     const location = useLocation()
     const {
         userInfo,
-        getUserInfo
+        getUserInfo,
+        logout
     } = useUser(state => ({
         getUserInfo: state.getUserInfo,
-        userInfo: state.userInfo
+        userInfo: state.userInfo,
+        logout: state.logout
     }))
 
     const handleMenuItemClick = (val: { key: string }) => {
@@ -58,10 +61,22 @@ export default () => {
         getUserInfo()
     }, [])
 
+    const UserInfo = () => {
+        const items = [
+            { label: '设置', key: 'setting' }, // 菜单项务必填写 key
+            { label: <span onClick={logout}>退出</span>, key: 'logout' },
+        ];
+        return (
+            <Dropdown menu={{ items }}>
+                <span>{userInfo.name ?? "-"} </span>
+            </Dropdown>
+        );
+    }
+
     return <Layout style={{ width: "100vw", height: "100vh" }}>
         <Header className={styles.header}>
             <div className={styles.logo} >Recorder</div>
-            <div className={styles.action}>{userInfo.name ?? "-"} </div>
+            <div className={styles.action}><UserInfo /></div>
         </Header>
         <Layout>
             <Sider width={180} className="site-layout-background">
