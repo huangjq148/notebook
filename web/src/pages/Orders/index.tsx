@@ -1,7 +1,8 @@
 import { SearchForm, TextButton } from "@/components"
 import { useTable } from '@/hooks'
+import { PlusOutlined } from "@ant-design/icons"
 import { deleteOrder, queryOrder, changeOrderStatus, statistics, revokeStockOrder } from "@/services/order"
-import { Button, Form, Input, message, Modal, Space, Table, DatePicker, Select, Descriptions } from 'antd'
+import { Button, Form, Input, FloatButton, message, Modal, Space, Table, DatePicker, Select, Descriptions } from 'antd'
 import { useEffect, useState } from 'react'
 import EditPage from "./Edit"
 import { STATUS, translateToArray } from "@/data"
@@ -175,9 +176,6 @@ export default () => {
                 <Form.Item>
                     <Space>
                         <Button htmlType='submit' type="primary">查询</Button>
-                        <Button onClick={() => {
-                            setModalOptions({ id: 0, open: true })
-                        }}>新增</Button>
                     </Space>
                 </Form.Item>
             </Form>
@@ -195,6 +193,9 @@ export default () => {
         </SearchForm>
 
         <div className={styles.tableWrapper}>
+            <FloatButton icon={<PlusOutlined />} type="primary" shape="circle" onClick={() => {
+                setModalOptions({ id: 0, open: true })
+            }} />
             <Table rowKey="id" loading={loading} pagination={pagination} onChange={handlePageChange} dataSource={dataSource} columns={columns} />
         </div>
 
