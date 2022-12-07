@@ -176,7 +176,7 @@ func QueryPage(c *fiber.Ctx, queryResult interface{}, data interface{}) (interfa
 		return nil, e
 	}
 
-	countSql := "select count(1) from " + tableName + whereSql
+	countSql := "select count(1) from " + tableName + " where 1=1 and createUser=" + userId + " " + whereSql
 
 	db.Get(&count, countSql, conditions...)
 
