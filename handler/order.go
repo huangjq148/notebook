@@ -134,8 +134,8 @@ type OrderQueryCondition struct {
 	Table           string `table:"t_order"`
 	Name            string `db:"name" json:"name" op:"like"`
 	Contact         string `db:"contact" json:"contact" op:"like"`
-	StartCreateDate string `db:"createDate" json:"startCreateDate" op:">="`
-	EndCreateDate   string `db:"createDate" json:"endCreateDate" op:"<="`
+	StartCreateDate string `db:"createTime" json:"startCreateDate" op:">="`
+	EndCreateDate   string `db:"createTime" json:"endCreateDate" op:"<="`
 	Status          string `db:"status" json:"status" op:"="`
 }
 
