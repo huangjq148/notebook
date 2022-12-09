@@ -7,9 +7,10 @@ import (
 	"api-fiber-gorm/services"
 	"api-fiber-gorm/utils"
 	"fmt"
-	"github.com/gofiber/fiber/v2"
 	"strconv"
 	"strings"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func handleSearchCondition(c *fiber.Ctx) (string, []interface{}) {
@@ -134,8 +135,8 @@ type OrderQueryCondition struct {
 	Table           string `table:"t_order"`
 	Name            string `db:"name" json:"name" op:"like"`
 	Contact         string `db:"contact" json:"contact" op:"like"`
-	StartCreateDate string `db:"createTime" json:"startCreateDate" op:">="`
-	EndCreateDate   string `db:"createTime" json:"endCreateDate" op:"<="`
+	StartCreateDate string `db:"orderTime" json:"startCreateDate" op:">="`
+	EndCreateDate   string `db:"orderTime" json:"endCreateDate" op:"<="`
 	Status          string `db:"status" json:"status" op:"="`
 }
 
