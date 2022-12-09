@@ -26,19 +26,19 @@ func handleSearchCondition(c *fiber.Ctx) (string, []interface{}) {
 		paramKeys = append(paramKeys, "name like ?")
 		paramValues = append(paramValues, "%"+c.Query("name")+"%")
 	}
-	//
+
 	if c.Query("contact") != "" {
 		paramKeys = append(paramKeys, "contact like ?")
 		paramValues = append(paramValues, "%"+c.Query("contact")+"%")
 	}
 
 	if c.Query("startCreateDate") != "" {
-		paramKeys = append(paramKeys, "createTime >= ?")
+		paramKeys = append(paramKeys, "orderTime >= ?")
 		paramValues = append(paramValues, c.Query("startCreateDate"))
 	}
 
 	if c.Query("endCreateDate") != "" {
-		paramKeys = append(paramKeys, "createTime <= ?")
+		paramKeys = append(paramKeys, "orderTime <= ?")
 		paramValues = append(paramValues, c.Query("endCreateDate"))
 	}
 
@@ -113,7 +113,7 @@ func RevokeStockOrder(c *fiber.Ctx) error {
 		if err != nil {
 			return c.JSON(fiber.Map{"status": "error", "message": "id 错误"})
 		}
-		oldOrder, err = services.GetOrderById(intId)
+		oldOrder, _ = services.GetOrderById(intId)
 	}
 
 	err := OutStock(oldOrder.StockId, "-"+oldOrder.Number)
