@@ -42,14 +42,13 @@ func handleSearchCondition(c *fiber.Ctx) (string, []interface{}) {
 		paramValues = append(paramValues, c.Query("endCreateDate"))
 	}
 
-	fmt.Println(c.Query("status"))
 	if c.Query("status") != "" {
 		paramKeys = append(paramKeys, "status like ?")
 		paramValues = append(paramValues, "%"+c.Query("status")+"%")
 	}
 
 	whereSql := " where 1=1 and " + strings.Join(paramKeys, " and ")
-	fmt.Println(whereSql, paramValues)
+
 	return whereSql, paramValues
 }
 
@@ -160,10 +159,10 @@ func DeleteOrder(c *fiber.Ctx) error {
 	error := services.DeleteOrder(userId, id)
 
 	if error != nil {
-		return c.JSON(fiber.Map{"status": "error", "message": error.Error()})
+		return c.JSON(response.Error(nil, error.Error()))
 	}
 
-	return c.JSON(fiber.Map{"status": "success", "message": "删除成功"})
+	return c.JSON(response.Success(nil, "删除成功"))
 }
 
 func GetOrderById(c *fiber.Ctx) error {
