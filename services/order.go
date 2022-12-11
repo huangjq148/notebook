@@ -4,16 +4,14 @@ import (
 	"api-fiber-gorm/database"
 	"api-fiber-gorm/model"
 	"errors"
-	"fmt"
+	"github.com/gofiber/fiber/v2"
 )
 
-func GetOrderById(id int) (model.Order, error) {
-	sql := "select * from t_order where id = ?"
+func GetOrderById(c *fiber.Ctx, id int) (model.Order, error) {
 	var order model.Order
 
-	e := database.DBConn.Get(&order, sql, id)
+	e := database.GetById(c, "t_order", id, &order)
 
-	fmt.Println(sql, id, order)
 	if e != nil {
 		return order, errors.New("查找不到数据")
 	}
@@ -21,8 +19,8 @@ func GetOrderById(id int) (model.Order, error) {
 	return order, nil
 }
 
-func DeleteOrder(userId string, id string) error {
-	e := database.DeleteById("t_order", userId, id)
+func DeleteOrder(c *fiber.Ctx, id string) error {
+	e := database.DeleteById(c, "t_order", id)
 
 	if e != nil {
 		return errors.New("删除订单失败")

@@ -107,7 +107,7 @@ func UpdateProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
 	}
 
-	database.GetById(product)
+	//database.GetById(product)
 
 	result, e := db.Exec("update t_product set name=?, buyPrice=?, sellPrice=? where id=?", product.Name, product.BuyPrice, product.SellPrice, product.Id)
 

@@ -24,30 +24,13 @@ func (this *GenerateWhereSql) getData() (string, []interface{}) {
 	return strings.Join(this.paramKeys, " and "), this.paramValues
 }
 
-func AddCondition(obj GenerateWhereSql, key string, value string) GenerateWhereSql {
-	obj.AddParam(key, value)
-	return obj
-}
-
-// v := reflect.ValueOf(data)
-// count := v.NumField()
-// for i := 0; i < count; i++ {
-// 	f := v.Field(i) //字段值
-// 	switch f.Kind() {
-// 	case reflect.String:
-// 		fmt.Println(f.String())
-// 	case reflect.Int:
-// 		fmt.Println(f.Int())
-// 	}
-// }
-
 func Create(c *fiber.Ctx, tableName string, data interface{}) error {
 	data1 := data
 	typeOfData := reflect.TypeOf(data)
 	fieldLen := typeOfData.NumField()
 	db := DBConn
-	//token := c.Get("Authorization")
-	//userId := utils.GetFromToken(token, "user_id")
+	token := c.Get("Authorization")
+	userId := utils.GetFromToken(token, "user_id")
 	if err := c.BodyParser(&data1); err != nil {
 		return err
 	}
@@ -56,42 +39,101 @@ func Create(c *fiber.Ctx, tableName string, data interface{}) error {
 	if !ok {
 		return errors.New("转换错误")
 	}
-	v := reflect.ValueOf(data2)
-	fmt.Println(v)
-
-	m1 := make(map[string]string)
-	for i := 0; i < fieldLen; i++ {
-		tag := typeOfData.Field(i).Tag
-		m1[tag.Get("json")] = tag.Get("db")
-	}
 
 	conditions := make([]interface{}, 0)
 	conditionNames := make([]string, 0)
 	placeholders := make([]string, 0)
 
-	for key, value := range data2 {
-		placeholders = append(placeholders, "?")
-		conditionNames = append(conditionNames, m1[key])
-		fmt.Println(value)
-		conditions = append(conditions, value)
+	for i := 0; i < fieldLen; i++ {
+		tag := typeOfData.Field(i).Tag
+		dbFieldName := tag.Get("db")
+		jsonName := tag.Get("json")
+
+		if dbFieldName != "id" && dbFieldName != "" {
+			value, ok := data2[jsonName]
+
+			placeholders = append(placeholders, "?")
+			conditionNames = append(conditionNames, dbFieldName)
+			if ok {
+				conditions = append(conditions, value)
+			} else {
+				conditions = append(conditions, "")
+			}
+		}
 	}
+
+	conditionNames = append(conditionNames, "createTime", "createUser")
+	placeholders = append(placeholders, "?", "?")
+	conditions = append(conditions, utils.GetNow(), userId)
 
 	sql := "insert into " + tableName + "(" + strings.Join(conditionNames, ",") + ") values(" + strings.Join(placeholders, ",") + ") "
-	fmt.Println(sql)
-	_, e := db.Exec(sql, conditions...)
+
+	fmt.Println(sql, conditions)
+
+	result, e := db.Exec(sql, conditions...)
 
 	if e != nil {
+		fmt.Println(e)
 		return errors.New("插入失败")
 	}
-	//result, e := db.Exec("insert into t_order(name, contact, phone, address, buyPrice, sellPrice , number, otherCost, status, remark, stockId, createTime, createUser) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
-	//	order.Name, order.Contact, order.Phone, order.Address, order.BuyPrice, order.SellPrice, order.Number, order.OtherCost, order.Status, order.Remark, order.StockId, time.Now().Format("2006-01-02"), userId)
 
-	//if e != nil {
-	//	fmt.Println("err=", e)
-	//	return c.JSON(fiber.Map{"status": "error", "message": e.Error()})
-	//}
+	fmt.Println(result.LastInsertId())
 
 	return nil
+}
+
+func Update(c *fiber.Ctx, tableName string, data interface{}) (interface{}, error) {
+	data1 := data
+	typeOfData := reflect.TypeOf(data)
+	fieldLen := typeOfData.NumField()
+	token := c.Get("Authorization")
+	userId := utils.GetFromToken(token, "user_id")
+	var dataId interface{}
+
+	if err := c.BodyParser(&data1); err != nil {
+		return nil, err
+	}
+
+	data2, _ := data1.(map[string]interface{})
+
+	conditions := make([]interface{}, 0)
+	conditionNames := make([]string, 0)
+
+	for i := 0; i < fieldLen; i++ {
+		tag := typeOfData.Field(i).Tag
+		dbFieldName := tag.Get("db")
+		jsonName := tag.Get("json")
+
+		if dbFieldName != "id" && dbFieldName != "" {
+			value, ok := data2[jsonName]
+
+			if ok {
+				conditionNames = append(conditionNames, dbFieldName+"=?")
+				conditions = append(conditions, value)
+			}
+		} else if dbFieldName == "id" {
+			value, ok := data2["id"]
+
+			if ok {
+				dataId = value
+			}
+		}
+	}
+
+	conditionNames = append(conditionNames, "updateTime=?", "updateUser=?")
+	conditions = append(conditions, utils.GetNow(), userId)
+
+	sql := "update " + tableName + " set " + strings.Join(conditionNames, ",") + " where id=?"
+	conditions = append(conditions, dataId)
+
+	result, e := DBConn.Exec(sql, conditions...)
+	if e != nil {
+		fmt.Println(e)
+		return nil, errors.New("插入失败")
+	}
+	fmt.Println(result.LastInsertId())
+
+	return result, nil
 }
 
 func generateSql(c *fiber.Ctx, data interface{}) (string, string, []interface{}) {
@@ -183,45 +225,62 @@ func QueryPage(c *fiber.Ctx, queryResult interface{}, data interface{}) (interfa
 	return fiber.Map{"content": queryResult, "total": count}, nil
 }
 
-func DeleteById(tableName, userId, id string) error {
+func DeleteById(c *fiber.Ctx, tableName, id string) error {
+	token := c.Get("Authorization")
+	userId := utils.GetFromToken(token, "user_id")
 	sql := "delete from " + tableName + " where 1=1 and createUser=? and id=?"
 
 	_, e := DBConn.Exec(sql, userId, id)
 
 	if e != nil {
+		fmt.Println(e.Error())
 		return e
 	}
 	return nil
 }
 
-func GetById(data interface{}) {
+func GetById(c *fiber.Ctx, tableName string, id int, data interface{}) error {
+	token := c.Get("Authorization")
+	userId := utils.GetFromToken(token, "user_id")
+	sql := "select * from " + tableName + " where id=? and createUser=?"
 
-	typeOfData := reflect.TypeOf(data)
-	fieldLen := typeOfData.NumField()
-	values := reflect.ValueOf(data)
+	e := DBConn.Get(data, sql, id, userId)
 
-	for i := 0; i < fieldLen; i++ {
-		fieldName := typeOfData.Field(i).Name
-		fieldValue := values.Field(i)
-
-		fmt.Println(fieldName, fieldValue)
+	if e != nil {
+		return errors.New("查找不到数据")
 	}
 
-	// veggies := []string{"potatoes", "tomatoes", "brinjal"}
-	// fruits := []string{"oranges", "apples"}
-	// food := append(veggies, fruits...)
-	// fmt.Println("food:", foodfruits...)
-
-	// v := reflect.ValueOf(data)
-	// count := v.NumField()
-	// for i := 0; i < count; i++ {
-	// 	f := v.Field(i) //字段值
-	// 	switch f.Kind() {
-	// 	case reflect.String:
-	// 		fmt.Println(f.String())
-	// 	case reflect.Int:
-	// 		fmt.Println(f.Int())
-	// 	}
-	// }
-	// fmt.Println(data, 1112)
+	return nil
 }
+
+//func GetById(data interface{}) {
+//
+//	typeOfData := reflect.TypeOf(data)
+//	fieldLen := typeOfData.NumField()
+//	values := reflect.ValueOf(data)
+//
+//	for i := 0; i < fieldLen; i++ {
+//		fieldName := typeOfData.Field(i).Name
+//		fieldValue := values.Field(i)
+//
+//		fmt.Println(fieldName, fieldValue)
+//	}
+//
+//	// veggies := []string{"potatoes", "tomatoes", "brinjal"}
+//	// fruits := []string{"oranges", "apples"}
+//	// food := append(veggies, fruits...)
+//	// fmt.Println("food:", foodfruits...)
+//
+//	// v := reflect.ValueOf(data)
+//	// count := v.NumField()
+//	// for i := 0; i < count; i++ {
+//	// 	f := v.Field(i) //字段值
+//	// 	switch f.Kind() {
+//	// 	case reflect.String:
+//	// 		fmt.Println(f.String())
+//	// 	case reflect.Int:
+//	// 		fmt.Println(f.Int())
+//	// 	}
+//	// }
+//	// fmt.Println(data, 1112)
+//}
