@@ -11,7 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func SearchConcact(c *fiber.Ctx) error {
+func SearchContact(c *fiber.Ctx) error {
 	db := database.DBConn
 	name := c.Query("name")
 	token := c.Get("Authorization")
