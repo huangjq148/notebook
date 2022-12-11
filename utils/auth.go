@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"api-fiber-gorm/config"
+	"hjq-notebook/config"
 	"strings"
 
 	"github.com/golang-jwt/jwt"

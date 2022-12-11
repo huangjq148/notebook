@@ -1,8 +1,8 @@
 package main
 
 import (
-	"api-fiber-gorm/database"
-	"api-fiber-gorm/router"
+	"hjq-notebook/database"
+	"hjq-notebook/router"
 	"log"
 
 	"github.com/gofiber/fiber/v2"

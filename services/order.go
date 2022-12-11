@@ -1,10 +1,10 @@
 package services
 
 import (
-	"api-fiber-gorm/database"
-	"api-fiber-gorm/model"
 	"errors"
 	"github.com/gofiber/fiber/v2"
+	"hjq-notebook/database"
+	"hjq-notebook/model"
 )
 
 func GetOrderById(c *fiber.Ctx, id int) (model.Order, error) {

@@ -1,8 +1,8 @@
 package router
 
 import (
-	"api-fiber-gorm/handler"
-	"api-fiber-gorm/middleware"
+	"hjq-notebook/handler"
+	"hjq-notebook/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -12,7 +12,6 @@ import (
 func SetupRoutes(app *fiber.App) {
 	// Middleware
 	api := app.Group("/api", logger.New())
-	api.Get("/", handler.Hello)
 
 	// Auth
 	auth := app.Group("/auth")

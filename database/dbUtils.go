@@ -1,10 +1,10 @@
 package database
 
 import (
-	"api-fiber-gorm/utils"
 	"errors"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"hjq-notebook/utils"
 	"reflect"
 	"strconv"
 	"strings"

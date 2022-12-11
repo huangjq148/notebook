@@ -1,12 +1,12 @@
 package handler
 
 import (
-	"api-fiber-gorm/database"
-	"api-fiber-gorm/model"
-	"api-fiber-gorm/model/response"
-	"api-fiber-gorm/services"
-	"api-fiber-gorm/utils"
 	"fmt"
+	"hjq-notebook/database"
+	"hjq-notebook/model"
+	"hjq-notebook/model/response"
+	"hjq-notebook/services"
+	"hjq-notebook/utils"
 	"strconv"
 	"strings"
 

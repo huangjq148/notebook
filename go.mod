@@ -1,4 +1,4 @@
-module api-fiber-gorm
+module hjq-notebook
 
 go 1.17
 

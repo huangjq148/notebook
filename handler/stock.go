@@ -1,12 +1,12 @@
 package handler
 
 import (
-	"api-fiber-gorm/database"
-	"api-fiber-gorm/model"
-	"api-fiber-gorm/model/response"
-	"api-fiber-gorm/utils"
 	"errors"
 	"fmt"
+	"hjq-notebook/database"
+	"hjq-notebook/model"
+	"hjq-notebook/model/response"
+	"hjq-notebook/utils"
 	"time"
 
 	"github.com/gofiber/fiber/v2"

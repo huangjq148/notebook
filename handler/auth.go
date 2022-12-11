@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"api-fiber-gorm/config"
-	"api-fiber-gorm/database"
 	"fmt"
+	"hjq-notebook/config"
+	"hjq-notebook/database"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
