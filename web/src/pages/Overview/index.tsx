@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react'
-import { Table, Form, Input, Button, Space, List, Typography, DatePicker } from 'antd'
 import { SearchForm } from "@/components"
-import { useTable } from '@/hooks'
-import styles from "./index.module.less"
 import { getTop5Data } from '@/services/overview'
+import { Button, DatePicker, Form, List } from 'antd'
 import dayjs from 'dayjs'
+import { useEffect, useState } from 'react'
+import styles from "./index.module.less"
 
 type TopData = {
     name: string;
@@ -12,7 +11,7 @@ type TopData = {
 }
 
 export default () => {
-    const [conditions, setConditions] = useState({})
+    // const [conditions, setConditions] = useState({})
     const [topData, setTopData] = useState<any>({})
 
 
@@ -62,7 +61,7 @@ export default () => {
                 dataSource={topData.top5BuyGoods ?? []}
                 renderItem={(item: TopData) => (
                     <List.Item>
-                        <><span>{item.name}</span> {item.money}</>
+                        <><span>{item.name}</span> {parseFloat(item.money).toFixed(2)}</>
                     </List.Item>
                 )}
             />
@@ -72,7 +71,7 @@ export default () => {
                 dataSource={topData.top5SellGoods ?? []}
                 renderItem={(item: TopData) => (
                     <List.Item>
-                        <><span>{item.name}</span> {item.money}</>
+                        <><span>{item.name}</span> {parseFloat(item.money).toFixed(2)}</>
                     </List.Item>
                 )}
             />
@@ -82,7 +81,7 @@ export default () => {
                 dataSource={topData.top5ProfitGoods ?? []}
                 renderItem={(item: TopData) => (
                     <List.Item>
-                        <><span>{item.name}</span> {item.money}</>
+                        <><span>{item.name}</span> {parseFloat(item.money).toFixed(2)}</>
                     </List.Item>
                 )}
             />
@@ -92,7 +91,7 @@ export default () => {
                 dataSource={topData.top5BuyCustomer ?? []}
                 renderItem={(item: TopData) => (
                     <List.Item>
-                        <><span>{item.name}</span> {item.money}</>
+                        <><span>{item.name}</span> {parseFloat(item.money).toFixed(2)}</>
                     </List.Item>
                 )}
             />

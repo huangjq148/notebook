@@ -42,7 +42,11 @@ export default () => {
         {
           path: "contact",
           element: <ContactPage />
-        }
+        },
+        {
+          path: '/',
+          element: <Navigate to="/overview" />,
+        },
       ]
     },
     {
