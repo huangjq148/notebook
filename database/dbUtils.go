@@ -82,6 +82,42 @@ func Create(c *fiber.Ctx, tableName string, data interface{}) error {
 	return nil
 }
 
+func UpdateEntity(c *fiber.Ctx, tableName string, data interface{}) (interface{}, error) {
+	token := c.Get("Authorization")
+	userId := utils.GetFromToken(token, "user_id")
+	typeOfData := reflect.TypeOf(data)
+	fieldLen := typeOfData.NumField()
+	values := reflect.ValueOf(data)
+	conditions := make([]interface{}, 0)
+	conditionNames := make([]string, 0)
+	var id string
+
+	for i := 0; i < fieldLen; i++ {
+		tag := typeOfData.Field(i).Tag
+		dbName := tag.Get("db")
+		if dbName == "id" {
+			id = values.Field(i).String()
+		} else {
+			conditionNames = append(conditionNames, dbName+"=?")
+			conditions = append(conditions, values.Field(i).String())
+		}
+	}
+	conditionNames = append(conditionNames, "updateUser=?", "updateTime=?")
+	conditions = append(conditions, userId, utils.GetNow())
+
+	sql := "update " + tableName + " set " + strings.Join(conditionNames, ",") + " where id=? and createUser=?"
+	conditions = append(conditions, id, userId)
+
+	_, e := DBConn.Exec(sql, conditions...)
+
+	if e != nil {
+		fmt.Println(e.Error())
+		return nil, e
+	}
+
+	return nil, nil
+}
+
 func Update(c *fiber.Ctx, tableName string, data interface{}) (interface{}, error) {
 	data1 := data
 	typeOfData := reflect.TypeOf(data)

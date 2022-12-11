@@ -52,7 +52,7 @@ func handleSearchCondition(c *fiber.Ctx) (string, []interface{}) {
 	return whereSql, paramValues
 }
 
-// 统计订单信息
+// Statistics 统计订单信息
 func Statistics(c *fiber.Ctx) error {
 	type StatisticsInfo struct {
 		BuyMoney  string `db:"buyMoney" json:"buyMoney"`
@@ -72,16 +72,16 @@ func Statistics(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": result})
 }
 
-// 创建订单
+// CreateOrder 创建订单
 func CreateOrder(c *fiber.Ctx) error {
 	var order model.Order
 
 	database.Create(c, "t_order", order)
 
-	return c.JSON(fiber.Map{"status": "success", "message": "保存成功", "data": nil})
+	return c.JSON(response.Success(nil, "创建成功"))
 }
 
-// 撤销来自库存的订单
+// RevokeStockOrder 撤销来自库存的订单
 func RevokeStockOrder(c *fiber.Ctx) error {
 	var oldOrder model.Order
 	id := c.Params("id")
@@ -89,7 +89,7 @@ func RevokeStockOrder(c *fiber.Ctx) error {
 	if id != "" {
 		intId, err := strconv.Atoi(id)
 		if err != nil {
-			return c.JSON(fiber.Map{"status": "error", "message": "id 错误"})
+			return c.JSON(response.Error("id 错误"))
 		}
 		oldOrder, _ = services.GetOrderById(c, intId)
 	}
@@ -97,19 +97,19 @@ func RevokeStockOrder(c *fiber.Ctx) error {
 	err := OutStock(oldOrder.StockId, "-"+oldOrder.Number)
 
 	if err != nil {
-		return c.JSON(fiber.Map{"status": "error", "message": "更新库存失败"})
+		return c.JSON(response.Error("更新库存失败"))
 	}
 
 	err = services.DeleteOrder(c, id)
 
 	if err != nil {
-		return c.JSON(fiber.Map{"status": "error", "message": "删除订单数据失败", "id": id})
+		return c.JSON(response.Error("删除订单数据失败"))
 	}
 
-	return c.JSON(fiber.Map{"status": "success", "message": "修改成功"})
+	return c.JSON(response.Success("", "修改成功"))
 }
 
-// 查询订单列表
+// QueryOrderList 查询订单列表
 func QueryOrderList(c *fiber.Ctx) error {
 	type OrderQueryCondition struct {
 		Table           string `table:"t_order"`
@@ -124,81 +124,81 @@ func QueryOrderList(c *fiber.Ctx) error {
 	result, e := database.QueryPage(c, &queryResult, OrderQueryCondition{})
 
 	if e != nil {
-		return c.JSON(response.Error(nil, e.Error()))
+		return c.JSON(response.Error(e.Error()))
 	}
 
 	return c.JSON(response.Success(result, "查询成功"))
 }
 
-// 删除订单
+// DeleteOrder 删除订单
 func DeleteOrder(c *fiber.Ctx) error {
 	id := c.Params("id")
 
 	error := services.DeleteOrder(c, id)
 
 	if error != nil {
-		return c.JSON(response.Error(nil, error.Error()))
+		return c.JSON(response.Error(error.Error()))
 	}
 
 	return c.JSON(response.Success(nil, "删除成功"))
 }
 
-// 根据 ID 获取订单
+// GetOrderById 根据 ID 获取订单
 func GetOrderById(c *fiber.Ctx) error {
 	var order model.Order
 	id := c.Params("id")
 
-	if id != "" {
-		intId, err := strconv.Atoi(id)
-		if err != nil {
-			return c.JSON(fiber.Map{"status": "error", "message": "id 错误"})
-		}
-		e := database.GetById(c, "t_order", intId, &order)
-
-		if e != nil {
-			fmt.Println("err=", e)
-			return c.JSON(fiber.Map{"status": "error", "message": e.Error()})
-		}
-		return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": order})
-
-	} else {
+	intId, err := strconv.Atoi(id)
+	if err != nil {
 		return c.JSON(fiber.Map{"status": "error", "message": "id 错误"})
 	}
+	e := database.GetById(c, "t_order", intId, &order)
+
+	if e != nil {
+		fmt.Println("err=", e)
+		return c.JSON(response.Error(e.Error()))
+	}
+
+	return c.JSON(response.Success(order, "查询成功"))
 }
 
+// UpdateOrder 更新订单
 func UpdateOrder(c *fiber.Ctx) error {
-	//db := database.DBConn
 	var order model.Order
 
 	if err := c.BodyParser(&order); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
+		return c.JSON(response.Error("参数格式错误" + err.Error()))
 	}
 
-	result, e := database.Update(c, "t_order", order)
-	//database.GetById(order)
+	_, e := database.Update(c, "t_order", order)
 
-	//result, e := db.Exec("update t_order set name=?, contact=?, phone=?, address=?, buyPrice=?, sellPrice=?, otherCost=?, number=?, remark=? where id=?",
-	//	order.Name, order.Contact, order.Phone, order.Address, order.BuyPrice, order.SellPrice, order.OtherCost, order.Number, order.Remark, order.Id)
-	//
 	if e != nil {
 		fmt.Println("err=", e)
-		return c.JSON(fiber.Map{"status": "error", "message": "修改失败", "data": e.Error()})
+		return c.JSON(response.Error("修改失败"))
 	}
 
-	return c.JSON(fiber.Map{"status": "success", "message": "修改成功", "data": result})
+	return c.JSON(response.Success("", "修改成功"))
 }
 
+// ChangeStatus 修改订单状态
 func ChangeStatus(c *fiber.Ctx) error {
-	db := database.DBConn
+	type OrderStatusChange struct {
+		Id     string `db:"id"`
+		Status string `db:"status"`
+	}
 	status := c.Params("status")
 	id := c.Params("id")
 
-	result, e := db.Exec("update t_order set status=? where id=?", status, id)
+	var newOrder OrderStatusChange
+	newOrder.Id = id
+	newOrder.Status = status
+
+	_, e := database.UpdateEntity(c, "t_order", newOrder)
 
 	if e != nil {
-		fmt.Println("err=", e)
-		return c.JSON(fiber.Map{"status": "error", "message": "修改失败", "data": e.Error()})
+		fmt.Println("err=", e.Error())
+		return c.JSON(response.Error("修改失败"))
 	}
 
-	return c.JSON(fiber.Map{"status": "success", "message": "修改成功", "data": result})
+	return c.JSON(response.Success("", "修改成功"))
 }
