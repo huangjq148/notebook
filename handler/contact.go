@@ -3,9 +3,9 @@ package handler
 import (
 	"api-fiber-gorm/database"
 	"api-fiber-gorm/model"
+	"api-fiber-gorm/model/response"
 	"api-fiber-gorm/utils"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -61,41 +61,22 @@ type ContactQuery struct {
 }
 
 func QueryContactList(c *fiber.Ctx) error {
-
-	var paramKeys []string
-	var paramValues []interface{}
-	var queryResult []model.Contact
-	var count int
-	db := database.DBConn
-	pageSql := utils.GeneratePageSql(c)
-	orderSql := " order by createTime desc"
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
-
-	// database.QueryPage(c, &queryResult, model.Contact{})
-
-	paramKeys = append(paramKeys, "createUser=?")
-	paramValues = append(paramValues, userId)
-
-	paramKeys = append(paramKeys, "realname like ?")
-	paramValues = append(paramValues, "%"+c.Query("name")+"%")
-
-	paramKeys = append(paramKeys, "phone like ?")
-	paramValues = append(paramValues, "%"+c.Query("phone")+"%")
-
-	paramKeys = append(paramKeys, "address like ?")
-	paramValues = append(paramValues, "%"+c.Query("address")+"%")
-
-	e := db.Select(&queryResult, "select * from t_contact where "+strings.Join(paramKeys, " and ")+orderSql+pageSql, paramValues...)
-
-	if e != nil {
-		fmt.Println("err=", e)
-		return c.JSON(fiber.Map{"status": "error", "message": e.Error()})
+	type ContactQueryCondition struct {
+		Table   string `table:"t_contact"`
+		Name    string `db:"name" json:"name" op:"like"`
+		Address string `db:"address" json:"address" op:"like"`
+		Phone   string `db:"phone" json:"phone" op:"like"`
 	}
 
-	db.Get(&count, "select count(1) from t_contact "+strings.Join(paramKeys, " and "), paramValues...)
+	var queryResult []model.Contact
 
-	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": fiber.Map{"content": queryResult, "total": count}})
+	result, e := database.QueryPage(c, &queryResult, ContactQueryCondition{})
+
+	if e != nil {
+		return c.JSON(response.Error(e.Error()))
+	}
+
+	return c.JSON(response.Success(result, "查询成功"))
 }
 
 func DeleteContact(c *fiber.Ctx) error {
