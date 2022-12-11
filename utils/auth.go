@@ -1,11 +1,18 @@
 package utils
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"hjq-notebook/config"
 	"strings"
 
 	"github.com/golang-jwt/jwt"
 )
+
+func GetUserId(c *fiber.Ctx) string {
+	token := c.Get("Authorization")
+	userId := GetFromToken(token, "user_id")
+	return userId
+}
 
 func GetFromToken(token string, key string) string {
 

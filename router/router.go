@@ -17,6 +17,9 @@ func SetupRoutes(app *fiber.App) {
 	auth := app.Group("/auth")
 	auth.Post("/login", handler.Login)
 
+	overview := app.Group("/overview")
+	overview.Get("", middleware.Protected(), handler.OverviewData)
+
 	order := app.Group("/order")
 	order.Delete("/revoke/stock/:id", middleware.Protected(), handler.RevokeStockOrder)
 	order.Get("/statistics", middleware.Protected(), handler.Statistics)
