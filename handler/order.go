@@ -76,7 +76,15 @@ func Statistics(c *fiber.Ctx) error {
 func CreateOrder(c *fiber.Ctx) error {
 	var order model.Order
 
+	if err := c.BodyParser(&order); err != nil {
+		return err
+	}
+
 	database.Create(c, "t_order", order)
+
+	if err := OutStock(order.StockId, order.Number); err != nil {
+		return c.JSON(response.Error(err.Error()))
+	}
 
 	return c.JSON(response.Success(nil, "创建成功"))
 }

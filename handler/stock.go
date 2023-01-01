@@ -35,7 +35,7 @@ func CreateStock(c *fiber.Ctx) error {
 
 func QueryStockList(c *fiber.Ctx) error {
 	type StockQueryCondition struct {
-		Table string `table:"t_product"`
+		Table string `table:"t_stock"`
 		Name  string `db:"name" json:"name" op:"like"`
 	}
 	var queryResult []model.Stock

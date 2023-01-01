@@ -96,7 +96,7 @@ export default () => {
             <EditPage onSubmit={handleAfterCreate} id={modalOptions.id} />
         </Modal>
 
-        <Modal title="出库" footer={null} open={outStockModal.open} onCancel={() => setOutStockModal({ open: false, data: {} })}>
+        <Modal title="出库" footer={null} destroyOnClose open={outStockModal.open} onCancel={() => setOutStockModal({ open: false, data: {} })}>
             <StockSell onSubmit={handleAfterOutStock} stockInfo={outStockModal.data} />
         </Modal>
     </div >
