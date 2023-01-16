@@ -5,45 +5,87 @@ import { SearchForm } from "@/components";
 const data = [
   {
     name: "Page A",
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
+    profit: 4000,
   },
   {
     name: "Page B",
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
+    profit: 3000,
   },
   {
     name: "Page C",
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
+    profit: 2000,
   },
   {
     name: "Page D",
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
+    profit: 2780,
   },
   {
     name: "Page E",
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
+    profit: 1890,
   },
   {
     name: "Page F",
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
+    profit: 2390,
   },
   {
     name: "Page G",
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
+    profit: 3490,
+  },
+  {
+    name: "Page A",
+    profit: 4000,
+  },
+  {
+    name: "Page B",
+    profit: 3000,
+  },
+  {
+    name: "Page C",
+    profit: 2000,
+  },
+  {
+    name: "Page D",
+    profit: 2780,
+  },
+  {
+    name: "Page E",
+    profit: 1890,
+  },
+  {
+    name: "Page F",
+    profit: 2390,
+  },
+  {
+    name: "Page G",
+    profit: 3490,
+  },
+  {
+    name: "Page A",
+    profit: 4000,
+  },
+  {
+    name: "Page B",
+    profit: 3000,
+  },
+  {
+    name: "Page C",
+    profit: 2000,
+  },
+  {
+    name: "Page D",
+    profit: 2780,
+  },
+  {
+    name: "Page E",
+    profit: 1890,
+  },
+  {
+    name: "Page F",
+    profit: 2390,
+  },
+  {
+    name: "Page G",
+    profit: 3490,
   },
 ];
 
@@ -68,39 +110,9 @@ export default function Charts() {
         <YAxis />
         <Tooltip />
         <Legend />
-        <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
-        <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+        <Line type="monotone" dataKey="profit" stroke="#8884d8" activeDot={{ r: 8 }} />
+        {/* <Line type="monotone" dataKey="uv" stroke="#82ca9d" /> */}
       </LineChart>
     </ResponsiveContainer>
   );
 }
-
-// export default class Example extends PureComponent {
-//   // static demoUrl = 'https://codesandbox.io/s/simple-line-chart-kec3v';
-
-//   render() {
-//     return (
-//       <ResponsiveContainer width="100%" height="100%">
-//         <LineChart
-//           width={500}
-//           height={300}
-//           data={data}
-//           margin={{
-//             top: 5,
-//             right: 30,
-//             left: 20,
-//             bottom: 5,
-//           }}
-//         >
-//           <CartesianGrid strokeDasharray="3 3" />
-//           <XAxis dataKey="name" />
-//           <YAxis />
-//           <Tooltip />
-//           <Legend />
-//           <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
-//           <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
-//         </LineChart>
-//       </ResponsiveContainer>
-//     );
-//   }
-// }
