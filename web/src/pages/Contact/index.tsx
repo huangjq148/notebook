@@ -1,4 +1,4 @@
-import { SearchForm, TextButton } from "@/components";
+import { SearchForm, TextButton, DeleteConfirmButton } from "@/components";
 import { useTable } from "@/hooks";
 import { deleteContact, queryContact } from "@/services/contact";
 import { Button, Form, Input, message, Modal, Space, Table } from "antd";
@@ -44,7 +44,9 @@ export default () => {
       render: (record: Contact) => (
         <Space size="middle">
           <TextButton onClick={() => handleEditClick(record.id as string)}>编辑</TextButton>
-          <TextButton onClick={() => handleContactDelete(record.id as string)}>删除</TextButton>
+          <DeleteConfirmButton onConfirm={() => handleContactDelete(record.id as string)}>
+            <TextButton>删除</TextButton>
+          </DeleteConfirmButton>
         </Space>
       ),
     },
@@ -61,7 +63,7 @@ export default () => {
 
   const handleEditClick = (id: string) => {
     setModalOptions({ id, open: true });
-  }
+  };
 
   return (
     <div>

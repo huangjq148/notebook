@@ -1,85 +1,110 @@
-import { SearchForm } from "@/components"
-import { useTable } from '@/hooks'
-import { deleteProduct, queryProduct } from "@/services/product"
-import { Button, Form, Input, message, Modal, Space, Table } from 'antd'
-import { useState } from 'react'
-import { TextButton } from "@/components"
-import EditPage from "./Edit"
-import styles from "./index.module.less"
+import { SearchForm, DeleteConfirmButton } from "@/components";
+import { useTable } from "@/hooks";
+import { deleteProduct, queryProduct } from "@/services/product";
+import { Button, Form, Input, message, Modal, Space, Table } from "antd";
+import { useState } from "react";
+import { TextButton } from "@/components";
+import EditPage from "./Edit";
+import styles from "./index.module.less";
 
 export default () => {
-    const [conditions, setConditions] = useState({})
-    const { dataSource, loading, pagination, searchForm, handlePageChange } = useTable<Product>({ request: queryProduct, conditions })
-    const [modalOptions, setModalOptions] = useState({ id: 0, open: false })
+  const [conditions, setConditions] = useState({});
+  const { dataSource, loading, pagination, searchForm, handlePageChange } = useTable<Product>({
+    request: queryProduct,
+    conditions,
+  });
+  const [modalOptions, setModalOptions] = useState({ id: 0, open: false });
 
-    const handleProductDelete = async (id = 0) => {
-        await deleteProduct(id)
-        message.success("删除成功")
-        searchForm()
-    }
+  const handleProductDelete = async (id = 0) => {
+    await deleteProduct(id);
+    message.success("删除成功");
+    searchForm();
+  };
 
-    const columns = [
-        {
-            title: '产品名',
-            dataIndex: 'name',
-        },
-        {
-            title: '进价',
-            dataIndex: 'buyPrice',
-        },
-        {
-            title: '售价',
-            dataIndex: 'sellPrice',
-        },
-        {
-            title: '操作',
-            key: "operation",
-            width: "160px",
-            render: (record: Product) => (
-                <Space size="middle">
-                    <TextButton onClick={() => handleEditClick(record.id)}>编辑</TextButton>
-                    <TextButton onClick={() => handleProductDelete(record.id)}>删除</TextButton>
-                </Space>
-            )
-        },
-    ];
+  const columns = [
+    {
+      title: "产品名",
+      dataIndex: "name",
+    },
+    {
+      title: "进价",
+      dataIndex: "buyPrice",
+    },
+    {
+      title: "售价",
+      dataIndex: "sellPrice",
+    },
+    {
+      title: "操作",
+      key: "operation",
+      width: "160px",
+      render: (record: Product) => (
+        <Space size="middle">
+          <TextButton onClick={() => handleEditClick(record.id)}>编辑</TextButton>
+          <DeleteConfirmButton onConfirm={() => handleProductDelete(record.id)}>
+            <TextButton>删除</TextButton>
+          </DeleteConfirmButton>
+        </Space>
+      ),
+    },
+  ];
 
-    const handleFormSearch = (values: any) => {
-        setConditions(values);
-    }
+  const handleFormSearch = (values: any) => {
+    setConditions(values);
+  };
 
-    const handleAfterCreate = () => {
-        setModalOptions({ id: 0, open: false })
-        searchForm()
-    }
+  const handleAfterCreate = () => {
+    setModalOptions({ id: 0, open: false });
+    searchForm();
+  };
 
-    const handleEditClick = (id = 0) => {
-        setModalOptions({ id, open: true });
-    }
+  const handleEditClick = (id = 0) => {
+    setModalOptions({ id, open: true });
+  };
 
+  return (
+    <div>
+      <SearchForm>
+        <Form onFinish={handleFormSearch} layout="inline">
+          <Form.Item label="品名" name="name">
+            <Input allowClear />
+          </Form.Item>
+          <Form.Item>
+            <Space>
+              <Button htmlType="submit" type="primary">
+                查询
+              </Button>
+              <Button
+                onClick={() => {
+                  setModalOptions({ id: 0, open: true });
+                }}
+              >
+                新增
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </SearchForm>
+      <div className={styles.tableWrapper}>
+        <Table
+          rowKey="id"
+          loading={loading}
+          pagination={pagination}
+          onChange={handlePageChange}
+          dataSource={dataSource}
+          columns={columns}
+        />
+      </div>
 
-    return <div>
-        <SearchForm>
-            <Form onFinish={handleFormSearch} layout="inline">
-                <Form.Item label="品名" name="name">
-                    <Input allowClear />
-                </Form.Item>
-                <Form.Item>
-                    <Space>
-                        <Button htmlType='submit' type="primary">查询</Button>
-                        <Button onClick={() => {
-                            setModalOptions({ id: 0, open: true })
-                        }}>新增</Button>
-                    </Space>
-                </Form.Item>
-            </Form>
-        </SearchForm>
-        <div className={styles.tableWrapper}>
-            <Table rowKey="id" loading={loading} pagination={pagination} onChange={handlePageChange} dataSource={dataSource} columns={columns} />
-        </div>
-
-        <Modal destroyOnClose footer={null} title={modalOptions.id ? "编辑" : "新增"} open={modalOptions.open} onCancel={() => setModalOptions({ id: 0, open: false })} >
-            <EditPage onSubmit={handleAfterCreate} id={modalOptions.id} />
-        </Modal>
-    </div >
-}
+      <Modal
+        destroyOnClose
+        footer={null}
+        title={modalOptions.id ? "编辑" : "新增"}
+        open={modalOptions.open}
+        onCancel={() => setModalOptions({ id: 0, open: false })}
+      >
+        <EditPage onSubmit={handleAfterCreate} id={modalOptions.id} />
+      </Modal>
+    </div>
+  );
+};
