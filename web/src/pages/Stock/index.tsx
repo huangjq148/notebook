@@ -7,6 +7,13 @@ import EditPage from "./Edit";
 import styles from "./index.module.less";
 import StockSell from "@/pages/Orders/Edit";
 
+interface Statistics {
+  buyMoney: number;
+  sellMoney: number;
+  number: number;
+  otherCost: number;
+}
+
 export default () => {
   const [conditions, setConditions] = useState({});
   const { dataSource, loading, pagination, searchForm, handlePageChange } = useTable<Product>({
@@ -17,6 +24,12 @@ export default () => {
   const [outStockModal, setOutStockModal] = useState<{ open: boolean; data: Partial<Stock> }>({
     open: false,
     data: {},
+  });
+  const [statisticsInfo, setStatisticsInfo] = useState<Statistics>({
+    sellMoney: 0,
+    buyMoney: 0,
+    number: 0,
+    otherCost: 0,
   });
 
   const handleProductDelete = async (id: number) => {
@@ -106,6 +119,22 @@ export default () => {
             </Space>
           </Form.Item>
         </Form>
+      </SearchForm>
+      <SearchForm>
+        <div>
+          汇总：
+          <Space size="large">
+            <span>总成本：{parseFloat(`${statisticsInfo.buyMoney}`).toFixed(2)}</span>
+            <span>总售价：{parseFloat(`${statisticsInfo.sellMoney}`).toFixed(2)}</span>
+            <span>
+              总利润：
+              {parseFloat(`${statisticsInfo.sellMoney - statisticsInfo.buyMoney - statisticsInfo.otherCost}`).toFixed(
+                2,
+              )}
+            </span>
+            <span>总数量：{parseFloat(`${statisticsInfo.number}`).toFixed(1)}</span>
+          </Space>
+        </div>
       </SearchForm>
       <div className={styles.tableWrapper}>
         <Table

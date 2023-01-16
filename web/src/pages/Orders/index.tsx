@@ -2,20 +2,7 @@ import { SearchForm, TextButton, DateRangePicker, DeleteConfirmButton } from "@/
 import { useTable } from "@/hooks";
 import { PlusOutlined } from "@ant-design/icons";
 import { deleteOrder, queryOrder, changeOrderStatus, statistics, revokeStockOrder } from "@/services/order";
-import {
-  Button,
-  Form,
-  Input,
-  FloatButton,
-  message,
-  Modal,
-  Space,
-  Table,
-  DatePicker,
-  Select,
-  Descriptions,
-  Popconfirm,
-} from "antd";
+import { Button, Form, Input, FloatButton, message, Modal, Space, Table, Select, Descriptions } from "antd";
 import { useEffect, useState } from "react";
 import EditPage from "./Edit";
 import { STATUS, translateToArray } from "@/data";

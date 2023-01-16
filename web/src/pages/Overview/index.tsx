@@ -4,6 +4,7 @@ import { Button, DatePicker, Form, List } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import styles from "./index.module.less";
+import Charts from "./charts";
 
 type TopData = {
   name: string;
@@ -90,6 +91,9 @@ export default () => {
           />
         ))}
       </div>
+      <SearchForm style={{ height: "400px", width: "100%", marginTop: "16px" }}>
+        <Charts />
+      </SearchForm>
     </div>
   );
 };
