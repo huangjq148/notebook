@@ -40,6 +40,11 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
     setDataSource((value: OrderProductInfo[]) => {
       // @ts-ignore
       value[index][key] = newValue;
+      props.onChange?.(
+        value.filter((item) => {
+          return item.name && item.number;
+        }),
+      );
       return value;
     });
   };
@@ -216,7 +221,11 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
   ];
 
   useEffect(() => {
-    props.onChange?.(dataSource);
+    props.onChange?.(
+      dataSource.filter((item) => {
+        return item.name && item.number;
+      }),
+    );
   }, [dataSource]);
 
   return (
