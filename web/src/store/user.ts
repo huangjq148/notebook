@@ -31,7 +31,6 @@ export default create(
         },
 
         updateUserInfo: async (params: UserInfo) => {
-            console.log(params);
             message.success("保存成功")
         },
 

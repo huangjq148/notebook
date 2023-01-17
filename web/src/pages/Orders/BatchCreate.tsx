@@ -297,7 +297,7 @@ export default (props: Props) => {
 
   return (
     <>
-      <Form onFinish={handleFormSubmit} form={formRef} initialValues={{}} onValuesChange={console.log}>
+      <Form onFinish={handleFormSubmit} form={formRef}>
         <Form.Item name="orderTime" label="日期" style={{ width: "400px" }}>
           <DatePicker
             presets={[

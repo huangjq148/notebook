@@ -101,6 +101,7 @@ export default () => {
     {
       title: "产品名",
       dataIndex: "name",
+      width: 100,
     },
     {
       title: "姓名",
@@ -147,11 +148,13 @@ export default () => {
     {
       title: "日期",
       dataIndex: "orderTime",
+      width: 140,
       render: (text: string, record: Order) => dayjs(text || record.createTime).format("YYYY-MM-DD"),
     },
     {
       title: "状态",
       dataIndex: "status",
+      width: 80,
       render(status: string) {
         return (
           <span className={styles.status} data-status={status}>
@@ -163,7 +166,7 @@ export default () => {
     {
       title: "操作",
       key: "operation",
-      width: "200px",
+      width: 180,
       render: (record: Order) => (
         <Space size="middle">
           <TextButton onClick={() => handleEditClick(record.id)}>编辑</TextButton>

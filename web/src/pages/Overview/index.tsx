@@ -35,7 +35,6 @@ export default () => {
         data: result.top5BuyCustomer || [],
       },
     ];
-    console.log(newData);
     setTopData(newData);
   };
 
