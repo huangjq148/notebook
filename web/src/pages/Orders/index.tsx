@@ -5,6 +5,7 @@ import { deleteOrder, queryOrder, changeOrderStatus, statistics, revokeStockOrde
 import { Button, Form, Input, FloatButton, message, Modal, Space, Table, Select, Descriptions } from "antd";
 import { useEffect, useState } from "react";
 import EditPage from "./Edit";
+import BatchCreate from "./BatchCreate";
 import { STATUS, translateToArray } from "@/data";
 import dayjs from "dayjs";
 import styles from "./index.module.less";
@@ -29,6 +30,7 @@ export default () => {
     conditions,
   });
   const [modalOptions, setModalOptions] = useState({ id: 0, open: false });
+  const [batchModalOpen, setBatchModalOpen] = useState(false);
   const [contactOptions, setContactOptions] = useState<{ data: ContactInfo; open: boolean }>({ data: {}, open: false });
   const [statisticsInfo, setStatisticsInfo] = useState<Statistics>({
     sellMoney: 0,
@@ -77,6 +79,11 @@ export default () => {
 
   const handleAfterCreate = () => {
     setModalOptions({ id: 0, open: false });
+    handleSearchForm();
+  };
+
+  const handleAfterBatchCreate = () => {
+    setBatchModalOpen(false);
     handleSearchForm();
   };
 
@@ -206,6 +213,9 @@ export default () => {
               <Button htmlType="submit" type="primary">
                 查询
               </Button>
+              <Button type="primary" onClick={() => setBatchModalOpen(true)}>
+                批量新增
+              </Button>
             </Space>
           </Form.Item>
         </Form>
@@ -255,6 +265,17 @@ export default () => {
         onCancel={() => setModalOptions({ id: 0, open: false })}
       >
         <EditPage onSubmit={handleAfterCreate} id={modalOptions.id} />
+      </Modal>
+
+      <Modal
+        destroyOnClose
+        footer={null}
+        title={"批量新增"}
+        open={batchModalOpen}
+        width={1000}
+        onCancel={() => setBatchModalOpen(false)}
+      >
+        <BatchCreate onSubmit={handleAfterBatchCreate} />
       </Modal>
 
       <Modal
