@@ -1,11 +1,11 @@
-package handler
+package product
 
 import (
 	"fmt"
-	"hjq-notebook/database"
-	"hjq-notebook/model"
-	"hjq-notebook/model/response"
-	"hjq-notebook/utils"
+	"hjq-notebook/internal/database"
+	"hjq-notebook/internal/model"
+	"hjq-notebook/internal/model/response"
+	"hjq-notebook/internal/utils"
 	"time"
 
 	"github.com/gofiber/fiber/v2"

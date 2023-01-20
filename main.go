@@ -1,8 +1,8 @@
 package main
 
 import (
-	"hjq-notebook/database"
-	"hjq-notebook/router"
+	"hjq-notebook/internal/database"
+	"hjq-notebook/internal/router"
 	"log"
 
 	"github.com/gofiber/fiber/v2"

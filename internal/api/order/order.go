@@ -1,12 +1,13 @@
-package handler
+package order
 
 import (
 	"fmt"
-	"hjq-notebook/database"
-	"hjq-notebook/model"
-	"hjq-notebook/model/response"
-	"hjq-notebook/services"
-	"hjq-notebook/utils"
+	"hjq-notebook/internal/api/stock"
+	"hjq-notebook/internal/database"
+	"hjq-notebook/internal/model"
+	"hjq-notebook/internal/model/response"
+	"hjq-notebook/internal/services"
+	"hjq-notebook/internal/utils"
 	"strconv"
 	"strings"
 
@@ -82,7 +83,7 @@ func CreateOrder(c *fiber.Ctx) error {
 
 	database.Create(c, "t_order", order)
 
-	if err := OutStock(order.StockId, order.Number); err != nil {
+	if err := stock.OutStock(order.StockId, order.Number); err != nil {
 		return c.JSON(response.Error(err.Error()))
 	}
 
@@ -102,7 +103,7 @@ func RevokeStockOrder(c *fiber.Ctx) error {
 		oldOrder, _ = services.GetOrderById(c, intId)
 	}
 
-	err := OutStock(oldOrder.StockId, "-"+oldOrder.Number)
+	err := stock.OutStock(oldOrder.StockId, "-"+oldOrder.Number)
 
 	if err != nil {
 		return c.JSON(response.Error("更新库存失败"))

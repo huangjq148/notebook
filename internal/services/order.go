@@ -3,11 +3,12 @@ package services
 import (
 	"errors"
 	"fmt"
-	"github.com/gofiber/fiber/v2"
-	"hjq-notebook/database"
-	"hjq-notebook/model"
-	"hjq-notebook/utils"
+	"hjq-notebook/internal/database"
+	"hjq-notebook/internal/model"
+	"hjq-notebook/internal/utils"
 	"strings"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type STATISTICS struct {
@@ -42,7 +43,7 @@ func handleTopDataCondition(c *fiber.Ctx) (string, []interface{}) {
 func GetTop5BuyGoods(c *fiber.Ctx) []STATISTICS {
 	var top5BuyGoods []STATISTICS
 	// GoodsBuyTop5 进货最多的产品
-	sql := "select  name,sum(buyPrice*number) money from t_order "
+	sql := "select name,sum(buyPrice*number) money from t_order "
 	groupSql := " group by name order by money desc limit 5"
 	whereSql, conditions := handleTopDataCondition(c)
 	sql = sql + whereSql + groupSql

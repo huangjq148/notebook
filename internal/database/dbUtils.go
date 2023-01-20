@@ -3,11 +3,12 @@ package database
 import (
 	"errors"
 	"fmt"
-	"github.com/gofiber/fiber/v2"
-	"hjq-notebook/utils"
+	"hjq-notebook/internal/utils"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type GenerateWhereSql struct {

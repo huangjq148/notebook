@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"hjq-notebook/config"
+	"hjq-notebook/internal/config"
 
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v2"

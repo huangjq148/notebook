@@ -1,9 +1,10 @@
 package utils
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"hjq-notebook/config"
+	"hjq-notebook/internal/config"
 	"strings"
+
+	"github.com/gofiber/fiber/v2"
 
 	"github.com/golang-jwt/jwt"
 )

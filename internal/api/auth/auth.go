@@ -1,9 +1,9 @@
-package handler
+package auth
 
 import (
 	"fmt"
-	"hjq-notebook/config"
-	"hjq-notebook/database"
+	"hjq-notebook/internal/config"
+	"hjq-notebook/internal/database"
 	"time"
 
 	"github.com/gofiber/fiber/v2"

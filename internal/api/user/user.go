@@ -1,11 +1,11 @@
-package handler
+package user
 
 import (
 	"errors"
 	"fmt"
-	"hjq-notebook/database"
-	"hjq-notebook/model"
-	"hjq-notebook/utils"
+	"hjq-notebook/internal/database"
+	"hjq-notebook/internal/model"
+	"hjq-notebook/internal/utils"
 
 	"github.com/gofiber/fiber/v2"
 )

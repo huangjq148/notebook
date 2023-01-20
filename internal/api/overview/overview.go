@@ -1,9 +1,10 @@
-package handler
+package overview
 
 import (
+	"hjq-notebook/internal/model/response"
+	"hjq-notebook/internal/services"
+
 	"github.com/gofiber/fiber/v2"
-	"hjq-notebook/model/response"
-	"hjq-notebook/services"
 )
 
 func OverviewData(c *fiber.Ctx) error {
