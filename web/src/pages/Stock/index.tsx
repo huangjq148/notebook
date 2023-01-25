@@ -1,8 +1,8 @@
 import { SearchForm, TextButton, DeleteConfirmButton } from "@/components";
 import { useTable } from "@/hooks";
-import { deleteStock, queryStock } from "@/services/stock";
+import { deleteStock, queryStock, statistics } from "@/services/stock";
 import { Button, Form, Input, message, Modal, Popconfirm, Space, Table } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EditPage from "./Edit";
 import styles from "./index.module.less";
 import StockSell from "@/pages/Orders/Edit";
@@ -11,7 +11,6 @@ interface Statistics {
   buyMoney: number;
   sellMoney: number;
   number: number;
-  otherCost: number;
 }
 
 export default () => {
@@ -29,22 +28,29 @@ export default () => {
     sellMoney: 0,
     buyMoney: 0,
     number: 0,
-    otherCost: 0,
   });
 
   const handleProductDelete = async (id: number) => {
     await deleteStock(id);
     message.success("删除成功");
     searchForm();
+    queryStatistics();
   };
 
   const handleFormSearch = (values: any) => {
     setConditions(values);
+    queryStatistics(values);
   };
 
   const handleAfterCreate = () => {
     setModalOptions({ id: 0, open: false });
+    queryStatistics();
     searchForm();
+  };
+
+  const queryStatistics = async (innerConditions?: any) => {
+    const result = await statistics(innerConditions ?? conditions);
+    setStatisticsInfo(result as Statistics);
   };
 
   const handleAfterOutStock = () => {
@@ -59,6 +65,10 @@ export default () => {
   const handleStockSell = (stock: Stock) => {
     setOutStockModal({ open: true, data: stock });
   };
+
+  useEffect(() => {
+    queryStatistics();
+  }, []);
 
   const columns = [
     {
@@ -128,11 +138,10 @@ export default () => {
             <span>总售价：{parseFloat(`${statisticsInfo.sellMoney}`).toFixed(2)}</span>
             <span>
               总利润：
-              {parseFloat(`${statisticsInfo.sellMoney - statisticsInfo.buyMoney - statisticsInfo.otherCost}`).toFixed(
+              {parseFloat(`${statisticsInfo.sellMoney - statisticsInfo.buyMoney}`).toFixed(
                 2,
               )}
             </span>
-            <span>总数量：{parseFloat(`${statisticsInfo.number}`).toFixed(1)}</span>
           </Space>
         </div>
       </SearchForm>

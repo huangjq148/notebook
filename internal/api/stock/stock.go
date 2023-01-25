@@ -12,6 +12,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type StockQueryCondition struct {
+	Table string `table:"t_stock"`
+	Name  string `db:"name" json:"name" op:"like"`
+}
+
 func CreateStock(c *fiber.Ctx) error {
 	db := database.DBConn
 	var stock model.Stock
@@ -34,30 +39,31 @@ func CreateStock(c *fiber.Ctx) error {
 }
 
 // Statistics 统计订单信息
-// func Statistics(c *fiber.Ctx) error {
-// 	type StatisticsInfo struct {
-// 		BuyMoney  string `db:"buyMoney" json:"buyMoney"`
-// 		SellMoney string `db:"sellMoney" json:"sellMoney"`
-// 		Number    string `db:"number" json:"number"`
-// 		OtherCost string `db:"otherCost" json:"otherCost"`
-// 	}
+func Statistics(c *fiber.Ctx) error {
+	type StatisticsInfo struct {
+		BuyMoney  string `db:"buyMoney" json:"buyMoney"`
+		SellMoney string `db:"sellMoney" json:"sellMoney"`
+		Number    string `db:"number" json:"number"`
+	}
 
-// 	var result StatisticsInfo
-// 	whereSql, paramValues := handleSearchCondition(c)
-// 	db := database.DBConn
+	var result StatisticsInfo
+	token := c.Get("Authorization")
+	userId := utils.GetFromToken(token, "user_id")
 
-// 	finalSql := "select IFNULL(sum(t.buyPrice*t.number),0) buyMoney,IFNULL(sum(t.sellPrice*t.number),0) sellMoney,IFNULL(sum(t.number),0) number, IFNULL(sum(t.otherCost),0) otherCost from t_order t " + whereSql
+	tableName, whereSql, conditions := database.GenerateSql(c, StockQueryCondition{})
 
-// 	db.Get(&result, finalSql, paramValues...)
+	sql := "select IFNULL(sum(buyPrice * number),0) buyMoney,IFNULL(sum(sellPrice * number),0) sellMoney, IFNULL(sum(number),0) number from " + tableName + " where 1=1 and createUser=" + userId + " " + whereSql
 
-// 	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": result})
-// }
+	db := database.DBConn
+
+	if e := db.Get(&result, sql, conditions...); e != nil {
+		return c.JSON(fiber.Map{"status": "fail", "message": "查询失败"})
+	}
+
+	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": result})
+}
 
 func QueryStockList(c *fiber.Ctx) error {
-	type StockQueryCondition struct {
-		Table string `table:"t_stock"`
-		Name  string `db:"name" json:"name" op:"like"`
-	}
 	var queryResult []model.Stock
 
 	result, e := database.QueryPage(c, &queryResult, StockQueryCondition{})

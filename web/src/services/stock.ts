@@ -8,6 +8,10 @@ export const queryStock = async (conditions: Record<string, unknown>): Promise<S
     return request(`/stock`, { method: "GET", params: conditions })
 }
 
+export const statistics = async (conditions: Record<string, unknown>): Promise<any> => {
+    return request(`/stock/statistics`, { method: "GET", params: conditions })
+}
+
 export const queryStockById = async (id: number): Promise<Stock> => {
     return request(`/stock/${id}`, { method: "GET" })
 }

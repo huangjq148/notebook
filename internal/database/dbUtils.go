@@ -173,7 +173,7 @@ func Update(c *fiber.Ctx, tableName string, data interface{}) (interface{}, erro
 	return result, nil
 }
 
-func generateSql(c *fiber.Ctx, data interface{}) (string, string, []interface{}) {
+func GenerateSql(c *fiber.Ctx, data interface{}) (string, string, []interface{}) {
 	typeOfData := reflect.TypeOf(data)
 	fieldLen := typeOfData.NumField()
 	conditions := make([]interface{}, 0)
@@ -191,19 +191,15 @@ func generateSql(c *fiber.Ctx, data interface{}) (string, string, []interface{})
 			case "like":
 				conditionNames = append(conditionNames, " and "+tag.Get("db")+" like ? ")
 				conditions = append(conditions, "%"+c.Query(tag.Get("json"))+"%")
-				break
 			case "=":
 				conditions = append(conditions, c.Query(tag.Get("json")))
 				conditionNames = append(conditionNames, " and "+tag.Get("db")+" "+tag.Get("op")+"?")
-				break
 			case "<=":
 				conditions = append(conditions, c.Query(tag.Get("json")))
 				conditionNames = append(conditionNames, " and "+tag.Get("db")+" "+tag.Get("op")+"?")
-				break
 			case ">=":
 				conditions = append(conditions, c.Query(tag.Get("json")))
 				conditionNames = append(conditionNames, " and "+tag.Get("db")+" "+tag.Get("op")+"?")
-				break
 			}
 		}
 	}
@@ -244,7 +240,7 @@ func QueryPage(c *fiber.Ctx, queryResult interface{}, data interface{}) (interfa
 	token := c.Get("Authorization")
 	userId := utils.GetFromToken(token, "user_id")
 
-	tableName, whereSql, conditions := generateSql(c, data)
+	tableName, whereSql, conditions := GenerateSql(c, data)
 
 	sql := "select * from " + tableName + " where 1=1 and createUser=" + userId + " " + whereSql + orderSql + pageSql
 
