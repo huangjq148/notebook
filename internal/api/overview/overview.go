@@ -24,8 +24,8 @@ func OverviewData(c *fiber.Ctx) error {
 
 func ProfitStatic(c *fiber.Ctx) error {
 	type Result struct {
-		Profit    string `db:"profit" json:"profit"`
-		OrderTime string `db:"orderTime" json:"orderTime"`
+		Profit    float32 `db:"profit" json:"profit"`
+		OrderTime string  `db:"orderTime" json:"orderTime"`
 	}
 	userId := c.Get("current_user_id")
 
