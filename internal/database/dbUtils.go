@@ -25,6 +25,7 @@ func (this *GenerateWhereSql) getData() (string, []interface{}) {
 	return strings.Join(this.paramKeys, " and "), this.paramValues
 }
 
+/** 创建 */
 func Create(c *fiber.Ctx, tableName string, data interface{}) error {
 	data1 := data
 	typeOfData := reflect.TypeOf(data)
@@ -256,6 +257,10 @@ func QueryPage(c *fiber.Ctx, queryResult interface{}, data interface{}) (interfa
 	db.Get(&count, countSql, conditions...)
 
 	return fiber.Map{"content": queryResult, "total": count}, nil
+}
+
+func QueryList(c *fiber.Ctx) error {
+	return nil
 }
 
 func DeleteById(c *fiber.Ctx, tableName, id string) error {

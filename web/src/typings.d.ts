@@ -20,13 +20,13 @@ declare interface Product extends CreateInfo {
 
 declare interface Order extends CreateInfo {
     id?: number
-    goodsName: string
+    name: string
     contace: string
     address: string
     phone: string
     buyPrice: string
     sellPrice: string
-    number: number
+    number: string
     remark: string
     status: string
     stockId: number

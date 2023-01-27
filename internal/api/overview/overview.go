@@ -1,6 +1,7 @@
 package overview
 
 import (
+	"hjq-notebook/internal/database"
 	"hjq-notebook/internal/model/response"
 	"hjq-notebook/internal/services"
 
@@ -19,4 +20,17 @@ func OverviewData(c *fiber.Ctx) error {
 		"top5ProfitGoods": top5ProfitGoods,
 		"top5BuyCustomer": top5BuyCustomer,
 	}, "查询成功"))
+}
+
+func ProfitStatic(c *fiber.Ctx) error {
+	type Result struct {
+		Profit    string `db:"profit" json:"profit"`
+		OrderTime string `db:"orderTime" json:"orderTime"`
+	}
+
+	result := []Result{}
+	sql := "select sum(sellPrice*number-buyPrice*number-otherCost) profit,orderTime from t_order  group by orderTime order by orderTime desc limit 0,14"
+	database.DBConn.Select(&result, sql)
+
+	return c.JSON(response.Success(result, "查询成功"))
 }

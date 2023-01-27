@@ -6,3 +6,10 @@ export const getTop5Data = async (conditions = {}) => {
         params: conditions
     })
 }
+
+export const getProfitStatistics = async (conditions = {}) => {
+    return request("/overview/profit/statistics", {
+        method: "GET",
+        params: conditions
+    })
+}

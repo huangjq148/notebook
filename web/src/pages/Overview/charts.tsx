@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { SearchForm } from "@/components";
+import { getProfitStatistics } from "@/services/overview"
 
 const data = [
   {
@@ -92,21 +93,28 @@ const data = [
 export default function Charts() {
   const [dataSource, setDataSource] = useState([]);
 
-  useEffect(() => {}, []);
+  const lodData = async () => {
+    const result = await getProfitStatistics()
+    setDataSource(result as any)
+  }
+
+  useEffect(() => {
+    lodData()
+  }, []);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart
         width={500}
         height={300}
-        data={data}
+        data={dataSource}
         margin={{
           top: 5,
           bottom: 5,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
+        <XAxis dataKey="orderTime" />
         <YAxis />
         <Tooltip />
         <Legend />

@@ -9,6 +9,7 @@ import BatchCreate from "./BatchCreate";
 import { STATUS, translateToArray } from "@/data";
 import dayjs from "dayjs";
 import styles from "./index.module.less";
+import { copy } from "@/utils"
 
 interface ContactInfo {
   contact?: string;
@@ -31,6 +32,7 @@ export default () => {
   });
   const [modalOptions, setModalOptions] = useState({ id: 0, open: false });
   const [batchModalOpen, setBatchModalOpen] = useState(false);
+  const [selectedDataStr, setSelectDataStr] = useState("")
   const [contactOptions, setContactOptions] = useState<{ data: ContactInfo; open: boolean }>({ data: {}, open: false });
   const [statisticsInfo, setStatisticsInfo] = useState<Statistics>({
     sellMoney: 0,
@@ -54,6 +56,11 @@ export default () => {
     message.success("删除成功");
     handleSearchForm();
   };
+
+  const handleCopyClick = () => {
+    copy(selectedDataStr)
+    message.success("复制成功")
+  }
 
   const handleOrderStatusChange = async (id: number = 0, status: string) => {
     await changeOrderStatus(id, status);
@@ -191,6 +198,25 @@ export default () => {
     },
   ];
 
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: Order[]) => {
+      let result: string[] = []
+      let total = 0
+      selectedRows.map(item => {
+        let sum = 0
+        sum += parseFloat(item.sellPrice) * parseFloat(item.number + "")
+        total += sum
+        if (parseFloat(item.number) == 1) {
+          result.push(`${item.name}：${sum}`)
+        } else {
+          result.push(`${item.name}：${item.number} * ${item.sellPrice} = ${sum}`)
+        }
+      })
+      result.push(`总计：${total.toFixed(2)}`)
+      setSelectDataStr(result.join("\n"))
+    },
+  };
+
   useEffect(() => {
     queryStatistics();
   }, []);
@@ -218,6 +244,9 @@ export default () => {
               </Button>
               <Button type="primary" onClick={() => setBatchModalOpen(true)}>
                 批量新增
+              </Button>
+              <Button type="primary" onClick={handleCopyClick}>
+                复制
               </Button>
             </Space>
           </Form.Item>
@@ -251,6 +280,10 @@ export default () => {
           }}
         />
         <Table
+          rowSelection={{
+            type: "checkbox",
+            ...rowSelection,
+          }}
           rowKey="id"
           loading={loading}
           pagination={pagination}

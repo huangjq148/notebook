@@ -91,7 +91,10 @@ export default () => {
         ))}
       </div>
       <SearchForm style={{ height: "400px", width: "100%", marginTop: "16px" }}>
-        <Charts />
+        <>
+          <p>近14天利润</p>
+          <Charts />
+        </>
       </SearchForm>
     </div>
   );

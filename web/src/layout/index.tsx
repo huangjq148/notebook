@@ -1,6 +1,6 @@
 import {
-    MenuFoldOutlined,
-    MenuUnfoldOutlined, UserOutlined
+  MenuFoldOutlined,
+  MenuUnfoldOutlined, UserOutlined
 } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 
@@ -100,7 +100,8 @@ const App: React.FC = () => {
         </Header>
         <Content
           style={{
-            margin: "24px 16px",
+            padding: "24px 16px",
+            overflow: "auto"
           }}
         >
           <Outlet />
