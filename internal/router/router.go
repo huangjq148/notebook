@@ -23,7 +23,7 @@ func SetupRoutes(app *fiber.App) {
 	authRouter := app.Group("/auth")
 	authRouter.Post("/login", auth.Login)
 
-	authVerifyRouter := app.Use(middleware.Protected())
+	authVerifyRouter := app.Use(middleware.Protected()).Use(middleware.User())
 
 	overviewRouter := authVerifyRouter.Group("/overview")
 	overviewRouter.Get("", overview.OverviewData)

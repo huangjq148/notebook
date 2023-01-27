@@ -27,9 +27,10 @@ func ProfitStatic(c *fiber.Ctx) error {
 		Profit    string `db:"profit" json:"profit"`
 		OrderTime string `db:"orderTime" json:"orderTime"`
 	}
+	userId := c.Get("current_user_id")
 
 	result := []Result{}
-	sql := "select sum(sellPrice*number-buyPrice*number-otherCost) profit,orderTime from t_order  group by orderTime order by orderTime desc limit 0,14"
+	sql := "select sum(sellPrice*number-buyPrice*number-otherCost) profit,orderTime from t_order where createUser=" + userId + " group by orderTime order by orderTime desc limit 0,14"
 	database.DBConn.Select(&result, sql)
 
 	return c.JSON(response.Success(result, "查询成功"))
