@@ -10,6 +10,7 @@ import { STATUS, translateToArray } from "@/data";
 import dayjs from "dayjs";
 import styles from "./index.module.less";
 import { copy } from "@/utils";
+import Decimal from "decimal.js";
 
 interface ContactInfo {
   contact?: string;
@@ -204,7 +205,7 @@ export default () => {
       let total = 0;
       selectedRows.map((item) => {
         let sum = 0;
-        sum += (parseFloat(item.sellPrice) * 100 * (parseFloat(item.number + "") * 100)) / 10000;
+        sum += Decimal.mul(parseFloat(item.sellPrice), parseFloat(item.number + "")).toNumber();
         total += sum;
         if (parseFloat(item.number) == 1) {
           result.push(`${item.name}：${sum}`);
