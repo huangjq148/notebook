@@ -205,7 +205,7 @@ export default () => {
       let total = 0;
       selectedRows.map((item) => {
         let sum = 0;
-        sum += Decimal.mul(parseFloat(item.sellPrice), parseFloat(item.number + "")).toNumber();
+        sum += Math.round(Decimal.mul(parseFloat(item.sellPrice), parseFloat(item.number + "")).toNumber());
         total += sum;
         if (parseFloat(item.number) == 1) {
           result.push(`${item.name}：${sum}`);
@@ -213,7 +213,7 @@ export default () => {
           result.push(`${item.name}：${item.number} * ${item.sellPrice} = ${sum}`);
         }
       });
-      result.push(`总计：${total.toFixed(2)}`);
+      result.push(`总计：${total.toFixed(0)}`);
       setSelectDataStr(result.join("\n"));
     },
   };
