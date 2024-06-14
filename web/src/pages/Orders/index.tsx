@@ -6,7 +6,8 @@ import { Button, Form, Input, FloatButton, message, Modal, Space, Table, Select,
 import { useEffect, useState } from "react";
 import EditPage from "./Edit";
 import BatchCreate from "./BatchCreate";
-import { STATUS, translateToArray } from "@/data";
+// import { STATUS, translateToArray } from "@/data";
+import { translateToArray } from "@/data";
 import dayjs from "dayjs";
 import styles from "./index.module.less";
 import { copy } from "@/utils";
@@ -159,18 +160,18 @@ export default () => {
       width: 140,
       render: (text: string, record: Order) => dayjs(text || record.createTime).format("YYYY-MM-DD"),
     },
-    {
-      title: "状态",
-      dataIndex: "status",
-      width: 80,
-      render(status: string) {
-        return (
-          <span className={styles.status} data-status={status}>
-            {translateToArray("STATUS")[status]}
-          </span>
-        );
-      },
-    },
+    // {
+    //   title: "状态",
+    //   dataIndex: "status",
+    //   width: 80,
+    //   render(status: string) {
+    //     return (
+    //       <span className={styles.status} data-status={status}>
+    //         {translateToArray("STATUS")[status]}
+    //       </span>
+    //     );
+    //   },
+    // },
     {
       title: "操作",
       key: "operation",
@@ -178,11 +179,11 @@ export default () => {
       render: (record: Order) => (
         <Space size="middle">
           <TextButton onClick={() => handleEditClick(record.id)}>编辑</TextButton>
-          {record.status == "1" ? (
+          {/* {record.status == "1" ? (
             <TextButton onClick={() => handleOrderStatusChange(record.id, "2")}>已完成</TextButton>
           ) : (
             <TextButton onClick={() => handleOrderStatusChange(record.id, "1")}>未完成</TextButton>
-          )}
+          )} */}
           <DeleteConfirmButton
             onConfirm={() => {
               if (record.stockId) {
@@ -235,9 +236,9 @@ export default () => {
           <Form.Item label="日期" name="createTime">
             <DateRangePicker />
           </Form.Item>
-          <Form.Item label="状态" name="status">
+          {/* <Form.Item label="状态" name="status">
             <Select allowClear options={STATUS} placeholder="请选择" />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item>
             <Space>
               <Button htmlType="submit" type="primary">
