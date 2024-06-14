@@ -1,23 +1,33 @@
-import React, { lazy, useEffect } from 'react';
-import type { RouteObject } from 'react-router-dom';
-import { useLocation, useRoutes, Navigate } from 'react-router-dom';
-import BasicLayout from "@/layout"
-import LoginPage from "@/pages/Login"
-import OverviewPage from "@/pages/Overview"
-import OrdersPage from "@/pages/Orders"
-import ProductPage from "@/pages/Product"
-import ContactPage from "@/pages/Contact"
-import StockPage from "@/pages/Stock"
+import React, { lazy, useEffect } from "react";
+import type { RouteObject } from "react-router-dom";
+import { useLocation, useRoutes, Navigate } from "react-router-dom";
+import BasicLayout from "@/layout";
+import LoginPage from "@/pages/Login";
+import OverviewPage from "@/pages/Overview";
+import OrdersPage from "@/pages/Orders";
+import ProductPage from "@/pages/Product";
+import ContactPage from "@/pages/Contact";
+import StockPage from "@/pages/Stock";
+import DataTransfer from "@/pages/Setting/DataTransfer";
 // const AuthWrapper = lazy(() => import('@/layouts/AuthWrapper'));
 
 export default () => {
   const location = useLocation();
 
-
   const routes: RouteObject[] = [
     {
-      path: '/login',
+      path: "/login",
       element: <LoginPage />,
+    },
+    {
+      path: "/setting",
+      element: <BasicLayout />,
+      children: [
+        {
+          path: "data-transfer",
+          element: <DataTransfer />,
+        },
+      ],
     },
     {
       path: "/",
@@ -25,32 +35,32 @@ export default () => {
       children: [
         {
           path: "overview",
-          element: <OverviewPage />
+          element: <OverviewPage />,
         },
         {
           path: "orders",
-          element: <OrdersPage />
+          element: <OrdersPage />,
         },
         {
           path: "goods",
-          element: <ProductPage />
+          element: <ProductPage />,
         },
         {
           path: "stock",
-          element: <StockPage />
+          element: <StockPage />,
         },
         {
           path: "contact",
-          element: <ContactPage />
+          element: <ContactPage />,
         },
         {
-          path: '/',
+          path: "/",
           element: <Navigate to="/overview" />,
         },
-      ]
+      ],
     },
     {
-      path: '/',
+      path: "/",
       element: <Navigate to="/login" />,
     },
   ];

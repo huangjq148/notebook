@@ -62,7 +62,8 @@ func SetupRoutes(app *fiber.App) {
 	stockRouter.Delete("/:id", stock.DeleteStock)
 	stockRouter.Patch("", stock.UpdateStock)
 
-	// // Auth
+	// Auth
 	userRouter := authVerifyRouter.Group("/user")
 	userRouter.Get("/info", user.UserInfo)
+	userRouter.Get("/", user.UserList)
 }

@@ -28,8 +28,8 @@ export default defineConfig({
     proxy: {
       "/api/": {
         // target: `https://sdk-preview.sofunny.io`,
-        // target: `http://localhost:3000/`,
-        target: "http://huangjq.top:3000",
+        target: `http://localhost:3000/`,
+        // target: "http://huangjq.top:3000",
         rewrite: (path) => path.replace(/^\/api/, ""),
         // target: `http://10.30.60.81:9080`,
         // target: `http://${config.VITE_APP_SERVER}:${config.VITE_APP_SERVER_PORT}`,

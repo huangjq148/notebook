@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import EditPage from "./Edit";
 import BatchCreate from "./BatchCreate";
 // import { STATUS, translateToArray } from "@/data";
-import { translateToArray } from "@/data";
 import dayjs from "dayjs";
 import styles from "./index.module.less";
 import { copy } from "@/utils";

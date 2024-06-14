@@ -1,5 +1,9 @@
-import request from "@/utils/request"
+import request from "@/utils/request";
 
-export const fetchUserInfo = async (id: string = "1"): Promise<UserInfo> => {
-    return request(`/user/info`, { method: "GET" })
-}
+export const fetchUserInfo = async (): Promise<UserInfo> => {
+  return request(`/user/info`, { method: "GET" });
+};
+
+export const fetchUserList = async (): Promise<UserInfo[]> => {
+  return request(`/user`, { method: "GET" });
+};

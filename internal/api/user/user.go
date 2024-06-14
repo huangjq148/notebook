@@ -36,3 +36,27 @@ func UserInfo(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "success", "data": user})
 	}
 }
+
+func queryUserList() ([]model.User, error) {
+	db := database.DBConn
+	var user []model.User
+
+	e := db.Select(&user, "select * from t_user")
+
+	if e != nil {
+		fmt.Println("err=", e)
+		return user, errors.New("not data")
+	}
+	return user, nil
+}
+
+// Hello hanlde api status
+func UserList(c *fiber.Ctx) error {
+	users, err := queryUserList()
+
+	if err != nil {
+		return c.JSON(fiber.Map{"status": "error", "message": err.Error()})
+	} else {
+		return c.JSON(fiber.Map{"status": "success", "data": users})
+	}
+}

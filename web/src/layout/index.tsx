@@ -1,7 +1,4 @@
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined, UserOutlined
-} from "@ant-design/icons";
+import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 
 import { useUser } from "@/store";
@@ -59,6 +56,7 @@ const App: React.FC = () => {
 
   const UserInfo = () => {
     const items = [
+      { label: <span onClick={()=>{navigate("/setting/data-transfer")}}>数据转移</span>, key: "dataTransfer" }, // 菜单项务必填写 key
       { label: "设置", key: "setting" }, // 菜单项务必填写 key
       { label: <span onClick={logout}>退出</span>, key: "logout" },
     ];
@@ -101,7 +99,7 @@ const App: React.FC = () => {
         <Content
           style={{
             padding: "24px 16px",
-            overflow: "auto"
+            overflow: "auto",
           }}
         >
           <Outlet />
