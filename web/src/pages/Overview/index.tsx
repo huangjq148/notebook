@@ -90,7 +90,7 @@ export default () => {
           />
         ))}
       </div>
-      <SearchForm style={{ height: "400px", width: "100%", marginTop: "16px" }}>
+      <SearchForm style={{ height: "400px", width: "100%", marginTop: "16px", marginBottom: 16 }}>
         <>
           <p>近14天利润</p>
           <Charts />
