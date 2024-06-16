@@ -7,6 +7,7 @@ import (
 	"hjq-notebook/internal/api/overview"
 	"hjq-notebook/internal/api/product"
 	"hjq-notebook/internal/api/stock"
+	"hjq-notebook/internal/api/system"
 	"hjq-notebook/internal/api/user"
 	"hjq-notebook/internal/middleware"
 
@@ -66,4 +67,8 @@ func SetupRoutes(app *fiber.App) {
 	userRouter := authVerifyRouter.Group("/user")
 	userRouter.Get("/info", user.UserInfo)
 	userRouter.Get("/", user.UserList)
+
+	// Auth
+	systemRouter := authVerifyRouter.Group("/system")
+	systemRouter.Post("/data/transfer", system.TransferData)
 }

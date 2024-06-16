@@ -1,16 +1,15 @@
 import { DateRangePicker, SearchForm } from "@/components";
 import { useTable } from "@/hooks";
 import { queryOrder } from "@/services/order";
-import { Button, Form, Input, Modal, Select, Space, Table } from "antd";
+import { Button, Form, Input, message, Space, Table } from "antd";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
-import { fetchUserList } from "@/services/user";
+import { useState } from "react";
+import TargetUserSelectModal from "./TargetUserSelectModal";
 
 const Order = () => {
   const [conditions, setConditions] = useState({});
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [open, setOpen] = useState(false);
-  const [users, setUsers] = useState<{}[]>([]);
   const { dataSource, loading, searchForm, pagination, handlePageChange } = useTable<Order>({
     request: queryOrder,
     conditions,
@@ -84,23 +83,16 @@ const Order = () => {
     },
   };
 
-  const transferData = () => {
-    console.log(selectedKeys);
-    setOpen(true);
-    // searchForm();
-  };
-
-  useEffect(() => {
-    fetchUserList().then((res) => {
-      setUsers(res.map((item) => ({ value: item.id, label: item.name })));
-    });
-  }, []);
+  const handleTransferData = async () => {
+    searchForm()
+    message.success("数据移交成功")
+    setSelectedKeys([])
+    setOpen(false)
+  }
 
   return (
     <div>
-      <Modal open={open} title="数据移交" onCancel={() => setOpen(false)}>
-        数据移交给：<Select style={{ width: 200 }} options={users}></Select>
-      </Modal>
+      <TargetUserSelectModal open={open} onCancel={() => setOpen(false)} onOk={handleTransferData} dataIds={selectedKeys} type="order" />
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
           <Form.Item label="品名" name="name">
@@ -117,7 +109,7 @@ const Order = () => {
               <Button htmlType="submit" type="primary" loading={loading}>
                 查询
               </Button>
-              <Button onClick={transferData}>数据移交</Button>
+              <Button onClick={() => setOpen(true)}>数据移交</Button>
             </Space>
           </Form.Item>
         </Form>
@@ -134,7 +126,7 @@ const Order = () => {
         dataSource={dataSource}
         columns={columns}
       />
-    </div>
+    </div >
   );
 };
 

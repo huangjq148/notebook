@@ -7,9 +7,7 @@ import Zh from "antd/locale/zh_CN"
 import 'dayjs/locale/zh-cn';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <ConfigProvider locale={Zh}>
-      <App />
-    </ConfigProvider>
-  </React.StrictMode>
+  <ConfigProvider locale={Zh}>
+    <App />
+  </ConfigProvider>
 )

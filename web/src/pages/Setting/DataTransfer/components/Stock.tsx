@@ -1,12 +1,14 @@
 import { Card, SearchForm } from "@/components";
 import { useTable } from "@/hooks";
 import { queryStock } from "@/services/stock";
-import { Button, Form, Input, Space, Table } from "antd";
+import { Button, Form, Input, message, Space, Table } from "antd";
 import { useState } from "react";
+import TargetUserSelectModal from "./TargetUserSelectModal";
 
 const Stock = () => {
   const [conditions, setConditions] = useState({});
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
+  const [open, setOpen] = useState(false);
   const { dataSource, loading, pagination, searchForm, handlePageChange } = useTable<Product>({
     request: queryStock,
     conditions,
@@ -35,18 +37,22 @@ const Stock = () => {
     setConditions(values);
   };
 
-  const transferData = () => {
-    console.log(selectedKeys);
-    searchForm();
-  };
   const rowSelection = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: Product[]) => {
+    onChange: (selectedRowKeys: React.Key[]) => {
       setSelectedKeys(selectedRowKeys);
     },
   };
 
+  const handleTransferData = async () => {
+    searchForm()
+    message.success("数据移交成功")
+    setSelectedKeys([])
+    setOpen(false)
+  }
+
   return (
     <Card>
+      <TargetUserSelectModal open={open} onCancel={() => setOpen(false)} onOk={handleTransferData} dataIds={selectedKeys} type="stock" />
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
           <Form.Item label="品名" name="name">
@@ -57,7 +63,7 @@ const Stock = () => {
               <Button htmlType="submit" type="primary">
                 查询
               </Button>
-              <Button onClick={transferData}>数据移交</Button>
+              <Button onClick={() => setOpen(true)}>数据移交</Button>
             </Space>
           </Form.Item>
         </Form>
