@@ -1,14 +1,27 @@
 .topListWrapper {
-  background-color: white;
-  border-radius: 6px;
-  padding: 16px 24px;
   display: flex;
   justify-content: space-between;
-  gap: 20px;
-  flex-flow: wrap;
+  gap: 16px;
+  flex-wrap: wrap;
 
-  .listDataContainer {
-    min-width: 200px;
+  .topListItem {
+    box-sizing: border-box;
+    padding: 20px;
+    background: white;
+    border-radius: 6px;
+    height: 400px;
     flex: 1;
+
+    @media (min-width: 576px) {
+      width: 100%;
+    }
+
+    @media (min-width: 1200px) {
+      width: calc(50% - 16px);
+    }
+
+    @media (min-width: 1800px) {
+      width: calc(25% - 16px);
+    }
   }
 }

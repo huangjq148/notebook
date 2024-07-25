@@ -14,7 +14,7 @@ var (
 )
 
 // ConnectDB connect to db
-func ConnectDB() {
+func ConnectDB() (string, bool) {
 	var err error
 	// p := config.Config("DB_PORT")
 	// port, err := strconv.ParseUint(p, 10, 32)
@@ -32,7 +32,7 @@ func ConnectDB() {
 	// 验证连接
 	if err := db.Ping(); err != nil {
 		fmt.Println("open database fail")
-		return
+		return "数据库链接失败", false
 	}
 
 	DBConn = db
@@ -40,4 +40,5 @@ func ConnectDB() {
 
 	fmt.Println("Connection Opened to Database")
 	// DB.AutoMigrate(&model.Product{}, &model.User{})
+	return "数据库链接成功", true
 }

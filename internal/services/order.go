@@ -12,8 +12,8 @@ import (
 )
 
 type STATISTICS struct {
-	Name  string `db:"name" json:"name"`
-	Money string `db:"money" json:"money"`
+	Name  string  `db:"name" json:"name"`
+	Money float32 `db:"money" json:"money"`
 }
 
 func handleTopDataCondition(c *fiber.Ctx) (string, []interface{}) {

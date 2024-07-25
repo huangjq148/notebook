@@ -1,10 +1,11 @@
-import { SearchForm, DateRangePicker } from "@/components";
+import { DateRangePicker, SearchForm } from "@/components";
 import { getTop5Data } from "@/services/overview";
-import { Button, DatePicker, Form, List } from "antd";
+import { Button, Form } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
+import ProfitCharts from "./components/Profit";
+import Top5Product from "./components/Top5Product";
 import styles from "./index.module.less";
-import Charts from "./charts";
 
 type TopData = {
   name: string;
@@ -72,28 +73,16 @@ export default () => {
       </SearchForm>
 
       <div className={styles.topListWrapper}>
-        {topData.map((topDataItem: any) => (
-          <List
-            className={styles.listDataContainer}
-            key={topDataItem.label}
-            header={<div>{topDataItem.label}</div>}
-            bordered
-            dataSource={topDataItem.data ?? []}
-            renderItem={(item: TopData) => (
-              <List.Item>
-                <>
-                  <span>{item.name}</span>
-                  <span>{parseFloat(item.money).toFixed(2)}</span>
-                </>
-              </List.Item>
-            )}
-          />
+        {topData.map((topDataItem: any, index: number) => (
+          <div className={styles.topListItem}>
+            <Top5Product key={index} data={topDataItem} />
+          </div>
         ))}
       </div>
       <SearchForm style={{ height: "400px", width: "100%", marginTop: "16px", marginBottom: 16 }}>
         <>
           <p>近14天利润</p>
-          <Charts />
+          <ProfitCharts />
         </>
       </SearchForm>
     </div>
