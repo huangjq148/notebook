@@ -211,3 +211,13 @@ func ChangeStatus(c *fiber.Ctx) error {
 
 	return c.JSON(response.Success("", "修改成功"))
 }
+
+// QueryContactsByOrders 查询订单联系人
+func QueryContactsByOrders(c *fiber.Ctx) error {
+	result := []string{}
+	sql := "select DISTINCT contact from t_order where createUser=?"
+	userId := utils.GetUserId(c)
+
+	database.QueryListBySql(sql, &result, userId)
+	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": result})
+}

@@ -31,3 +31,7 @@ export const changeOrderStatus = async (id: number, status: string): Promise<voi
 export const revokeStockOrder = async (id: number): Promise<void> => {
     return request(`/order/revoke/stock/${id}`, { method: "DELETE" })
 }
+
+export const queryContactsByOrders = async (): Promise<string[]> => {
+    return request(`/order/contacts`, { method: "Get" })
+}

@@ -35,6 +35,7 @@ func SetupRoutes(app *fiber.App) {
 	orderRouter.Get("/statistics", order.Statistics)
 	orderRouter.Post("", order.CreateOrder)
 	orderRouter.Get("", order.QueryOrderList)
+	orderRouter.Get("/contacts", order.QueryContactsByOrders)
 	orderRouter.Get("/:id", order.GetOrderById)
 	orderRouter.Delete("/:id", order.DeleteOrder)
 	orderRouter.Patch("", order.UpdateOrder)

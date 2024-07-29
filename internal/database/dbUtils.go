@@ -291,6 +291,28 @@ func GetById(c *fiber.Ctx, tableName string, id int, data interface{}) error {
 	return nil
 }
 
+// 传入sql语句将结果设置到传入的结构体中
+func QueryObjectBySql(sql string, data interface{}, conditions ...interface{}) error {
+	e := DBConn.Get(data, sql, conditions...)
+
+	if e != nil {
+		return errors.New("查找不到数据")
+	}
+
+	return nil
+}
+
+// 传入sql语句将结果设置到传入的结构体中
+func QueryListBySql(sql string, data interface{}, conditions ...interface{}) error {
+	e := DBConn.Select(data, sql, conditions...)
+
+	if e != nil {
+		return errors.New("查找不到数据")
+	}
+
+	return nil
+}
+
 //func GetById(data interface{}) {
 //
 //	typeOfData := reflect.TypeOf(data)
