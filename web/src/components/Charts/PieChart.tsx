@@ -1,5 +1,5 @@
-import React, { useCallback } from "react";
-import { Cell, Label, LabelList, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Empty } from "antd";
 
 const COLORS = [
   "#0088FE",
@@ -52,7 +52,7 @@ const PieChartComponent = (props: PieChartProps) => {
     );
   };
 
-  return (
+  return props?.data?.length ? (
     <ResponsiveContainer width="100%" height="100%">
       <PieChart>
         <Pie
@@ -72,7 +72,7 @@ const PieChartComponent = (props: PieChartProps) => {
         <Tooltip />
       </PieChart>
     </ResponsiveContainer>
-  );
+  ) : <Empty />;
 };
 
 export default PieChartComponent;
