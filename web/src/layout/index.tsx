@@ -1,26 +1,18 @@
-import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from "@ant-design/icons";
-import React, { useEffect, useState } from "react";
+import { UserOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
 
-import { useUser } from "@/store";
 import { DesktopOutlined, FileOutlined, PieChartOutlined } from "@ant-design/icons";
-import { Dropdown, Layout, Menu, MenuProps, Space, theme } from "antd";
+import { Layout, Menu, MenuProps } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import LayoutHeader from "./components/Header";
 import styles from "./index.module.less";
 
-const { Header, Sider, Content } = Layout;
+const { Sider, Content } = Layout;
 
 const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
-  const { userInfo, getUserInfo, logout } = useUser((state) => ({
-    getUserInfo: state.getUserInfo,
-    userInfo: state.userInfo,
-    logout: state.logout,
-  }));
 
   const handleMenuItemClick = (val: { key: string }) => {
     navigate(val.key);
@@ -54,26 +46,6 @@ const App: React.FC = () => {
     },
   ];
 
-  const UserInfo = () => {
-    const items = [
-      { label: <span onClick={()=>{navigate("/setting/data-transfer")}}>数据转移</span>, key: "dataTransfer" }, // 菜单项务必填写 key
-      { label: "设置", key: "setting" }, // 菜单项务必填写 key
-      { label: <span onClick={logout}>退出</span>, key: "logout" },
-    ];
-    return (
-      <Dropdown menu={{ items }}>
-        <Space>
-          <UserOutlined />
-          <span className={styles.userInfo}>{userInfo.name ?? "-"} </span>
-        </Space>
-      </Dropdown>
-    );
-  };
-
-  useEffect(() => {
-    getUserInfo();
-  }, []);
-
   return (
     <Layout style={{ width: "100vw", height: "100vh" }}>
       <Sider trigger={null} collapsible collapsed={collapsed}>
@@ -87,15 +59,7 @@ const App: React.FC = () => {
         />
       </Sider>
       <Layout className="site-layout">
-        <Header className={styles.header} style={{ padding: "0 16px", background: colorBgContainer }}>
-          {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
-            className: styles.trigger,
-            onClick: () => setCollapsed(!collapsed),
-          })}
-          <div className={styles.action}>
-            <UserInfo />
-          </div>
-        </Header>
+        <LayoutHeader setCollapsed={setCollapsed} collapsed={collapsed} />
         <Content
           style={{
             padding: "24px 16px",

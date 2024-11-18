@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
+import { inspectorServer } from "@react-dev-inspector/vite-plugin";
 
 function pathResolve(dir: string) {
   return resolve(__dirname, ".", dir);
@@ -8,7 +9,7 @@ function pathResolve(dir: string) {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [inspectorServer(), react()],
   base: "./",
   resolve: {
     alias: [
@@ -25,6 +26,7 @@ export default defineConfig({
   },
   server: {
     port: 8000,
+    host: true,
     proxy: {
       "/api/": {
         // target: `https://sdk-preview.sofunny.io`,

@@ -4,7 +4,7 @@ import { createOrder, updateOrder, queryOrderById } from "@/services/order";
 import ContactList from "./ContactList";
 import ProductList from "./ProductList";
 import dayjs from "dayjs";
-import { TextButton } from "@/components";
+import { TextButton, OrderContactSelect } from "@/components";
 import { PlusCircleOutlined } from "@ant-design/icons";
 
 type Props = {
@@ -314,6 +314,7 @@ export default (props: Props) => {
             style={{ width: "100%", marginRight: "10px" }}
             rules={[{ required: true, message: "请输入姓名" }]}
           >
+            <OrderContactSelect />
             <Input />
           </Form.Item>
           <Button type="primary" onClick={() => setContactModal({ open: true })}>

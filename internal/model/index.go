@@ -64,7 +64,8 @@ type User struct {
 	// 对应 name 表字段
 	Name string `db:"realname" json:"name"`
 	// 对应 sex 表字段
-	Sex *string `db:"sex" json:"sex"`
+	Sex      *string `db:"sex" json:"sex"`
+	Username string  `json:"username"`
 	// 对应 avatar 表字段
 	*CreateInfo
 }

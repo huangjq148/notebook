@@ -14,7 +14,7 @@ func queryUserInfoById(id string) (model.User, error) {
 	db := database.DBConn
 	var user model.User
 
-	e := db.Get(&user, "select * from t_user where id=?", id)
+	e := db.Get(&user, "select tu.*,tua.username from (select * from t_user where id = ?) tu,t_user_account tua where tu.id = tua.userId", id)
 
 	if e != nil {
 		fmt.Println("err=", e)

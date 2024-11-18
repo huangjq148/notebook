@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.8.0",
+    "@react-dev-inspector/vite-plugin": "^2.0.1",
     "@types/lodash-es": "^4.17.6",
     "@types/node": "^18.11.9",
     "antd": "^5.0.0",
@@ -31,6 +32,7 @@
     "@types/react": "^18.0.24",
     "@types/react-dom": "^18.0.8",
     "@vitejs/plugin-react": "^2.2.0",
+    "react-dev-inspector": "^2.0.1",
     "typescript": "^4.6.4",
     "vite": "^3.2.3"
   }
