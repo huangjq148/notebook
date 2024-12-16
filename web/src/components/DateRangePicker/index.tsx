@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 
 export type DatePickerProps = {} & AntDatePickerProps;
 
-const DatePicker: React.FC<DatePickerProps> = (props) => {
+const DatePicker: React.FC<DatePickerProps> = (props: any) => {
   return (
     // @ts-ignore
     <AntDatePicker.RangePicker

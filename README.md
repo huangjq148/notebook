@@ -14,3 +14,8 @@
     - GET /product/:id - _Get product_
     - POST /product - _Create product_
     - DELETE /product/:id - _Delete product_
+
+
+# 构建镜像
+
+在项目根目录执行 `docker build -t web .`
