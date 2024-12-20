@@ -1,0 +1,14 @@
+# yaml 配置
+version: '3'
+services:
+  web: 
+    build: 
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"
+
+  server: 
+    build: 
+      dockerfile: Dockerfile.server
+    ports:
+      - "3000:3000"
