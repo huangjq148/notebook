@@ -1,6 +1,7 @@
 FROM node:16 AS node_build
 WORKDIR /app
 COPY ./web/package.json ./
+COPY ./web/.npmrc ./
 RUN npm install -g pnpm@8
 RUN pnpm install
 COPY ./web/. .
