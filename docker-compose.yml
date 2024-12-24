@@ -1,14 +1,32 @@
 # yaml 配置
 version: '3'
 services:
+  mysql:
+    image: mysql:8
+    container_name: mysql_container
+    # network_mode: host  # 设置网络模式为 host
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: notebook
+      MYSQL_USER: huangjq
+      MYSQL_PASSWORD: fright2014
+    ports:
+      - "3306:3306"
+    # volumes:
+    #   - /path/to/mysql/data:/var/lib/mysql
+
   web: 
     build: 
       dockerfile: Dockerfile
+    # network_mode: host  # 设置网络模式为 host
     ports:
       - "8000:80"
 
   server: 
     build: 
       dockerfile: Dockerfile.server
+    depends_on:
+      - mysql
+    # network_mode: host  # 设置网络模式为 host
     ports:
       - "3000:3000"

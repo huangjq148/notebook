@@ -12,6 +12,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 FROM alpine:latest
 WORKDIR /app
 COPY --from=go_builder /app/main .
+COPY --from=go_builder /app/.env .
 EXPOSE 3000
 # 定义启动命令
 CMD ["/app/main"]

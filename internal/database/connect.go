@@ -20,7 +20,8 @@ func ConnectDB() (string, bool) {
 	// port, err := strconv.ParseUint(p, 10, 32)
 	// dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.Config("DB_HOST"), port, config.Config("DB_USER"), config.Config("DB_PASSWORD"), config.Config("DB_NAME"))
 	// DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	db, _ := sqlx.Open("mysql", "root:root@tcp(127.0.0.1:3306)/notebook")
+	connectInfo := "huangjq:fright2014@tcp(192.168.5.100:3306)/notebook"
+	db, _ := sqlx.Open("mysql", connectInfo)
 
 	if err != nil {
 		panic("failed to connect database")
@@ -31,7 +32,7 @@ func ConnectDB() (string, bool) {
 	db.SetMaxIdleConns(10)
 	// 验证连接
 	if err := db.Ping(); err != nil {
-		fmt.Println("open database fail")
+		fmt.Println("open database fail",err,connectInfo)
 		return "数据库链接失败", false
 	}
 
