@@ -2,6 +2,8 @@ FROM node:16 AS node_build
 WORKDIR /app
 COPY ./web/package.json ./
 COPY ./web/.npmrc ./
+# 设置 npm 镜像源
+RUN npm config set registry https://registry.npmmirror.com
 RUN npm install -g pnpm@8
 RUN pnpm install
 COPY ./web/. .
