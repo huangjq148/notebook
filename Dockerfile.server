@@ -3,6 +3,7 @@
 FROM golang:1.20 as go_builder
 WORKDIR /app
 COPY go.mod go.sum ./
+RUN go env -w GOPROXY=https://mirrors.aliyun.com/goproxy,direct
 RUN go mod download
 COPY . .
 # 交叉编译
