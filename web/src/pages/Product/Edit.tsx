@@ -34,14 +34,14 @@ export default (props: Props) => {
     }, [props.id])
 
     return <Form onFinish={handleFormSubmit} form={formRef}>
-        <Form.Item label="商品" name="name">
-            <Input />
+        <Form.Item label="产品" name="name">
+            <Input placeholder="产品名称"/>
         </Form.Item>
         <Form.Item label="进价" name="buyPrice">
-            <Input />
+            <Input placeholder="进价"/>
         </Form.Item>
         <Form.Item label="售价" name="sellPrice">
-            <Input />
+            <Input placeholder="售价"/>
         </Form.Item>
         <Form.Item >
             <Button htmlType='submit'>保存</Button>

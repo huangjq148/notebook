@@ -70,13 +70,13 @@ export default () => {
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
           <Form.Item label="姓名" name="name">
-            <Input allowClear />
+            <Input allowClear placeholder="联系人姓名"/>
           </Form.Item>
           <Form.Item label="电话" name="phone">
-            <Input allowClear />
+            <Input allowClear placeholder="联系人电话"/>
           </Form.Item>
           <Form.Item label="地址" name="address">
-            <Input allowClear />
+            <Input allowClear placeholder="联系人地址"/>
           </Form.Item>
           <Form.Item>
             <Space>

@@ -35,13 +35,13 @@ export default (props: Props) => {
 
     return <Form onFinish={handleFormSubmit} form={formRef}>
         <Form.Item label="姓名" name="name">
-            <Input />
+            <Input placeholder="联系人姓名"/>
         </Form.Item>
         <Form.Item label="电话" name="phone">
-            <Input />
+            <Input placeholder="联系人电话"/>
         </Form.Item>
         <Form.Item label="地址" name="address">
-            <Input />
+            <Input placeholder="联系人地址"/>
         </Form.Item>
         <Form.Item >
             <Button htmlType='submit'>保存</Button>

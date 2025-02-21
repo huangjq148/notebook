@@ -100,7 +100,8 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
               onChange={(e) => {
                 handleDataSourceChange(index, "name", e.target.value);
               }}
-            ></Input>
+              placeholder="产品名称"
+            />
             <Button
               type="primary"
               onClick={() => {
@@ -127,7 +128,8 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
             onChange={(e) => {
               handleDataSourceChange(index, "buyPrice", e.target.value);
             }}
-          ></Input>
+            placeholder="进价"
+          />
         ) : (
           val
         );
@@ -145,7 +147,8 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
             onChange={(e) => {
               handleDataSourceChange(index, "sellPrice", e.target.value);
             }}
-          ></Input>
+            placeholder="售价"
+          />
         ) : (
           val
         );
@@ -163,7 +166,8 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
             onChange={(e) => {
               handleDataSourceChange(index, "number", e.target.value);
             }}
-          ></Input>
+            placeholder="数量"
+          />
         ) : (
           val
         );
@@ -181,7 +185,8 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
             onChange={(e) => {
               handleDataSourceChange(index, "otherCost", e.target.value);
             }}
-          ></Input>
+            placeholder="其他费用"
+          />
         ) : (
           val || "-"
         );
@@ -302,6 +307,7 @@ export default (props: Props) => {
       <Form onFinish={handleFormSubmit} form={formRef}>
         <Form.Item name="orderTime" label="日期" style={{ width: "400px" }}>
           <DatePicker
+            allowClear={false}
             presets={[
               { label: "昨天", value: dayjs().add(-1, "day") },
               { label: "今天", value: dayjs() },
@@ -318,7 +324,7 @@ export default (props: Props) => {
               rules={[{ required: true, message: "请输入姓名" }]}
             >
               {/* <OrderContactSelect /> */}
-              <Input />
+              <Input placeholder="请输入姓名" />
             </Form.Item>
             <Button type="primary" onClick={() => setContactModal({ open: true })}>
               选择

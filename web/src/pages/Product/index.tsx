@@ -67,7 +67,7 @@ export default () => {
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
           <Form.Item label="品名" name="name">
-            <Input allowClear />
+            <Input allowClear placeholder="产品名称"/>
           </Form.Item>
           <Form.Item>
             <Space>

@@ -59,6 +59,10 @@ export default () => {
   };
 
   const handleCopyClick = () => {
+    if (!selectedDataStr) {
+      message.warning("未选择要复制的数据");
+      return;
+    }
     copy(selectedDataStr);
     message.success("复制成功");
   };
@@ -227,10 +231,10 @@ export default () => {
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
           <Form.Item label="品名" name="name">
-            <Input allowClear />
+            <Input allowClear placeholder="商品名称" />
           </Form.Item>
           <Form.Item label="姓名" name="contact">
-            <Input allowClear />
+            <Input allowClear placeholder="客户姓名" />
           </Form.Item>
           <Form.Item label="日期" name="createTime">
             <DateRangePicker />

@@ -35,16 +35,16 @@ export default (props: Props) => {
 
     return <Form onFinish={handleFormSubmit} form={formRef}>
         <Form.Item label="品名" name="name">
-            <Input />
+            <Input placeholder="产品名称"/>
         </Form.Item>
         <Form.Item label="进价" name="buyPrice">
-            <Input />
+            <Input placeholder="进价"/>
         </Form.Item>
         <Form.Item label="售价" name="sellPrice">
-            <Input />
+            <Input placeholder="售价"/>
         </Form.Item>
         <Form.Item label="数量" name="number">
-            <Input />
+            <Input placeholder="数量"/>
         </Form.Item>
         <Form.Item >
             <Button htmlType='submit'>保存</Button>
