@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Button, DatePicker, Form, Input, InputNumber, message, Modal, Space, Table, TableColumnProps } from "antd";
-import { createOrder, updateOrder, queryOrderById } from "@/services/order";
-import ContactList from "./ContactList";
-import ProductList from "./ProductList";
+import { TextButton } from "@/components";
+import { createOrder, queryOrderById, updateOrder } from "@/services/order";
+import { DownOutlined, MinusCircleOutlined, PlusCircleOutlined } from "@ant-design/icons";
+import { Button, DatePicker, Form, Input, message, Modal, Space, Table } from "antd";
 import dayjs from "dayjs";
-import { TextButton, OrderContactSelect } from "@/components";
-import { PlusCircleOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
+import ContactList from "./ContactList";
+import styles from "./index.module.less";
+import ProductList from "./ProductList";
 
 type Props = {
   id?: number;
@@ -248,6 +249,7 @@ export default (props: Props) => {
   const [oldData, setOldData] = useState<Partial<Order>>({});
   const [formRef] = Form.useForm();
   const [contactModal, setContactModal] = useState({ open: false });
+  const [showMoreInfoSetting, setShowMoreInfoSetting] = useState(false);
 
   const handleContactSelect = (val: Contact) => {
     formRef.setFieldsValue({
@@ -307,29 +309,48 @@ export default (props: Props) => {
             defaultValue={dayjs(dayjs(), "YYYY-MM-DD")}
           />
         </Form.Item>
-        <div style={{ display: "flex", width: "400px" }}>
-          <Form.Item
-            label="姓名"
-            name="contact"
-            style={{ width: "100%", marginRight: "10px" }}
-            rules={[{ required: true, message: "请输入姓名" }]}
-          >
-            {/* <OrderContactSelect /> */}
-            <Input />
+        <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ display: "flex", width: "400px" }}>
+            <Form.Item
+              label="姓名"
+              name="contact"
+              style={{ width: "100%", marginRight: "10px" }}
+              rules={[{ required: true, message: "请输入姓名" }]}
+            >
+              {/* <OrderContactSelect /> */}
+              <Input />
+            </Form.Item>
+            <Button type="primary" onClick={() => setContactModal({ open: true })}>
+              选择
+            </Button>
+          </div>
+          <Form.Item className={styles.toggleButton}>
+            <div onClick={() => setShowMoreInfoSetting((val) => !val)}>
+              {showMoreInfoSetting ? (
+                <>
+                  <MinusCircleOutlined /> 收起
+                </>
+              ) : (
+                <>
+                  <PlusCircleOutlined /> 更多
+                </>
+              )}
+            </div>
           </Form.Item>
-          <Button type="primary" onClick={() => setContactModal({ open: true })}>
-            选择
-          </Button>
         </div>
-        <Form.Item label="电话" name="phone" style={{ width: "400px" }}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="地址" name="address" style={{ width: "400px" }}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="备注" name="remark" style={{ width: "400px" }}>
-          <Input />
-        </Form.Item>
+        {showMoreInfoSetting && (
+          <>
+            <Form.Item label="电话" name="phone" style={{ width: "400px" }}>
+              <Input />
+            </Form.Item>
+            <Form.Item label="地址" name="address" style={{ width: "400px" }}>
+              <Input />
+            </Form.Item>
+            <Form.Item label="备注" name="remark" style={{ width: "400px" }}>
+              <Input />
+            </Form.Item>
+          </>
+        )}
         <Form.Item name="products">
           <EditTable />
         </Form.Item>

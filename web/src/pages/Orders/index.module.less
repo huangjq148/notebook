@@ -1,15 +1,25 @@
 .tableWrapper {
-    background-color: white;
-    border-radius: 6px;
-    padding: 16px 24px;
+  background-color: white;
+  border-radius: 6px;
+  padding: 16px 24px;
 }
 
 .status {
-    &[data-status="1"] {
-        color: orange;
-    }
+  &[data-status="1"] {
+    color: orange;
+  }
 
-    &[data-status="2"] {
-        color: green;
-    }
+  &[data-status="2"] {
+    color: green;
+  }
+}
+
+.toggleButton {
+  user-select: none;
+  color: #166cff;
+
+  &:hover {
+    color: #4386fa;
+    cursor: pointer;
+  }
 }
