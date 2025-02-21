@@ -314,7 +314,7 @@ export default (props: Props) => {
             style={{ width: "100%", marginRight: "10px" }}
             rules={[{ required: true, message: "请输入姓名" }]}
           >
-            <OrderContactSelect />
+            {/* <OrderContactSelect /> */}
             <Input />
           </Form.Item>
           <Button type="primary" onClick={() => setContactModal({ open: true })}>
