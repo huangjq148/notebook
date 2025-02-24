@@ -1,4 +1,4 @@
-import { SearchForm, DeleteConfirmButton } from "@/components";
+import { SearchForm, DeleteConfirmButton, OrderProductInput } from "@/components";
 import { useTable } from "@/hooks";
 import { deleteProduct, queryProduct } from "@/services/product";
 import { Button, Form, Input, message, Modal, Space, Table } from "antd";
@@ -66,8 +66,8 @@ export default () => {
     <div>
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
-          <Form.Item label="品名" name="name">
-            <Input allowClear placeholder="产品名称"/>
+          <Form.Item label="品名" name="name" className={styles.searchInput}>
+            <OrderProductInput placeholder="产品名称" />
           </Form.Item>
           <Form.Item>
             <Space>

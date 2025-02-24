@@ -35,6 +35,9 @@ dependencies:
   path:
     specifier: ^0.12.7
     version: 0.12.7
+  pinyin-pro:
+    specifier: ^3.26.0
+    version: 3.26.0
   prop-types:
     specifier: ^15.8.1
     version: 15.8.1
@@ -2227,6 +2230,10 @@ packages:
     engines: {node: '>=6'}
     requiresBuild: true
     optional: true
+
+  /pinyin-pro@3.26.0:
+    resolution: {integrity: sha512-HcBZZb0pvm0/JkPhZHWA5Hqp2cWHXrrW/WrV+OtaYYM+kf35ffvZppIUuGmyuQ7gDr1JDJKMkbEE+GN0wfMoGg==}
+    dev: false
 
   /pkg-up@3.1.0:
     resolution: {integrity: sha512-nDywThFk1i4BQK4twPQ6TA4RT8bDY96yeuCVBWL3ePARCiEKDRSrNGbFIgUJpLp+XeIR65v8ra7WuJOFUBtkMA==}

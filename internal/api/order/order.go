@@ -221,3 +221,13 @@ func QueryContactsByOrders(c *fiber.Ctx) error {
 	database.QueryListBySql(sql, &result, userId)
 	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": result})
 }
+
+// QueryProductByOrders 查询订单商品
+func QueryProductsByOrders(c *fiber.Ctx) error {
+	result := []string{}
+	sql := "select DISTINCT name from t_order where createUser=?"
+	userId := utils.GetUserId(c)
+
+	database.QueryListBySql(sql, &result, userId)
+	return c.JSON(fiber.Map{"status": "success", "message": "查询成功", "data": result})
+}

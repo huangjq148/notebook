@@ -35,3 +35,7 @@ export const revokeStockOrder = async (id: number): Promise<void> => {
 export const queryContactsByOrders = async (): Promise<string[]> => {
     return request(`/order/contacts`, { method: "Get" })
 }
+
+export const queryProductsByOrders = async (): Promise<string[]> => {
+    return request(`/order/products`, { method: "Get" })
+}

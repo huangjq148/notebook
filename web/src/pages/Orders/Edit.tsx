@@ -4,6 +4,7 @@ import { createOrder, updateOrder, queryOrderById } from "@/services/order"
 import ContactList from "./ContactList"
 import ProductList from "./ProductList"
 import dayjs from "dayjs"
+import { OrderContactInput, OrderProductInput } from '@/components'
 
 type Props = {
     id?: number
@@ -85,27 +86,27 @@ export default (props: Props) => {
             </Form.Item>
             <div style={{ display: "flex", width: "100%" }}>
                 <Form.Item label="产品名" name="name" style={{ width: "100%", marginRight: "10px" }} rules={[{ required: true, message: '请输入产品名' }]}>
-                    <Input disabled={!!props.stockInfo} />
+                    <OrderProductInput disabled={!!props.stockInfo} />
                 </Form.Item>
                 <Button type="primary" disabled={!!props.stockInfo} onClick={() => setProductModal({ open: true })}>选择</Button>
             </div>
             <div style={{ display: "flex", width: "100%" }}>
                 <Form.Item label="姓名" name="contact" style={{ width: "100%", marginRight: "10px" }} rules={[{ required: true, message: '请输入姓名' }]}>
-                    <Input />
+                    <OrderContactInput />
                 </Form.Item>
                 <Button type="primary" onClick={() => setContactModal({ open: true })}>选择</Button>
             </div>
             <Form.Item label="电话" name="phone">
-                <Input />
+                <Input placeholder='请输入电话'/>
             </Form.Item>
             <Form.Item label="地址" name="address">
-                <Input />
+                <Input placeholder='请输入地址'/>
             </Form.Item>
             <Form.Item label="进价" name="buyPrice" rules={[{ required: true, message: '请输入进价' }]}>
-                <Input disabled={!!props.stockInfo} />
+                <Input placeholder='请输入进价' disabled={!!props.stockInfo} />
             </Form.Item>
             <Form.Item label="售价" name="sellPrice" rules={[{ required: true, message: '请输入售价' }]}>
-                <Input />
+                <Input placeholder='请输入售价'/>
             </Form.Item>
             <Form.Item label="数量" name="number" rules={[{
                 required: true, message: '请输入数量',
@@ -116,13 +117,13 @@ export default (props: Props) => {
                     }
                 }
             }]}>
-                <Input />
+                <Input placeholder='请输入数量'/>
             </Form.Item>
             <Form.Item label="其他费用" name="otherCost">
-                <Input />
+                <Input placeholder='请输入其他费用'/>
             </Form.Item>
             <Form.Item label="备注" name="remark">
-                <Input />
+                <Input placeholder='请输入备注'/>
             </Form.Item>
             <Form.Item >
                 <Button htmlType='submit' type="primary">保存</Button>

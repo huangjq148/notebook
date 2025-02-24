@@ -1,11 +1,11 @@
-import { SearchForm, TextButton, DeleteConfirmButton } from "@/components";
+import { DeleteConfirmButton, OrderProductInput, SearchForm, TextButton } from "@/components";
 import { useTable } from "@/hooks";
+import StockSell from "@/pages/Orders/Edit";
 import { deleteStock, queryStock, statistics } from "@/services/stock";
-import { Button, Form, Input, message, Modal, Popconfirm, Space, Table } from "antd";
+import { Button, Form, message, Modal, Space, Table } from "antd";
 import { useEffect, useState } from "react";
 import EditPage from "./Edit";
 import styles from "./index.module.less";
-import StockSell from "@/pages/Orders/Edit";
 
 interface Statistics {
   buyMoney: number;
@@ -111,8 +111,8 @@ export default () => {
     <div>
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
-          <Form.Item label="品名" name="name">
-            <Input allowClear placeholder="产品名称"/>
+          <Form.Item label="品名" name="name" className={styles.searchInput}>
+            <OrderProductInput allowClear placeholder="产品名称"/>
           </Form.Item>
           <Form.Item>
             <Space>

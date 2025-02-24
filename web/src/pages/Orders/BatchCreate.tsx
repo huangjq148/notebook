@@ -1,4 +1,4 @@
-import { TextButton } from "@/components";
+import { OrderContactInput, TextButton } from "@/components";
 import { createOrder, queryOrderById, updateOrder } from "@/services/order";
 import { DownOutlined, MinusCircleOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Form, Input, message, Modal, Space, Table } from "antd";
@@ -323,8 +323,7 @@ export default (props: Props) => {
               style={{ width: "100%", marginRight: "10px" }}
               rules={[{ required: true, message: "请输入姓名" }]}
             >
-              {/* <OrderContactSelect /> */}
-              <Input placeholder="请输入姓名" />
+              <OrderContactInput placeholder="请输入姓名" />
             </Form.Item>
             <Button type="primary" onClick={() => setContactModal({ open: true })}>
               选择

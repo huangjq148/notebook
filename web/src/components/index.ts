@@ -6,6 +6,8 @@ import DeleteConfirmButton from "./DeleteConfirmButton";
 import Card from "./Card";
 export { default as LineChart } from "./Charts/LineChart";
 export { default as PieChart } from "./Charts/PieChart";
-export { default as OrderContactSelect } from "./OrderContactSelect";
+export { default as OrderContactInput } from "./OrderContactInput";
+export { default as OrderProductInput } from "./OrderProductInput";
+export { default as PinyinMatchInput } from "./PinyinMatchInput";
 
 export { SearchForm, TextButton, RemoteSearchSelect, DateRangePicker, DeleteConfirmButton, Card };

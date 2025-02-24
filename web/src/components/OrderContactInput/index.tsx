@@ -1,8 +1,9 @@
-import { Select, SelectProps } from "antd";
 import { queryContactsByOrders } from "@/services/order";
+import { AutoCompleteProps } from "antd";
 import { useEffect, useState } from "react";
+import PinyinMatchInput from "../PinyinMatchInput";
 
-const OrderContactSelect = (props: SelectProps) => {
+const OrderContactInput = (props: AutoCompleteProps) => {
   const [contacts, setContacts] = useState<{ value: string; label: string }[]>([]);
 
   const loadData = async () => {
@@ -14,7 +15,7 @@ const OrderContactSelect = (props: SelectProps) => {
     loadData();
   }, []);
 
-  return <Select mode="tags" options={contacts} {...props} />;
+  return <PinyinMatchInput placeholder="请输入客户姓名" options={contacts} {...props} />;
 };
 
-export default OrderContactSelect;
+export default OrderContactInput;

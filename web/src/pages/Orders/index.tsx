@@ -1,16 +1,23 @@
-import { SearchForm, TextButton, DateRangePicker, DeleteConfirmButton } from "@/components";
+import {
+  DateRangePicker,
+  DeleteConfirmButton,
+  OrderContactInput,
+  OrderProductInput,
+  SearchForm,
+  TextButton,
+} from "@/components";
 import { useTable } from "@/hooks";
+import { changeOrderStatus, deleteOrder, queryOrder, revokeStockOrder, statistics } from "@/services/order";
 import { PlusOutlined } from "@ant-design/icons";
-import { deleteOrder, queryOrder, changeOrderStatus, statistics, revokeStockOrder } from "@/services/order";
-import { Button, Form, Input, FloatButton, message, Modal, Space, Table, Select, Descriptions } from "antd";
+import { Button, Descriptions, FloatButton, Form, message, Modal, Space, Table } from "antd";
 import { useEffect, useState } from "react";
-import EditPage from "./Edit";
 import BatchCreate from "./BatchCreate";
+import EditPage from "./Edit";
 // import { STATUS, translateToArray } from "@/data";
-import dayjs from "dayjs";
-import styles from "./index.module.less";
 import { copy } from "@/utils";
+import dayjs from "dayjs";
 import Decimal from "decimal.js";
+import styles from "./index.module.less";
 
 interface ContactInfo {
   contact?: string;
@@ -230,18 +237,15 @@ export default () => {
     <div>
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
-          <Form.Item label="品名" name="name">
-            <Input allowClear placeholder="商品名称" />
+          <Form.Item label="品名" name="name" className={styles.searchInput}>
+            <OrderProductInput placeholder="商品名称" />
           </Form.Item>
-          <Form.Item label="姓名" name="contact">
-            <Input allowClear placeholder="客户姓名" />
+          <Form.Item label="姓名" name="contact"  className={styles.searchInput}>
+            <OrderContactInput placeholder="客户姓名" />
           </Form.Item>
           <Form.Item label="日期" name="createTime">
             <DateRangePicker />
           </Form.Item>
-          {/* <Form.Item label="状态" name="status">
-            <Select allowClear options={STATUS} placeholder="请选择" />
-          </Form.Item> */}
           <Form.Item>
             <Space>
               <Button htmlType="submit" type="primary">

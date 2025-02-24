@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import { OrderProductInput } from '@/components'
+import { createStock, queryStockById, updateStock } from "@/services/stock"
 import { Button, Form, Input, message } from "antd"
-import { createStock, updateStock, queryStockById } from "@/services/stock"
+import { useEffect, useState } from 'react'
 
 type Props = {
     id?: number
@@ -35,7 +36,7 @@ export default (props: Props) => {
 
     return <Form onFinish={handleFormSubmit} form={formRef}>
         <Form.Item label="品名" name="name">
-            <Input placeholder="产品名称"/>
+            <OrderProductInput placeholder="产品名称"/>
         </Form.Item>
         <Form.Item label="进价" name="buyPrice">
             <Input placeholder="进价"/>
