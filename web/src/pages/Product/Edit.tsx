@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Form, Input, message } from "antd"
 import { createProduct, updateProduct, queryProductById } from "@/services/product"
-import { OrderProductInput } from '@/components'
 
 type Props = {
     id?: number
@@ -36,7 +35,7 @@ export default (props: Props) => {
 
     return <Form onFinish={handleFormSubmit} form={formRef}>
         <Form.Item label="产品" name="name">
-            <OrderProductInput placeholder="产品名称"/>
+            <Input placeholder="产品名称"/>
         </Form.Item>
         <Form.Item label="进价" name="buyPrice">
             <Input placeholder="进价"/>
