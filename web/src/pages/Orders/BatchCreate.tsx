@@ -1,4 +1,4 @@
-import { OrderContactInput, TextButton } from "@/components";
+import { OrderContactInput, OrderProductInput, TextButton } from "@/components";
 import { createOrder, queryOrderById, updateOrder } from "@/services/order";
 import { DownOutlined, MinusCircleOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Form, Input, message, Modal, Space, Table } from "antd";
@@ -95,11 +95,9 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       render: (val: any, record: any, index: number) => {
         return index == currentEditIndex ? (
           <div style={{ display: "flex", width: "100%", gap: "5px" }}>
-            <Input
+            <OrderProductInput
               defaultValue={val}
-              onChange={(e) => {
-                handleDataSourceChange(index, "name", e.target.value);
-              }}
+              onChange={(e) => handleDataSourceChange(index, "name", e.target.value)}
               placeholder="产品名称"
             />
             <Button
