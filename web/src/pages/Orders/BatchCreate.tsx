@@ -96,8 +96,8 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
         return index == currentEditIndex ? (
           <div style={{ display: "flex", width: "100%", gap: "5px" }}>
             <OrderProductInput
-              defaultValue={val}
-              onChange={(e) => handleDataSourceChange(index, "name", e.target.value)}
+              value={val}
+              onChange={(value) => handleDataSourceChange(index, "name", value)}
               placeholder="产品名称"
             />
             <Button
