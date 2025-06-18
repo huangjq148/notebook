@@ -1,3 +1,10 @@
+type Router = RouteObject & {
+  children?: Router[];
+  label?: string;
+  hideInMenu?: boolean;
+  icon?: React.ReactNode;
+};
+
 declare interface CreateInfo {
   createUser: string;
   updateUser: string;

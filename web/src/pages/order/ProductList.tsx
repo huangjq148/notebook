@@ -4,7 +4,7 @@ import { deleteProduct, queryProduct } from "@/services/product"
 import { Button, Form, Input, message, Modal, Space, Table } from 'antd'
 import { useState } from 'react'
 import { TextButton } from "@/components"
-import EditPage from "@/pages/Product/Edit"
+import EditPage from "@/pages/product/Edit"
 import styles from "./index.module.less"
 
 type Props = {

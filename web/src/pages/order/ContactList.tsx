@@ -3,7 +3,7 @@ import { useTable } from "@/hooks";
 import { deleteContact, queryContact } from "@/services/contact";
 import { Button, Form, Input, message, Modal, Space, Table } from "antd";
 import { useState } from "react";
-import EditPage from "@/pages/Contact/Edit";
+import EditPage from "@/pages/contact/Edit";
 import styles from "./index.module.less";
 
 type Props = {

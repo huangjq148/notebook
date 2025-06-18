@@ -1,69 +1,36 @@
-import React, { lazy, useEffect } from "react";
-import type { RouteObject } from "react-router-dom";
-import { useLocation, useRoutes, Navigate } from "react-router-dom";
 import BasicLayout from "@/layout";
-import LoginPage from "@/pages/Login";
-import OverviewPage from "@/pages/Overview";
-import OrdersPage from "@/pages/Orders";
-import ProductPage from "@/pages/Product";
-import ContactPage from "@/pages/Contact";
-import StockPage from "@/pages/Stock";
-import DataTransfer from "@/pages/Setting/DataTransfer";
-// const AuthWrapper = lazy(() => import('@/layouts/AuthWrapper'));
+import LoginPage from "@/pages/login";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import modules from "./modules";
+import { generateMenuKeys } from "./utils";
+import lazyLoad from "./utils/lazyLoad";
 
-export default () => {
-  const location = useLocation();
+export const routes: Router[] = [
+  {
+    path: "/login",
+    element: <LoginPage />,
+    hideInMenu: true,
+  },
+  {
+    path: "/setting",
+    element: <BasicLayout />,
+    hideInMenu: true,
+    children: [
+      {
+        path: "data-transfer",
+        element: lazyLoad("@/pages/setting/dataTransfer"),
+      },
+    ],
+  },
+  {
+    path: "/",
+    element: <BasicLayout />,
+    children: modules,
+  },
+  {
+    path: "/",
+    element: <Navigate to="/login" />,
+  },
+];
 
-  const routes: RouteObject[] = [
-    {
-      path: "/login",
-      element: <LoginPage />,
-    },
-    {
-      path: "/setting",
-      element: <BasicLayout />,
-      children: [
-        {
-          path: "data-transfer",
-          element: <DataTransfer />,
-        },
-      ],
-    },
-    {
-      path: "/",
-      element: <BasicLayout />,
-      children: [
-        {
-          path: "overview",
-          element: <OverviewPage />,
-        },
-        {
-          path: "orders",
-          element: <OrdersPage />,
-        },
-        {
-          path: "goods",
-          element: <ProductPage />,
-        },
-        {
-          path: "stock",
-          element: <StockPage />,
-        },
-        {
-          path: "contact",
-          element: <ContactPage />,
-        },
-        {
-          path: "/",
-          element: <Navigate to="/overview" />,
-        },
-      ],
-    },
-    {
-      path: "/",
-      element: <Navigate to="/login" />,
-    },
-  ];
-
-  return useRoutes(routes);
-};
+export default createBrowserRouter(generateMenuKeys(routes));

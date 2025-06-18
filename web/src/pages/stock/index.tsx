@@ -1,6 +1,6 @@
 import { DeleteConfirmButton, OrderProductInput, SearchForm, TextButton } from "@/components";
 import { useTable } from "@/hooks";
-import StockSell from "@/pages/Orders/Edit";
+import StockSell from "@/pages/order/Edit";
 import { deleteStock, queryStock, statistics } from "@/services/stock";
 import { Button, Form, message, Modal, Space, Table } from "antd";
 import { useEffect, useState } from "react";
