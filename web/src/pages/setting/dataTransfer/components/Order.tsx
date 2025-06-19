@@ -1,10 +1,10 @@
-import { DateRangePicker, SearchForm } from "@/components";
-import { useTable } from "@/hooks";
-import { queryOrder } from "@/services/order";
-import { Button, Form, Input, message, Space, Table } from "antd";
-import dayjs from "dayjs";
-import { useState } from "react";
-import TargetUserSelectModal from "./TargetUserSelectModal";
+import { DateRangePicker, SearchForm } from '@/components';
+import { useTable } from '@/hooks';
+import { queryOrder } from '@/services/order';
+import { Button, Form, Input, message, Space, Table } from 'antd';
+import dayjs from 'dayjs';
+import { useState } from 'react';
+import TargetUserSelectModal from './TargetUserSelectModal';
 
 const Order = () => {
   const [conditions, setConditions] = useState({});
@@ -16,34 +16,34 @@ const Order = () => {
   });
   const columns = [
     {
-      title: "产品名",
-      dataIndex: "name",
+      title: '产品名',
+      dataIndex: 'name',
       width: 100,
     },
     {
-      title: "姓名",
-      dataIndex: "contact",
+      title: '姓名',
+      dataIndex: 'contact',
     },
     {
-      title: "进价",
-      dataIndex: "buyPrice",
+      title: '进价',
+      dataIndex: 'buyPrice',
     },
     {
-      title: "售价",
-      dataIndex: "sellPrice",
+      title: '售价',
+      dataIndex: 'sellPrice',
     },
     {
-      title: "数量",
-      dataIndex: "number",
+      title: '数量',
+      dataIndex: 'number',
     },
     {
-      title: "其他费用",
-      dataIndex: "otherCost",
-      render: (text: number) => text || "-",
+      title: '其他费用',
+      dataIndex: 'otherCost',
+      render: (text: number) => text || '-',
     },
     {
-      title: "利润",
-      dataIndex: "number",
+      title: '利润',
+      dataIndex: 'number',
       render: (text: string, record: any) => {
         return (
           <>
@@ -55,10 +55,10 @@ const Order = () => {
       },
     },
     {
-      title: "日期",
-      dataIndex: "orderTime",
+      title: '日期',
+      dataIndex: 'orderTime',
       width: 140,
-      render: (text: string, record: Order) => dayjs(text || record.createTime).format("YYYY-MM-DD"),
+      render: (text: string, record: Order) => dayjs(text || record.createTime).format('YYYY-MM-DD'),
     },
   ];
 
@@ -69,8 +69,8 @@ const Order = () => {
     if (createTime) {
       newConditions = {
         ...restValues,
-        startCreateDate: dayjs(createTime[0]).format("YYYY-MM-DD"),
-        endCreateDate: dayjs(createTime[1]).format("YYYY-MM-DD"),
+        startCreateDate: dayjs(createTime[0]).format('YYYY-MM-DD'),
+        endCreateDate: dayjs(createTime[1]).format('YYYY-MM-DD'),
       };
     }
 
@@ -84,15 +84,21 @@ const Order = () => {
   };
 
   const handleTransferData = async () => {
-    searchForm()
-    message.success("数据移交成功")
-    setSelectedKeys([])
-    setOpen(false)
-  }
+    searchForm();
+    message.success('数据移交成功');
+    setSelectedKeys([]);
+    setOpen(false);
+  };
 
   return (
     <div>
-      <TargetUserSelectModal open={open} onCancel={() => setOpen(false)} onOk={handleTransferData} dataIds={selectedKeys} type="order" />
+      <TargetUserSelectModal
+        open={open}
+        onCancel={() => setOpen(false)}
+        onOk={handleTransferData}
+        dataIds={selectedKeys}
+        type="order"
+      />
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
           <Form.Item label="品名" name="name">
@@ -116,7 +122,7 @@ const Order = () => {
       </SearchForm>
       <Table
         rowSelection={{
-          type: "checkbox",
+          type: 'checkbox',
           ...rowSelection,
         }}
         rowKey="id"
@@ -126,7 +132,7 @@ const Order = () => {
         dataSource={dataSource}
         columns={columns}
       />
-    </div >
+    </div>
   );
 };
 

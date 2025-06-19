@@ -1,14 +1,24 @@
-import { queryContactsByOrders } from "@/services/order";
-import { AutoCompleteProps } from "antd";
-import { useEffect, useState } from "react";
-import PinyinMatchInput from "../PinyinMatchInput";
+import { queryContactsByOrders } from '@/services/order';
+import { AutoCompleteProps } from 'antd';
+import { useEffect, useState } from 'react';
+import PinyinMatchInput from '../PinyinMatchInput';
 
 const OrderContactInput = (props: AutoCompleteProps) => {
-  const [contacts, setContacts] = useState<{ value: string; label: string }[]>([]);
+  const [contacts, setContacts] = useState<
+    {
+      value: string;
+      label: string;
+    }[]
+  >([]);
 
   const loadData = async () => {
     const result = await queryContactsByOrders();
-    setContacts(result.map((item) => ({ value: item, label: item })));
+    setContacts(
+      result.map((item) => ({
+        value: item,
+        label: item,
+      })),
+    );
   };
 
   useEffect(() => {

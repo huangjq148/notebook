@@ -1,11 +1,11 @@
-import { DateRangePicker, SearchForm } from "@/components";
-import { getTop5Data } from "@/services/overview";
-import { Button, Form } from "antd";
-import dayjs from "dayjs";
-import { useEffect, useState } from "react";
-import ProfitCharts from "./components/Profit";
-import Top5Product from "./components/Top5Product";
-import styles from "./index.module.less";
+import { DateRangePicker, SearchForm } from '@/components';
+import { getTop5Data } from '@/services/overview';
+import { Button, Form } from 'antd';
+import dayjs from 'dayjs';
+import { useEffect, useState } from 'react';
+import ProfitCharts from './components/Profit';
+import Top5Product from './components/Top5Product';
+import styles from './index.module.less';
 
 type TopData = {
   name: string;
@@ -20,19 +20,19 @@ export default () => {
 
     const newData = [
       {
-        label: "购买最多的产品",
+        label: '购买最多的产品',
         data: result.top5BuyGoods || [],
       },
       {
-        label: "卖的最多的产品",
+        label: '卖的最多的产品',
         data: result.top5SellGoods || [],
       },
       {
-        label: "利润最高的产品",
+        label: '利润最高的产品',
         data: result.top5ProfitGoods || [],
       },
       {
-        label: "利润最多的客户",
+        label: '利润最多的客户',
         data: result.top5BuyCustomer || [],
       },
     ];
@@ -48,8 +48,8 @@ export default () => {
 
     if (values.orderTime?.length) {
       conditions = {
-        startOrderTime: dayjs(values.orderTime[0]).format("YYYY-MM-DD"),
-        endOrderTime: dayjs(values.orderTime[1]).format("YYYY-MM-DD"),
+        startOrderTime: dayjs(values.orderTime[0]).format('YYYY-MM-DD'),
+        endOrderTime: dayjs(values.orderTime[1]).format('YYYY-MM-DD'),
       };
     }
 
@@ -79,7 +79,14 @@ export default () => {
           </div>
         ))}
       </div>
-      <SearchForm style={{ height: "400px", width: "100%", marginTop: "16px", marginBottom: 16 }}>
+      <SearchForm
+        style={{
+          height: '400px',
+          width: '100%',
+          marginTop: '16px',
+          marginBottom: 16,
+        }}
+      >
         <>
           <p>近14天利润</p>
           <ProfitCharts />

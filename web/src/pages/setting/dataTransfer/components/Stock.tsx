@@ -1,9 +1,9 @@
-import { Card, SearchForm } from "@/components";
-import { useTable } from "@/hooks";
-import { queryStock } from "@/services/stock";
-import { Button, Form, Input, message, Space, Table } from "antd";
-import { useState } from "react";
-import TargetUserSelectModal from "./TargetUserSelectModal";
+import { Card, SearchForm } from '@/components';
+import { useTable } from '@/hooks';
+import { queryStock } from '@/services/stock';
+import { Button, Form, Input, message, Space, Table } from 'antd';
+import { useState } from 'react';
+import TargetUserSelectModal from './TargetUserSelectModal';
 
 const Stock = () => {
   const [conditions, setConditions] = useState({});
@@ -16,20 +16,20 @@ const Stock = () => {
 
   const columns = [
     {
-      title: "产品名",
-      dataIndex: "name",
+      title: '产品名',
+      dataIndex: 'name',
     },
     {
-      title: "进价",
-      dataIndex: "buyPrice",
+      title: '进价',
+      dataIndex: 'buyPrice',
     },
     {
-      title: "售价",
-      dataIndex: "sellPrice",
+      title: '售价',
+      dataIndex: 'sellPrice',
     },
     {
-      title: "库存",
-      dataIndex: "number",
+      title: '库存',
+      dataIndex: 'number',
     },
   ];
 
@@ -44,15 +44,21 @@ const Stock = () => {
   };
 
   const handleTransferData = async () => {
-    searchForm()
-    message.success("数据移交成功")
-    setSelectedKeys([])
-    setOpen(false)
-  }
+    searchForm();
+    message.success('数据移交成功');
+    setSelectedKeys([]);
+    setOpen(false);
+  };
 
   return (
     <Card>
-      <TargetUserSelectModal open={open} onCancel={() => setOpen(false)} onOk={handleTransferData} dataIds={selectedKeys} type="stock" />
+      <TargetUserSelectModal
+        open={open}
+        onCancel={() => setOpen(false)}
+        onOk={handleTransferData}
+        dataIds={selectedKeys}
+        type="stock"
+      />
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
           <Form.Item label="品名" name="name">
@@ -71,7 +77,7 @@ const Stock = () => {
 
       <Table
         rowSelection={{
-          type: "checkbox",
+          type: 'checkbox',
           ...rowSelection,
         }}
         rowKey="id"

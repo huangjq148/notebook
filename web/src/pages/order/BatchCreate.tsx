@@ -1,12 +1,12 @@
-import { OrderContactInput, OrderProductInput, TextButton } from "@/components";
-import { createOrder, queryOrderById, updateOrder } from "@/services/order";
-import { DownOutlined, MinusCircleOutlined, PlusCircleOutlined } from "@ant-design/icons";
-import { Button, DatePicker, Form, Input, message, Modal, Space, Table } from "antd";
-import dayjs from "dayjs";
-import { useEffect, useState } from "react";
-import ContactList from "./ContactList";
-import styles from "./index.module.less";
-import ProductList from "./ProductList";
+import { OrderContactInput, OrderProductInput, TextButton } from '@/components';
+import { createOrder, queryOrderById, updateOrder } from '@/services/order';
+import { DownOutlined, MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Button, DatePicker, Form, Input, message, Modal, Space, Table } from 'antd';
+import dayjs from 'dayjs';
+import { useEffect, useState } from 'react';
+import ContactList from './ContactList';
+import styles from './index.module.less';
+import ProductList from './ProductList';
 
 type Props = {
   id?: number;
@@ -55,11 +55,11 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       const newDataSource = [
         ...val,
         {
-          name: "",
-          buyPrice: "",
-          sellPrice: "",
-          number: "",
-          otherCost: "",
+          name: '',
+          buyPrice: '',
+          sellPrice: '',
+          number: '',
+          otherCost: '',
           tmpId: Date.now(),
         },
       ];
@@ -88,16 +88,22 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
 
   const columns = [
     {
-      title: "产品名",
-      dataIndex: "name",
-      key: "name",
+      title: '产品名',
+      dataIndex: 'name',
+      key: 'name',
       width: 240,
       render: (val: any, record: any, index: number) => {
         return index == currentEditIndex ? (
-          <div style={{ display: "flex", width: "100%", gap: "5px" }}>
+          <div
+            style={{
+              display: 'flex',
+              width: '100%',
+              gap: '5px',
+            }}
+          >
             <OrderProductInput
               value={val}
-              onChange={(value) => handleDataSourceChange(index, "name", value)}
+              onChange={(value) => handleDataSourceChange(index, 'name', value)}
               placeholder="产品名称"
             />
             <Button
@@ -115,16 +121,16 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       },
     },
     {
-      title: "进价",
-      dataIndex: "buyPrice",
-      key: "buyPrice",
+      title: '进价',
+      dataIndex: 'buyPrice',
+      key: 'buyPrice',
       width: 100,
       render: (val: any, record: any, index: number) => {
         return index == currentEditIndex ? (
           <Input
             defaultValue={val}
             onChange={(e) => {
-              handleDataSourceChange(index, "buyPrice", e.target.value);
+              handleDataSourceChange(index, 'buyPrice', e.target.value);
             }}
             placeholder="进价"
           />
@@ -134,16 +140,16 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       },
     },
     {
-      title: "售价",
-      dataIndex: "sellPrice",
-      key: "sellPrice",
+      title: '售价',
+      dataIndex: 'sellPrice',
+      key: 'sellPrice',
       width: 100,
       render: (val: any, record: any, index: number) => {
         return index == currentEditIndex ? (
           <Input
             defaultValue={val}
             onChange={(e) => {
-              handleDataSourceChange(index, "sellPrice", e.target.value);
+              handleDataSourceChange(index, 'sellPrice', e.target.value);
             }}
             placeholder="售价"
           />
@@ -153,16 +159,16 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       },
     },
     {
-      title: "数量",
-      dataIndex: "number",
-      key: "number",
+      title: '数量',
+      dataIndex: 'number',
+      key: 'number',
       width: 100,
       render: (val: any, record: any, index: number) => {
         return index == currentEditIndex ? (
           <Input
             defaultValue={val}
             onChange={(e) => {
-              handleDataSourceChange(index, "number", e.target.value);
+              handleDataSourceChange(index, 'number', e.target.value);
             }}
             placeholder="数量"
           />
@@ -172,21 +178,21 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       },
     },
     {
-      title: "其他费用",
-      dataIndex: "otherCost",
-      key: "otherCost",
+      title: '其他费用',
+      dataIndex: 'otherCost',
+      key: 'otherCost',
       width: 100,
       render: (val: any, record: any, index: number) => {
         return index == currentEditIndex ? (
           <Input
             defaultValue={val}
             onChange={(e) => {
-              handleDataSourceChange(index, "otherCost", e.target.value);
+              handleDataSourceChange(index, 'otherCost', e.target.value);
             }}
             placeholder="其他费用"
           />
         ) : (
-          val || "-"
+          val || '-'
         );
       },
     },
@@ -196,9 +202,9 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
           <PlusCircleOutlined onClick={handleDataAdd}>添加一行</PlusCircleOutlined>
         </>
       ),
-      dataIndex: "action",
+      dataIndex: 'action',
       width: 80,
-      key: "action",
+      key: 'action',
       render: (val: any, record: any, index: number) => {
         return (
           <Space>
@@ -251,7 +257,9 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
 export default (props: Props) => {
   const [oldData, setOldData] = useState<Partial<Order>>({});
   const [formRef] = Form.useForm();
-  const [contactModal, setContactModal] = useState({ open: false });
+  const [contactModal, setContactModal] = useState({
+    open: false,
+  });
   const [showMoreInfoSetting, setShowMoreInfoSetting] = useState(false);
 
   const handleContactSelect = (val: Contact) => {
@@ -261,38 +269,58 @@ export default (props: Props) => {
       address: val.address,
     });
 
-    setContactModal({ open: false });
+    setContactModal({
+      open: false,
+    });
   };
 
-  const handleFormSubmit = async (values: Order & { products: OrderProductInfo[] }) => {
-    values.orderTime = dayjs(values.orderTime).format("YYYY-MM-DD");
+  const handleFormSubmit = async (
+    values: Order & {
+      products: OrderProductInfo[];
+    },
+  ) => {
+    values.orderTime = dayjs(values.orderTime).format('YYYY-MM-DD');
     if (props.id) {
-      await updateOrder({ ...oldData, ...values });
+      await updateOrder({
+        ...oldData,
+        ...values,
+      });
     } else {
       const { products, ...restValues } = values;
       const productsLength = values.products?.length;
 
       if (!productsLength) {
-        message.error("未添加产品信息");
+        message.error('未添加产品信息');
         return;
       }
 
       for (let i = 0; i < productsLength; i++) {
         const item = values.products[i];
-        const order = { ...item, ...restValues, status: "1", stockId: 0 };
+        const order = {
+          ...item,
+          ...restValues,
+          status: '1',
+          stockId: 0,
+        };
         await createOrder(order);
       }
     }
-    message.success("保存成功");
+    message.success('保存成功');
     props?.onSubmit?.();
   };
 
   const loadData = async () => {
     if (props.id) {
       const data = await queryOrderById(props.id);
-      const showDate = dayjs(dayjs(data.orderTime), "YYYY-MM-DD");
-      formRef.setFieldsValue({ ...data, orderTime: showDate });
-      setOldData({ ...data, orderTime: showDate as any });
+      const showDate = dayjs(dayjs(data.orderTime), 'YYYY-MM-DD');
+      formRef.setFieldsValue({
+        ...data,
+        orderTime: showDate,
+      });
+      setOldData({
+        ...data,
+        orderTime: showDate as any,
+      });
     }
   };
 
@@ -303,27 +331,64 @@ export default (props: Props) => {
   return (
     <>
       <Form onFinish={handleFormSubmit} form={formRef}>
-        <Form.Item name="orderTime" label="日期" style={{ width: "400px" }}>
+        <Form.Item
+          name="orderTime"
+          label="日期"
+          style={{
+            width: '400px',
+          }}
+        >
           <DatePicker
             allowClear={false}
             presets={[
-              { label: "昨天", value: dayjs().add(-1, "day") },
-              { label: "今天", value: dayjs() },
+              {
+                label: '昨天',
+                value: dayjs().add(-1, 'day'),
+              },
+              {
+                label: '今天',
+                value: dayjs(),
+              },
             ]}
-            defaultValue={dayjs(dayjs(), "YYYY-MM-DD")}
+            defaultValue={dayjs(dayjs(), 'YYYY-MM-DD')}
           />
         </Form.Item>
-        <div style={{ display: "flex", gap: 10 }}>
-          <div style={{ display: "flex", width: "400px" }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: 10,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              width: '400px',
+            }}
+          >
             <Form.Item
               label="姓名"
               name="contact"
-              style={{ width: "100%", marginRight: "10px" }}
-              rules={[{ required: true, message: "请输入姓名" }]}
+              style={{
+                width: '100%',
+                marginRight: '10px',
+              }}
+              rules={[
+                {
+                  required: true,
+                  message: '请输入姓名',
+                },
+              ]}
             >
               <OrderContactInput placeholder="请输入姓名" />
             </Form.Item>
-            <Button type="primary" onClick={() => setContactModal({ open: true })}>
+            <Button
+              type="primary"
+              onClick={() =>
+                setContactModal({
+                  open: true,
+                })
+              }
+            >
               选择
             </Button>
           </div>
@@ -343,13 +408,31 @@ export default (props: Props) => {
         </div>
         {showMoreInfoSetting && (
           <>
-            <Form.Item label="电话" name="phone" style={{ width: "400px" }}>
+            <Form.Item
+              label="电话"
+              name="phone"
+              style={{
+                width: '400px',
+              }}
+            >
               <Input />
             </Form.Item>
-            <Form.Item label="地址" name="address" style={{ width: "400px" }}>
+            <Form.Item
+              label="地址"
+              name="address"
+              style={{
+                width: '400px',
+              }}
+            >
               <Input />
             </Form.Item>
-            <Form.Item label="备注" name="remark" style={{ width: "400px" }}>
+            <Form.Item
+              label="备注"
+              name="remark"
+              style={{
+                width: '400px',
+              }}
+            >
               <Input />
             </Form.Item>
           </>
@@ -369,7 +452,11 @@ export default (props: Props) => {
         footer={null}
         width={1000}
         open={contactModal.open}
-        onCancel={() => setContactModal({ open: false })}
+        onCancel={() =>
+          setContactModal({
+            open: false,
+          })
+        }
       >
         <ContactList onRowSelect={handleContactSelect} />
       </Modal>

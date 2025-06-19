@@ -1,8 +1,8 @@
-import { Spin } from "antd";
-import React from "react";
-import { Suspense } from "react";
+import { Spin } from 'antd';
+import React from 'react';
+import { Suspense } from 'react';
 
-const modules: any = import.meta.glob("@/pages/**/index.tsx", { eager: false });
+const modules: any = import.meta.glob('@/pages/**/index.tsx', { eager: false });
 
 const componentsMap: Record<string, any> = {};
 
@@ -12,10 +12,10 @@ function transformPath(path: string) {
   if (!pathValid) return null; // 不符合条件返回null
 
   // 移除/src前缀
-  let result = path.replace(/^\/src/, "");
+  let result = path.replace(/^\/src/, '');
 
   // 如果以/index.tsx结尾，则移除
-  result = result.replace(/\/index\.tsx$/, "");
+  result = result.replace(/\/index\.tsx$/, '');
 
   return result;
 }
@@ -35,10 +35,10 @@ const lazyLoad = (componentName: string): any => {
       fallback={
         <div
           style={{
-            height: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            height: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <Spin size="large"></Spin>

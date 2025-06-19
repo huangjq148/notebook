@@ -1,39 +1,36 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import { resolve } from "path";
-import { inspectorServer } from "@react-dev-inspector/vite-plugin";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
+import { inspectorServer } from '@react-dev-inspector/vite-plugin';
 
 function pathResolve(dir: string) {
-  return resolve(__dirname, ".", dir);
+  return resolve(__dirname, '.', dir);
 }
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [inspectorServer(), react()],
-  base: "./",
+  base: './',
   resolve: {
     alias: [
       {
         find: /^~/,
-        replacement: pathResolve("node_modules") + "/",
+        replacement: pathResolve('node_modules') + '/',
       },
       {
         // /@/xxxx  =>  src/xxx
         find: /@\//,
-        replacement: pathResolve("src") + "/",
+        replacement: pathResolve('src') + '/',
       },
     ],
   },
   server: {
-    port: 8000,
+    port: 8001,
     host: true,
     proxy: {
-      "/api/": {
-        // target: `https://sdk-preview.sofunny.io`,
+      '/api/': {
         target: `http://localhost:3000/`,
-        // target: "http://huangjq.top:3000",
-        rewrite: (path) => path.replace(/^\/api/, ""),
-        // target: `http://10.30.60.81:9080`,
+        rewrite: (path) => path.replace(/^\/api/, ''),
         // target: `http://${config.VITE_APP_SERVER}:${config.VITE_APP_SERVER_PORT}`,
         changeOrigin: true,
       },

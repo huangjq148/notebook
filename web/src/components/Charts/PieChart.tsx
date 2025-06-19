@@ -1,18 +1,18 @@
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { Empty } from "antd";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+import { Empty } from 'antd';
 
 const COLORS = [
-  "#0088FE",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#80de1d",
-  "#ff4242",
-  "#4542ff",
-  "#ff42d0",
-  "#42cdff",
-  "#20f90c",
-  "#22b658",
+  '#0088FE',
+  '#00C49F',
+  '#FFBB28',
+  '#FF8042',
+  '#80de1d',
+  '#ff4242',
+  '#4542ff',
+  '#ff42d0',
+  '#42cdff',
+  '#20f90c',
+  '#22b658',
 ];
 
 type PieChartProps = {
@@ -39,12 +39,12 @@ const PieChartComponent = (props: PieChartProps) => {
     return (
       <>
         {props.showOuterLabel && (
-          <text x={x} y={y} fill="#666" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central">
+          <text x={x} y={y} fill="#666" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
             {restProps.name}
           </text>
         )}
         {props.showInnerLabel && (
-          <text x={x1} y={y1 + 10} fill="white" textAnchor={x1 > cx ? "start" : "end"} dominantBaseline="central">
+          <text x={x1} y={y1 + 10} fill="white" textAnchor={x1 > cx ? 'start' : 'end'} dominantBaseline="central">
             {`${(percent * 100).toFixed(0)}%`}
           </text>
         )}
@@ -65,14 +65,14 @@ const PieChartComponent = (props: PieChartProps) => {
           labelLine={props.showOuterLabel ?? false}
           label={label}
         >
-          {props.data?.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-          ))}
+          {props.data?.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
         </Pie>
         <Tooltip />
       </PieChart>
     </ResponsiveContainer>
-  ) : <Empty />;
+  ) : (
+    <Empty />
+  );
 };
 
 export default PieChartComponent;

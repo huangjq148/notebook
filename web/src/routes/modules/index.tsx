@@ -4,44 +4,44 @@ import {
   OrderedListOutlined,
   ProductOutlined,
   StockOutlined,
-} from "@ant-design/icons";
-import { Navigate } from "react-router-dom";
-import { flattenMenu, generateMenuKeys } from "../utils";
-import lazyLoad from "../utils/lazyLoad";
+} from '@ant-design/icons';
+import { Navigate } from 'react-router-dom';
+import { flattenMenu, generateMenuKeys } from '../utils';
+import lazyLoad from '../utils/lazyLoad';
 
 const menuRoutes: Router[] = [
   {
-    path: "overview",
-    label: "概览",
+    path: 'overview',
+    label: '概览',
     icon: <DashboardOutlined />,
-    element: lazyLoad("@/pages/overview"),
+    element: lazyLoad('@/pages/overview'),
   },
   {
-    path: "orders",
-    label: "订单",
+    path: 'orders',
+    label: '订单',
     icon: <OrderedListOutlined />,
-    element: lazyLoad("@/pages/order"),
+    element: lazyLoad('@/pages/order'),
   },
   {
-    path: "product",
-    label: "商品",
+    path: 'product',
+    label: '商品',
     icon: <ProductOutlined />,
-    element: lazyLoad("@/pages/product"),
+    element: lazyLoad('@/pages/product'),
   },
   {
-    path: "stock",
-    label: "库存",
+    path: 'stock',
+    label: '库存',
     icon: <StockOutlined />,
-    element: lazyLoad("@/pages/stock"),
+    element: lazyLoad('@/pages/stock'),
   },
   {
-    path: "contact",
-    label: "联系人",
+    path: 'contact',
+    label: '联系人',
     icon: <ContactsOutlined />,
-    element: lazyLoad("@/pages/contact"),
+    element: lazyLoad('@/pages/contact'),
   },
   {
-    path: "/",
+    path: '/',
     hideInMenu: true,
     element: <Navigate to="/overview" />,
   },

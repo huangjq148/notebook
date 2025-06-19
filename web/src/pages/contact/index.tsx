@@ -1,10 +1,10 @@
-import { SearchForm, TextButton, DeleteConfirmButton } from "@/components";
-import { useTable } from "@/hooks";
-import { deleteContact, queryContact } from "@/services/contact";
-import { Button, Form, Input, message, Modal, Space, Table } from "antd";
-import { useState } from "react";
-import EditPage from "./Edit";
-import styles from "./index.module.less";
+import { SearchForm, TextButton, DeleteConfirmButton } from '@/components';
+import { useTable } from '@/hooks';
+import { deleteContact, queryContact } from '@/services/contact';
+import { Button, Form, Input, message, Modal, Space, Table } from 'antd';
+import { useState } from 'react';
+import EditPage from './Edit';
+import styles from './index.module.less';
 
 export default () => {
   const [conditions, setConditions] = useState({});
@@ -12,35 +12,38 @@ export default () => {
     request: queryContact,
     conditions,
   });
-  const [modalOptions, setModalOptions] = useState({ id: "", open: false });
+  const [modalOptions, setModalOptions] = useState({
+    id: '',
+    open: false,
+  });
 
   const handleContactDelete = async (id: string) => {
     await deleteContact(id);
-    message.success("删除成功");
+    message.success('删除成功');
     searchForm();
   };
 
   const columns = [
     {
-      title: "姓名",
-      dataIndex: "name",
+      title: '姓名',
+      dataIndex: 'name',
     },
     {
-      title: "电话",
-      dataIndex: "phone",
+      title: '电话',
+      dataIndex: 'phone',
     },
     {
-      title: "地址",
-      dataIndex: "address",
+      title: '地址',
+      dataIndex: 'address',
     },
     {
-      title: "创建时间",
-      dataIndex: "createTime",
+      title: '创建时间',
+      dataIndex: 'createTime',
     },
     {
-      title: "操作",
-      key: "operation",
-      width: "140px",
+      title: '操作',
+      key: 'operation',
+      width: '140px',
       render: (record: Contact) => (
         <Space size="middle">
           <TextButton onClick={() => handleEditClick(record.id as string)}>编辑</TextButton>
@@ -57,12 +60,18 @@ export default () => {
   };
 
   const handleAfterCreate = () => {
-    setModalOptions({ id: "", open: false });
+    setModalOptions({
+      id: '',
+      open: false,
+    });
     searchForm();
   };
 
   const handleEditClick = (id: string) => {
-    setModalOptions({ id, open: true });
+    setModalOptions({
+      id,
+      open: true,
+    });
   };
 
   return (
@@ -70,13 +79,13 @@ export default () => {
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
           <Form.Item label="姓名" name="name">
-            <Input allowClear placeholder="联系人姓名"/>
+            <Input allowClear placeholder="联系人姓名" />
           </Form.Item>
           <Form.Item label="电话" name="phone">
-            <Input allowClear placeholder="联系人电话"/>
+            <Input allowClear placeholder="联系人电话" />
           </Form.Item>
           <Form.Item label="地址" name="address">
-            <Input allowClear placeholder="联系人地址"/>
+            <Input allowClear placeholder="联系人地址" />
           </Form.Item>
           <Form.Item>
             <Space>
@@ -85,7 +94,10 @@ export default () => {
               </Button>
               <Button
                 onClick={() => {
-                  setModalOptions({ id: "", open: true });
+                  setModalOptions({
+                    id: '',
+                    open: true,
+                  });
                 }}
               >
                 新增
@@ -108,9 +120,14 @@ export default () => {
       <Modal
         destroyOnClose
         footer={null}
-        title={modalOptions.id ? "编辑" : "新增"}
+        title={modalOptions.id ? '编辑' : '新增'}
         open={modalOptions.open}
-        onCancel={() => setModalOptions({ id: "", open: false })}
+        onCancel={() =>
+          setModalOptions({
+            id: '',
+            open: false,
+          })
+        }
       >
         <EditPage onSubmit={handleAfterCreate} id={modalOptions.id} />
       </Modal>

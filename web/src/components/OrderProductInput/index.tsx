@@ -1,14 +1,24 @@
-import { queryProductsByOrders } from "@/services/order";
-import { AutoCompleteProps } from "antd";
-import { useEffect, useState } from "react";
-import PinyinMatchInput from "../PinyinMatchInput";
+import { queryProductsByOrders } from '@/services/order';
+import { AutoCompleteProps } from 'antd';
+import { useEffect, useState } from 'react';
+import PinyinMatchInput from '../PinyinMatchInput';
 
 const OrderProductInput = (props: AutoCompleteProps) => {
-  const [products, setProducts] = useState<{ value: string; label: string }[]>([]);
+  const [products, setProducts] = useState<
+    {
+      value: string;
+      label: string;
+    }[]
+  >([]);
 
   const loadData = async () => {
     const result = await queryProductsByOrders();
-    setProducts(result.map((item) => ({ value: item, label: item })));
+    setProducts(
+      result.map((item) => ({
+        value: item,
+        label: item,
+      })),
+    );
   };
 
   useEffect(() => {

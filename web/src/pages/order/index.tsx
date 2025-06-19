@@ -5,19 +5,19 @@ import {
   OrderProductInput,
   SearchForm,
   TextButton,
-} from "@/components";
-import { useTable } from "@/hooks";
-import { changeOrderStatus, deleteOrder, queryOrder, revokeStockOrder, statistics } from "@/services/order";
-import { PlusOutlined } from "@ant-design/icons";
-import { Button, Descriptions, FloatButton, Form, message, Modal, Space, Table } from "antd";
-import { useEffect, useState } from "react";
-import BatchCreate from "./BatchCreate";
-import EditPage from "./Edit";
+} from '@/components';
+import { useTable } from '@/hooks';
+import { changeOrderStatus, deleteOrder, queryOrder, revokeStockOrder, statistics } from '@/services/order';
+import { PlusOutlined } from '@ant-design/icons';
+import { Button, Descriptions, FloatButton, Form, message, Modal, Space, Table } from 'antd';
+import { useEffect, useState } from 'react';
+import BatchCreate from './BatchCreate';
+import EditPage from './Edit';
 // import { STATUS, translateToArray } from "@/data";
-import { copy } from "@/utils";
-import dayjs from "dayjs";
-import Decimal from "decimal.js";
-import styles from "./index.module.less";
+import { copy } from '@/utils';
+import dayjs from 'dayjs';
+import Decimal from 'decimal.js';
+import styles from './index.module.less';
 
 interface ContactInfo {
   contact?: string;
@@ -38,10 +38,19 @@ export default () => {
     request: queryOrder,
     conditions,
   });
-  const [modalOptions, setModalOptions] = useState({ id: 0, open: false });
+  const [modalOptions, setModalOptions] = useState({
+    id: 0,
+    open: false,
+  });
   const [batchModalOpen, setBatchModalOpen] = useState(false);
-  const [selectedDataStr, setSelectDataStr] = useState("");
-  const [contactOptions, setContactOptions] = useState<{ data: ContactInfo; open: boolean }>({ data: {}, open: false });
+  const [selectedDataStr, setSelectDataStr] = useState('');
+  const [contactOptions, setContactOptions] = useState<{
+    data: ContactInfo;
+    open: boolean;
+  }>({
+    data: {},
+    open: false,
+  });
   const [statisticsInfo, setStatisticsInfo] = useState<Statistics>({
     sellMoney: 0,
     buyMoney: 0,
@@ -61,22 +70,22 @@ export default () => {
 
   const handleOrderDelete = async (id = 0) => {
     await deleteOrder(id);
-    message.success("删除成功");
+    message.success('删除成功');
     handleSearchForm();
   };
 
   const handleCopyClick = () => {
     if (!selectedDataStr) {
-      message.warning("未选择要复制的数据");
+      message.warning('未选择要复制的数据');
       return;
     }
     copy(selectedDataStr);
-    message.success("复制成功");
+    message.success('复制成功');
   };
 
   const handleOrderStatusChange = async (id: number = 0, status: string) => {
     await changeOrderStatus(id, status);
-    message.success("修改成功");
+    message.success('修改成功');
     searchForm();
   };
 
@@ -87,8 +96,8 @@ export default () => {
     if (createTime) {
       newConditions = {
         ...restValues,
-        startCreateDate: dayjs(createTime[0]).format("YYYY-MM-DD"),
-        endCreateDate: dayjs(createTime[1]).format("YYYY-MM-DD"),
+        startCreateDate: dayjs(createTime[0]).format('YYYY-MM-DD'),
+        endCreateDate: dayjs(createTime[1]).format('YYYY-MM-DD'),
       };
     }
 
@@ -97,7 +106,10 @@ export default () => {
   };
 
   const handleAfterCreate = () => {
-    setModalOptions({ id: 0, open: false });
+    setModalOptions({
+      id: 0,
+      open: false,
+    });
     handleSearchForm();
   };
 
@@ -107,48 +119,60 @@ export default () => {
   };
 
   const handleEditClick = (id = 0) => {
-    setModalOptions({ id, open: true });
+    setModalOptions({
+      id,
+      open: true,
+    });
   };
 
   const handleRevokeOutStock = async (order: Order) => {
     await revokeStockOrder(order.id ?? 0);
     handleSearchForm();
-    message.success("撤销库存订单成功");
+    message.success('撤销库存订单成功');
   };
 
   const columns = [
     {
-      title: "产品名",
-      dataIndex: "name",
+      title: '产品名',
+      dataIndex: 'name',
       width: 100,
     },
     {
-      title: "姓名",
-      dataIndex: "contact",
+      title: '姓名',
+      dataIndex: 'contact',
       render: (text: string, record: ContactInfo) => (
-        <TextButton onClick={() => setContactOptions({ open: true, data: record })}>{text}</TextButton>
+        <TextButton
+          onClick={() =>
+            setContactOptions({
+              open: true,
+              data: record,
+            })
+          }
+        >
+          {text}
+        </TextButton>
       ),
     },
     {
-      title: "进价",
-      dataIndex: "buyPrice",
+      title: '进价',
+      dataIndex: 'buyPrice',
     },
     {
-      title: "售价",
-      dataIndex: "sellPrice",
+      title: '售价',
+      dataIndex: 'sellPrice',
     },
     {
-      title: "数量",
-      dataIndex: "number",
+      title: '数量',
+      dataIndex: 'number',
     },
     {
-      title: "其他费用",
-      dataIndex: "otherCost",
-      render: (text: number) => text || "-",
+      title: '其他费用',
+      dataIndex: 'otherCost',
+      render: (text: number) => text || '-',
     },
     {
-      title: "利润",
-      dataIndex: "number",
+      title: '利润',
+      dataIndex: 'number',
       render: (text: string, record: any) => {
         return (
           <>
@@ -165,10 +189,10 @@ export default () => {
     //     render: (text: string) => text || "-"
     // },
     {
-      title: "日期",
-      dataIndex: "orderTime",
+      title: '日期',
+      dataIndex: 'orderTime',
       width: 140,
-      render: (text: string, record: Order) => dayjs(text || record.createTime).format("YYYY-MM-DD"),
+      render: (text: string, record: Order) => dayjs(text || record.createTime).format('YYYY-MM-DD'),
     },
     // {
     //   title: "状态",
@@ -183,8 +207,8 @@ export default () => {
     //   },
     // },
     {
-      title: "操作",
-      key: "operation",
+      title: '操作',
+      key: 'operation',
       width: 180,
       render: (record: Order) => (
         <Space size="middle">
@@ -216,7 +240,7 @@ export default () => {
       let total = 0;
       selectedRows.map((item) => {
         let sum = 0;
-        sum += Math.round(Decimal.mul(parseFloat(item.sellPrice), parseFloat(item.number + "")).toNumber());
+        sum += Math.round(Decimal.mul(parseFloat(item.sellPrice), parseFloat(item.number + '')).toNumber());
         total += sum;
         if (parseFloat(item.number) == 1) {
           result.push(`${item.name}：${sum}`);
@@ -225,7 +249,7 @@ export default () => {
         }
       });
       result.push(`总计：${total.toFixed(0)}`);
-      setSelectDataStr(result.join("\n"));
+      setSelectDataStr(result.join('\n'));
     },
   };
 
@@ -240,7 +264,7 @@ export default () => {
           <Form.Item label="品名" name="name" className={styles.searchInput}>
             <OrderProductInput placeholder="商品名称" />
           </Form.Item>
-          <Form.Item label="姓名" name="contact"  className={styles.searchInput}>
+          <Form.Item label="姓名" name="contact" className={styles.searchInput}>
             <OrderContactInput placeholder="客户姓名" />
           </Form.Item>
           <Form.Item label="日期" name="createTime">
@@ -265,16 +289,28 @@ export default () => {
         <div>
           汇总：
           <Space size="large">
-            <span>总成本：{parseFloat(`${statisticsInfo.buyMoney}`).toFixed(2)}</span>
-            <span>总售价：{parseFloat(`${statisticsInfo.sellMoney}`).toFixed(2)}</span>
-            <span>其他费用：{parseFloat(`${statisticsInfo.otherCost}`).toFixed(2)}</span>
+            <span>
+              总成本：
+              {parseFloat(`${statisticsInfo.buyMoney}`).toFixed(2)}
+            </span>
+            <span>
+              总售价：
+              {parseFloat(`${statisticsInfo.sellMoney}`).toFixed(2)}
+            </span>
+            <span>
+              其他费用：
+              {parseFloat(`${statisticsInfo.otherCost}`).toFixed(2)}
+            </span>
             <span>
               总利润：
               {parseFloat(`${statisticsInfo.sellMoney - statisticsInfo.buyMoney - statisticsInfo.otherCost}`).toFixed(
                 2,
               )}
             </span>
-            <span>总数量：{parseFloat(`${statisticsInfo.number}`).toFixed(1)}</span>
+            <span>
+              总数量：
+              {parseFloat(`${statisticsInfo.number}`).toFixed(1)}
+            </span>
           </Space>
         </div>
       </SearchForm>
@@ -285,12 +321,15 @@ export default () => {
           type="primary"
           shape="circle"
           onClick={() => {
-            setModalOptions({ id: 0, open: true });
+            setModalOptions({
+              id: 0,
+              open: true,
+            });
           }}
         />
         <Table
           rowSelection={{
-            type: "checkbox",
+            type: 'checkbox',
             ...rowSelection,
           }}
           rowKey="id"
@@ -305,9 +344,14 @@ export default () => {
       <Modal
         destroyOnClose
         footer={null}
-        title={modalOptions.id ? "编辑" : "新增"}
+        title={modalOptions.id ? '编辑' : '新增'}
         open={modalOptions.open}
-        onCancel={() => setModalOptions({ id: 0, open: false })}
+        onCancel={() =>
+          setModalOptions({
+            id: 0,
+            open: false,
+          })
+        }
       >
         <EditPage onSubmit={handleAfterCreate} id={modalOptions.id} />
       </Modal>
@@ -315,7 +359,7 @@ export default () => {
       <Modal
         destroyOnClose
         footer={null}
-        title={"批量新增"}
+        title={'批量新增'}
         open={batchModalOpen}
         width={1000}
         onCancel={() => setBatchModalOpen(false)}
@@ -327,7 +371,12 @@ export default () => {
         open={contactOptions.open}
         footer={null}
         cancelText="asd"
-        onCancel={() => setContactOptions({ open: false, data: {} })}
+        onCancel={() =>
+          setContactOptions({
+            open: false,
+            data: {},
+          })
+        }
         destroyOnClose
         title="客户信息"
       >
@@ -336,7 +385,16 @@ export default () => {
           <Descriptions.Item label="电话">{contactOptions.data.phone}</Descriptions.Item>
           <Descriptions.Item label="地址">{contactOptions.data.address}</Descriptions.Item>
         </Descriptions>
-        <Button onClick={() => setContactOptions({ open: false, data: {} })}>确定</Button>
+        <Button
+          onClick={() =>
+            setContactOptions({
+              open: false,
+              data: {},
+            })
+          }
+        >
+          确定
+        </Button>
       </Modal>
     </div>
   );

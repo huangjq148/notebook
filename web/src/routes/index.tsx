@@ -1,34 +1,34 @@
-import BasicLayout from "@/layout";
-import LoginPage from "@/pages/login";
-import { createBrowserRouter, Navigate } from "react-router-dom";
-import modules from "./modules";
-import { generateMenuKeys } from "./utils";
-import lazyLoad from "./utils/lazyLoad";
+import BasicLayout from '@/layout';
+import LoginPage from '@/pages/login';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import modules from './modules';
+import { generateMenuKeys } from './utils';
+import lazyLoad from './utils/lazyLoad';
 
 export const routes: Router[] = [
   {
-    path: "/login",
+    path: '/login',
     element: <LoginPage />,
     hideInMenu: true,
   },
   {
-    path: "/setting",
+    path: '/setting',
     element: <BasicLayout />,
     hideInMenu: true,
     children: [
       {
-        path: "data-transfer",
-        element: lazyLoad("@/pages/setting/dataTransfer"),
+        path: 'data-transfer',
+        element: lazyLoad('@/pages/setting/dataTransfer'),
       },
     ],
   },
   {
-    path: "/",
+    path: '/',
     element: <BasicLayout />,
     children: modules,
   },
   {
-    path: "/",
+    path: '/',
     element: <Navigate to="/login" />,
   },
 ];

@@ -1,5 +1,5 @@
-import React from "react";
-import styles from "./index.module.less";
+import React from 'react';
+import styles from './index.module.less';
 
 type TextButtonProps = {
   children: React.ReactNode;

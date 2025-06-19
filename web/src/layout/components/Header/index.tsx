@@ -1,12 +1,12 @@
-import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Dropdown, List, Modal, Space, Tag, theme } from "antd";
-import { Header } from "antd/es/layout/layout";
-import React, { useEffect, useState } from "react";
-import styles from "./index.module.less";
-import { useUser } from "@/store";
-import { useNavigate } from "react-router-dom";
-import { getTokenList } from "@/utils";
-import { setToken, deleteCatchToken } from "@/utils";
+import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Dropdown, List, Modal, Space, Tag, theme } from 'antd';
+import { Header } from 'antd/es/layout/layout';
+import React, { useEffect, useState } from 'react';
+import styles from './index.module.less';
+import { useUser } from '@/store';
+import { useNavigate } from 'react-router-dom';
+import { getTokenList } from '@/utils';
+import { setToken, deleteCatchToken } from '@/utils';
 
 const LayoutHeader = (props: { collapsed: boolean; setCollapsed: Function }) => {
   const { collapsed, setCollapsed } = props;
@@ -20,7 +20,10 @@ const LayoutHeader = (props: { collapsed: boolean; setCollapsed: Function }) => 
     logout: state.logout,
   }));
   const [tokenList, setTokenList] = useState([]);
-  const [selectedUser, setSelectUser] = useState({ username: "", token: "" });
+  const [selectedUser, setSelectUser] = useState({
+    username: '',
+    token: '',
+  });
   const [switchModalOpen, setSwitchModalOpen] = useState(false);
 
   const loadTokenList = () => {
@@ -34,12 +37,20 @@ const LayoutHeader = (props: { collapsed: boolean; setCollapsed: Function }) => 
   };
 
   const closeSwitchModal = () => {
-    setSelectUser({ username: "", token: "" });
+    setSelectUser({
+      username: '',
+      token: '',
+    });
     setSwitchModalOpen(false);
   };
 
   const handleSwitchAccount = () => {
-    setToken({ access_token: selectedUser.token }, selectedUser.username);
+    setToken(
+      {
+        access_token: selectedUser.token,
+      },
+      selectedUser.username,
+    );
     window.location.reload();
   };
 
@@ -56,24 +67,34 @@ const LayoutHeader = (props: { collapsed: boolean; setCollapsed: Function }) => 
         label: (
           <span
             onClick={() => {
-              navigate("/setting/data-transfer");
+              navigate('/setting/data-transfer');
             }}
           >
             数据转移
           </span>
         ),
-        key: "dataTransfer",
+        key: 'dataTransfer',
       }, // 菜单项务必填写 key
       // { label: "设置", key: "setting" }, // 菜单项务必填写 key
-      { label: <div onClick={openSwitchModal}>切换账号</div>, key: "switch-account" },
-      { label: <div onClick={logout}>退出</div>, key: "logout" },
+      {
+        label: <div onClick={openSwitchModal}>切换账号</div>,
+        key: 'switch-account',
+      },
+      {
+        label: <div onClick={logout}>退出</div>,
+        key: 'logout',
+      },
     ];
 
     return (
-      <Dropdown menu={{ items }}>
+      <Dropdown
+        menu={{
+          items,
+        }}
+      >
         <Space>
           <UserOutlined />
-          <span className={styles.userInfo}>{userInfo.name ?? "-"} </span>
+          <span className={styles.userInfo}>{userInfo.name ?? '-'} </span>
         </Space>
       </Dropdown>
     );
@@ -84,15 +105,23 @@ const LayoutHeader = (props: { collapsed: boolean; setCollapsed: Function }) => 
   }, []);
 
   return (
-    <Header className={styles.header} style={{ padding: "0 16px", background: colorBgContainer }}>
+    <Header
+      className={styles.header}
+      style={{
+        padding: '0 16px',
+        background: colorBgContainer,
+      }}
+    >
       <Modal
         title="切换用户"
         open={switchModalOpen}
         onOk={() => handleSwitchAccount()}
         onCancel={closeSwitchModal}
-        okButtonProps={{ disabled: !selectedUser.username }}
+        okButtonProps={{
+          disabled: !selectedUser.username,
+        }}
       >
-        <List bordered header={`已选中用户： ${selectedUser.username ? selectedUser.username : "-"}`}>
+        <List bordered header={`已选中用户： ${selectedUser.username ? selectedUser.username : '-'}`}>
           {tokenList.map((item: { username: string; token: string }) => (
             <List.Item
               key={item.username}

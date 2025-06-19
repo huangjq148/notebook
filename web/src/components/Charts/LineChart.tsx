@@ -1,7 +1,6 @@
-import React from "react";
-import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { Empty } from "antd"
-
+import React from 'react';
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Empty } from 'antd';
 
 type LineChartProps = {
   data: any[];
@@ -20,10 +19,19 @@ const LineChartComponent = (props: LineChartProps) => {
         <YAxis dataKey={props.yAxis} />
         {props.tooltip && <Tooltip />}
         {props.legend && <Legend />}
-        <Line type="monotone" dataKey={props.yAxis} stroke="#8884d8" activeDot={{ r: 8 }} />
+        <Line
+          type="monotone"
+          dataKey={props.yAxis}
+          stroke="#8884d8"
+          activeDot={{
+            r: 8,
+          }}
+        />
       </LineChart>
     </ResponsiveContainer>
-  ) : <Empty />;
+  ) : (
+    <Empty />
+  );
 };
 
 export default LineChartComponent;

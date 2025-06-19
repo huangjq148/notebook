@@ -1,5 +1,3 @@
-import useTable from "./useTable"
+import useTable from './useTable';
 
-export {
-    useTable
-}
+export { useTable };

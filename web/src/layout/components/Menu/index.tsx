@@ -1,6 +1,6 @@
-import { Menu } from "antd";
-import { routeWithKey } from "@/routes/modules";
-import { useNavigate } from "react-router-dom";
+import { Menu } from 'antd';
+import { routeWithKey } from '@/routes/modules';
+import { useNavigate } from 'react-router-dom';
 
 const SiderMenu = () => {
   const navigate = useNavigate();

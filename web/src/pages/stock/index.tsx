@@ -1,11 +1,11 @@
-import { DeleteConfirmButton, OrderProductInput, SearchForm, TextButton } from "@/components";
-import { useTable } from "@/hooks";
-import StockSell from "@/pages/order/Edit";
-import { deleteStock, queryStock, statistics } from "@/services/stock";
-import { Button, Form, message, Modal, Space, Table } from "antd";
-import { useEffect, useState } from "react";
-import EditPage from "./Edit";
-import styles from "./index.module.less";
+import { DeleteConfirmButton, OrderProductInput, SearchForm, TextButton } from '@/components';
+import { useTable } from '@/hooks';
+import StockSell from '@/pages/order/Edit';
+import { deleteStock, queryStock, statistics } from '@/services/stock';
+import { Button, Form, message, Modal, Space, Table } from 'antd';
+import { useEffect, useState } from 'react';
+import EditPage from './Edit';
+import styles from './index.module.less';
 
 interface Statistics {
   buyMoney: number;
@@ -19,8 +19,14 @@ export default () => {
     request: queryStock,
     conditions,
   });
-  const [modalOptions, setModalOptions] = useState({ id: 0, open: false });
-  const [outStockModal, setOutStockModal] = useState<{ open: boolean; data: Partial<Stock> }>({
+  const [modalOptions, setModalOptions] = useState({
+    id: 0,
+    open: false,
+  });
+  const [outStockModal, setOutStockModal] = useState<{
+    open: boolean;
+    data: Partial<Stock>;
+  }>({
     open: false,
     data: {},
   });
@@ -32,7 +38,7 @@ export default () => {
 
   const handleProductDelete = async (id: number) => {
     await deleteStock(id);
-    message.success("删除成功");
+    message.success('删除成功');
     searchForm();
     queryStatistics();
   };
@@ -43,7 +49,10 @@ export default () => {
   };
 
   const handleAfterCreate = () => {
-    setModalOptions({ id: 0, open: false });
+    setModalOptions({
+      id: 0,
+      open: false,
+    });
     queryStatistics();
     searchForm();
   };
@@ -54,16 +63,25 @@ export default () => {
   };
 
   const handleAfterOutStock = () => {
-    setOutStockModal({ open: false, data: {} });
+    setOutStockModal({
+      open: false,
+      data: {},
+    });
     searchForm();
   };
 
   const handleEditClick = (id: number) => {
-    setModalOptions({ id, open: true });
+    setModalOptions({
+      id,
+      open: true,
+    });
   };
 
   const handleStockSell = (stock: Stock) => {
-    setOutStockModal({ open: true, data: stock });
+    setOutStockModal({
+      open: true,
+      data: stock,
+    });
   };
 
   useEffect(() => {
@@ -72,25 +90,25 @@ export default () => {
 
   const columns = [
     {
-      title: "产品名",
-      dataIndex: "name",
+      title: '产品名',
+      dataIndex: 'name',
     },
     {
-      title: "进价",
-      dataIndex: "buyPrice",
+      title: '进价',
+      dataIndex: 'buyPrice',
     },
     {
-      title: "售价",
-      dataIndex: "sellPrice",
+      title: '售价',
+      dataIndex: 'sellPrice',
     },
     {
-      title: "库存",
-      dataIndex: "number",
+      title: '库存',
+      dataIndex: 'number',
     },
     {
-      title: "操作",
-      key: "operation",
-      width: "200px",
+      title: '操作',
+      key: 'operation',
+      width: '200px',
       render: (record: Stock) => (
         <Space size="middle">
           <TextButton onClick={() => handleStockSell(record)}>出货</TextButton>
@@ -112,7 +130,7 @@ export default () => {
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
           <Form.Item label="品名" name="name" className={styles.searchInput}>
-            <OrderProductInput allowClear placeholder="产品名称"/>
+            <OrderProductInput allowClear placeholder="产品名称" />
           </Form.Item>
           <Form.Item>
             <Space>
@@ -121,7 +139,10 @@ export default () => {
               </Button>
               <Button
                 onClick={() => {
-                  setModalOptions({ id: 0, open: true });
+                  setModalOptions({
+                    id: 0,
+                    open: true,
+                  });
                 }}
               >
                 新增
@@ -134,13 +155,17 @@ export default () => {
         <div>
           汇总：
           <Space size="large">
-            <span>总成本：{parseFloat(`${statisticsInfo.buyMoney}`).toFixed(2)}</span>
-            <span>总售价：{parseFloat(`${statisticsInfo.sellMoney}`).toFixed(2)}</span>
+            <span>
+              总成本：
+              {parseFloat(`${statisticsInfo.buyMoney}`).toFixed(2)}
+            </span>
+            <span>
+              总售价：
+              {parseFloat(`${statisticsInfo.sellMoney}`).toFixed(2)}
+            </span>
             <span>
               总利润：
-              {parseFloat(`${statisticsInfo.sellMoney - statisticsInfo.buyMoney}`).toFixed(
-                2,
-              )}
+              {parseFloat(`${statisticsInfo.sellMoney - statisticsInfo.buyMoney}`).toFixed(2)}
             </span>
           </Space>
         </div>
@@ -159,9 +184,14 @@ export default () => {
       <Modal
         destroyOnClose
         footer={null}
-        title={modalOptions.id ? "编辑" : "新增"}
+        title={modalOptions.id ? '编辑' : '新增'}
         open={modalOptions.open}
-        onCancel={() => setModalOptions({ id: 0, open: false })}
+        onCancel={() =>
+          setModalOptions({
+            id: 0,
+            open: false,
+          })
+        }
       >
         <EditPage onSubmit={handleAfterCreate} id={modalOptions.id} />
       </Modal>
@@ -171,7 +201,12 @@ export default () => {
         footer={null}
         destroyOnClose
         open={outStockModal.open}
-        onCancel={() => setOutStockModal({ open: false, data: {} })}
+        onCancel={() =>
+          setOutStockModal({
+            open: false,
+            data: {},
+          })
+        }
       >
         <StockSell onSubmit={handleAfterOutStock} stockInfo={outStockModal.data} />
       </Modal>

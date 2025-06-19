@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { getProfitStatistics } from "@/services/overview";
-import { LineChart } from "@/components";
+import { useEffect, useState } from 'react';
+import { getProfitStatistics } from '@/services/overview';
+import { LineChart } from '@/components';
 
 export default function Charts() {
   const [dataSource, setDataSource] = useState([]);

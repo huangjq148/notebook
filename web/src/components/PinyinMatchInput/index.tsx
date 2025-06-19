@@ -1,6 +1,6 @@
-import { AutoComplete, AutoCompleteProps } from "antd";
-import { match } from "pinyin-pro";
-import styles from "./index.module.less";
+import { AutoComplete, AutoCompleteProps } from 'antd';
+import { match } from 'pinyin-pro';
+import styles from './index.module.less';
 
 const PinyinMatchInput = (props: AutoCompleteProps) => {
   return (

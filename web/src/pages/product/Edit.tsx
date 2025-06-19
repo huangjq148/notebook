@@ -1,50 +1,55 @@
-import React, { useEffect, useState } from 'react'
-import { Button, Form, Input, message } from "antd"
-import { createProduct, updateProduct, queryProductById } from "@/services/product"
+import React, { useEffect, useState } from 'react';
+import { Button, Form, Input, message } from 'antd';
+import { createProduct, updateProduct, queryProductById } from '@/services/product';
 
 type Props = {
-    id?: number
-    onSubmit?: () => void
-}
+  id?: number;
+  onSubmit?: () => void;
+};
 
 export default (props: Props) => {
-    const [oldData, setOldData] = useState<Partial<Product>>({})
-    const [formRef] = Form.useForm()
+  const [oldData, setOldData] = useState<Partial<Product>>({});
+  const [formRef] = Form.useForm();
 
-    const handleFormSubmit = async (values: Product) => {
-        if (props.id) {
-            await updateProduct({ ...oldData, ...values })
-        } else {
-            await createProduct(values)
-        }
-        message.success("保存成功")
-        props?.onSubmit?.();
+  const handleFormSubmit = async (values: Product) => {
+    if (props.id) {
+      await updateProduct({
+        ...oldData,
+        ...values,
+      });
+    } else {
+      await createProduct(values);
     }
+    message.success('保存成功');
+    props?.onSubmit?.();
+  };
 
-    const loadData = async () => {
-        if (props.id) {
-            const data = await queryProductById(props.id)
-            formRef.setFieldsValue(data)
-            setOldData(data)
-        }
+  const loadData = async () => {
+    if (props.id) {
+      const data = await queryProductById(props.id);
+      formRef.setFieldsValue(data);
+      setOldData(data);
     }
+  };
 
-    useEffect(() => {
-        loadData()
-    }, [props.id])
+  useEffect(() => {
+    loadData();
+  }, [props.id]);
 
-    return <Form onFinish={handleFormSubmit} form={formRef}>
-        <Form.Item label="产品" name="name">
-            <Input placeholder="产品名称"/>
-        </Form.Item>
-        <Form.Item label="进价" name="buyPrice">
-            <Input placeholder="进价"/>
-        </Form.Item>
-        <Form.Item label="售价" name="sellPrice">
-            <Input placeholder="售价"/>
-        </Form.Item>
-        <Form.Item >
-            <Button htmlType='submit'>保存</Button>
-        </Form.Item>
+  return (
+    <Form onFinish={handleFormSubmit} form={formRef}>
+      <Form.Item label="产品" name="name">
+        <Input placeholder="产品名称" />
+      </Form.Item>
+      <Form.Item label="进价" name="buyPrice">
+        <Input placeholder="进价" />
+      </Form.Item>
+      <Form.Item label="售价" name="sellPrice">
+        <Input placeholder="售价" />
+      </Form.Item>
+      <Form.Item>
+        <Button htmlType="submit">保存</Button>
+      </Form.Item>
     </Form>
-}
+  );
+};

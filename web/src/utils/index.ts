@@ -1,9 +1,6 @@
-import request from "./request";
-import copy from "./copy"
+import request from './request';
+import copy from './copy';
 
-export {
-    request,
-    copy
-}
+export { request, copy };
 
-export * from "./auth"
+export * from './auth';
