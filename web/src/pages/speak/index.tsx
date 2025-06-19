@@ -66,9 +66,12 @@ const Speak = () => {
                 }} />
             }{" "}
             {word.split("").map((item, itemIndex) => (
-              <span onClick={() => {
-                speak(word.slice(itemIndex))
-              }}>{item}</span>
+              <span
+                onClick={() => {
+                  setCurrentRowIndex(index)
+                  speak(word.slice(itemIndex))
+                }}
+              >{item}</span>
             ))}
           </div>
         </div>
