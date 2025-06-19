@@ -40,14 +40,14 @@ const App: React.FC = () => {
             overflow: 'auto',
           }}
         >
-          <Watermark
+          {/* <Watermark
             content={`${userInfo.name}(${userInfo.username})`}
             style={{
               height: '100%',
             }}
-          >
-            <Outlet />
-          </Watermark>
+          > */}
+          <Outlet />
+          {/* </Watermark> */}
         </Content>
       </Layout>
     </Layout>

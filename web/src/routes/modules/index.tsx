@@ -41,6 +41,12 @@ const menuRoutes: Router[] = [
     element: lazyLoad('@/pages/contact'),
   },
   {
+    path: 'speak',
+    label: '说',
+    icon: <ContactsOutlined />,
+    element: lazyLoad('@/pages/speak'),
+  },
+  {
     path: '/',
     hideInMenu: true,
     element: <Navigate to="/overview" />,
