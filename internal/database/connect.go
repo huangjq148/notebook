@@ -32,7 +32,7 @@ func ConnectDB() (string, bool) {
 	db.SetMaxIdleConns(10)
 	// 验证连接
 	if err := db.Ping(); err != nil {
-		fmt.Println("open database fail",err,connectInfo)
+		fmt.Println("open database fail", err, connectInfo)
 		return "数据库链接失败", false
 	}
 

@@ -47,6 +47,12 @@ const menuRoutes: Router[] = [
     element: lazyLoad('@/pages/speak'),
   },
   {
+    path: 'alarm',
+    label: '定时提醒',
+    icon: <ContactsOutlined />,
+    element: lazyLoad('@/pages/alarm'),
+  },
+  {
     path: '/',
     hideInMenu: true,
     element: <Navigate to="/overview" />,

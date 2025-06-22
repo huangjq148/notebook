@@ -1,6 +1,7 @@
 package router
 
 import (
+	"hjq-notebook/internal/api/alarm"
 	"hjq-notebook/internal/api/auth"
 	"hjq-notebook/internal/api/contact"
 	"hjq-notebook/internal/api/order"
@@ -64,6 +65,9 @@ func SetupRoutes(app *fiber.App) {
 	stockRouter.Get("/:id", stock.GetStockById)
 	stockRouter.Delete("/:id", stock.DeleteStock)
 	stockRouter.Patch("", stock.UpdateStock)
+
+	alarmRouter := authRouter.Group("/alarm")
+	alarmRouter.Get("", alarm.CreateAlarm)
 
 	// Auth
 	userRouter := authVerifyRouter.Group("/user")

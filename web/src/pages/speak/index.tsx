@@ -37,6 +37,7 @@ const Speak = () => {
   const [currentRowIndex, setCurrentRowIndex] = useState<any>();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isSentence, setIsSentence] = useState(true);
+  const [isLoop, setIsLoop] = useState(true);
 
   function speak(text: string) {
     setIsSpeaking(true);
@@ -45,7 +46,12 @@ const Speak = () => {
     utterance.lang = 'zh-CN'; // 设置语言（中文）
     window.speechSynthesis.speak(utterance);
     utterance.onend = () => {
-      setIsSpeaking(false);
+      if (isLoop) {
+        speak(text);
+      } else {
+        setCurrentRowIndex(undefined);
+        setIsSpeaking(false);
+      }
     };
   }
 
@@ -55,6 +61,12 @@ const Speak = () => {
         description="句子"
         type={isSentence ? 'primary' : 'default'}
         onClick={() => setIsSentence((val) => !val)}
+      />
+      <FloatButton
+        style={{ bottom: 100 }}
+        description="循环"
+        type={isLoop ? 'primary' : 'default'}
+        onClick={() => setIsLoop((val) => !val)}
       />
 
       {words.map((word, index) => (
@@ -68,6 +80,7 @@ const Speak = () => {
               <StopOutlined
                 style={{ color: '#ff8888' }}
                 onClick={() => {
+                  setCurrentRowIndex(undefined);
                   window.speechSynthesis.cancel();
                   setIsSpeaking(false);
                 }}
