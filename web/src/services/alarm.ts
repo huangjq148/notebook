@@ -1,11 +1,24 @@
 import { request } from '@/utils';
 
 export const createAlarm = (data: {
-  // username: string;
-  // password: string;
+  title: string;
+  description: string;
 }): Promise<{ status: string; access_token: string }> => {
   return request('/alarm', {
-    method: 'GET',
+    method: 'POST',
     data,
+  });
+};
+
+export const queryAlarmList = (params: {}): Promise<{ status: string; access_token: string }> => {
+  return request('/alarm', {
+    method: 'GET',
+    params,
+  });
+};
+
+export const deleteAlarm = (id: number): Promise<{ status: string }> => {
+  return request(`/alarm/${id}`, {
+    method: 'DELETE',
   });
 };

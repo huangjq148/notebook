@@ -1,13 +1,20 @@
 import styles from './index.module.less';
 
-import { Button, Form, Input, Modal, Radio, Select, Table, TimePicker } from 'antd';
+import { Button, Form, Input, message, Modal, Popconfirm, Radio, Select, Space, Table, TimePicker } from 'antd';
 import { useState } from 'react';
 
-import { createAlarm } from '@/services/alarm';
+import { useTable } from '@/hooks';
+import { createAlarm, queryAlarmList, deleteAlarm } from '@/services/alarm';
+import { TextButton } from '@/components';
 
 const Alarm = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [form] = Form.useForm();
+  const [conditions] = useState({});
+  const { tableOptions, searchForm } = useTable({
+    request: queryAlarmList,
+    conditions,
+  });
   const columns = [
     {
       title: '标题',
@@ -21,30 +28,58 @@ const Alarm = () => {
       title: '是否重复',
       dataIndex: 'title',
     },
+    {
+      title: '操作',
+      dataIndex: 'id',
+      render: (id: number, record: any) => {
+        return (
+          <Space>
+            <TextButton
+              onClick={() => {
+                setModalOpen(true);
+                form.setFieldsValue(record);
+              }}
+            >
+              编辑
+            </TextButton>
+            <TextButton
+              danger
+              onClick={async () => {
+                await deleteAlarm(id);
+                message.success('删除成功');
+                searchForm();
+              }}
+            >
+              删除
+            </TextButton>
+
+            <TextButton onClick={() => message.error('查看功能未实现')}>查看</TextButton>
+          </Space>
+        );
+      },
+    },
   ];
-  const [dataSource, setDataSource] = useState([
-    {
-      title: '周三暄暄葫芦丝',
-      isRepeat: false,
-    },
-    {
-      title: '周四七七葫芦丝',
-      isRepeat: false,
-    },
-  ]);
 
   return (
     <>
       <Modal
         open={modalOpen}
         title="创建闹钟"
-        onCancel={() => setModalOpen(false)}
+        onCancel={() => {
+          form.resetFields();
+          setModalOpen(false);
+        }}
         onOk={async () => {
-          createAlarm({});
-          // await form.validateFields();
+          await form.validateFields();
+          const values = form.getFieldsValue();
+          await createAlarm({ ...values, date: values.date.join(','), time: values.time?.format?.('HH:mm') });
+          message.success('创建成功');
+          setModalOpen(false);
+          searchForm();
+          form.resetFields();
         }}
       >
-        <Form form={form} initialValues={{ repeat: true }} labelCol={{ span: 5 }}>
+        <Form form={form} initialValues={{ isRepeat: '1', isEnable: '1' }} labelCol={{ span: 5 }}>
           <Form.Item label="标题" rules={[{ required: true }]} name="title">
             <Input placeholder="请输入标题时间" />
           </Form.Item>
@@ -66,13 +101,21 @@ const Alarm = () => {
           <Form.Item label="提醒时间" name="time">
             <TimePicker placeholder="请选择提醒时间" style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item label="是否重复" rules={[{ required: true }]} name="repeat">
+          <Form.Item label="是否重复" rules={[{ required: true }]} name="isRepeat">
             <Radio.Group
               options={[
-                { value: true, label: '是' },
-                { value: false, label: '否' },
+                { value: '1', label: '是' },
+                { value: '0', label: '否' },
               ]}
-            ></Radio.Group>
+            />
+          </Form.Item>
+          <Form.Item label="是否启用" rules={[{ required: true }]} name="isEnable">
+            <Radio.Group
+              options={[
+                { value: '1', label: '启用' },
+                { value: '0', label: '停用' },
+              ]}
+            />
           </Form.Item>
           <Form.Item label="备注" name="description">
             <Input.TextArea rows={4} autoSize placeholder="请输入备注" />
@@ -84,7 +127,7 @@ const Alarm = () => {
         <Button type="primary" onClick={() => setModalOpen(true)}>
           新建
         </Button>
-        <Table dataSource={dataSource} columns={columns} />
+        <Table {...tableOptions} columns={columns} />
       </div>
     </>
   );

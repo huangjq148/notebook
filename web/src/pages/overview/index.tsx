@@ -7,10 +7,10 @@ import ProfitCharts from './components/Profit';
 import Top5Product from './components/Top5Product';
 import styles from './index.module.less';
 
-type TopData = {
-  name: string;
-  money: string;
-};
+// type TopData = {
+//   name: string;
+//   money: string;
+// };
 
 export default () => {
   const [topData, setTopData] = useState<any>([]);
@@ -74,7 +74,7 @@ export default () => {
 
       <div className={styles.topListWrapper}>
         {topData.map((topDataItem: any, index: number) => (
-          <div className={styles.topListItem}>
+          <div className={styles.topListItem} key={index}>
             <Top5Product key={index} data={topDataItem} />
           </div>
         ))}

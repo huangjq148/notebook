@@ -56,5 +56,11 @@ export default <T>(props: { request: any; conditions: Record<string, any> }) => 
     searchForm,
     pagination,
     handlePageChange,
+    tableOptions: {
+      dataSource,
+      loading,
+      pagination,
+      onChange: handlePageChange,
+    },
   };
 };

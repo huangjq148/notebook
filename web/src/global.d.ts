@@ -1,4 +1,7 @@
-type Router = RouteObject & {
+import React from 'react';
+import { RouteObject } from 'react-router-dom';
+
+declare type Router = RouteObject & {
   children?: Router[];
   label?: string;
   hideInMenu?: boolean;

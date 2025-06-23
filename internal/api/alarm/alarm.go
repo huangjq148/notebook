@@ -7,7 +7,6 @@ import (
 	"hjq-notebook/internal/database"
 	"hjq-notebook/internal/model"
 	"hjq-notebook/internal/model/response"
-	"hjq-notebook/internal/utils"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,42 +15,31 @@ import (
 )
 
 type AlarmCondition struct {
-	Table string `table:"t_stock"`
-	Name  string `db:"name" json:"name" op:"like"`
+	Table string `table:"t_alarm"`
+	// Name  string `db:"name" json:"name" op:"like"`
 }
 
-func CreateAlarm(c *fiber.Ctx) error {
-	// db := database.DBConn
-	// var stock model.Stock
-	// token := c.Get("Authorization")
-	// userId := utils.GetFromToken(token, "user_id")
+type TextContent struct {
+	Content string `json:"content"`
+}
 
-	// if err := c.BodyParser(&stock); err != nil {
-	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
-	// }
+type Message struct {
+	Msgtype string      `json:"msgtype"`
+	Text    TextContent `json:"text"`
+}
 
-	// result, e := db.Exec("insert into t_stock(name, buyPrice,sellPrice, number, createTime,createUser) values(?,?,?,?,?,?)",
-	// 	stock.Name, stock.BuyPrice, stock.SellPrice, stock.Number, time.Now().Format("2006-01-02"), userId)
-
-	// if e != nil {
-	// 	fmt.Println("err=", e)
-	// 	return c.JSON(fiber.Map{"status": "error", "message": e.Error()})
-	// }
-
-	//
+func Send(data interface{}) (string, []byte) {
+	// Define the webhook URL
 	url := "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=a3faa36b-f388-45a2-981d-0c9b7c611f80"
 
 	// 准备要发送的数据
-	data := map[string]interface{}{
-		"name":  "John Doe",
-		"email": "john@example.com",
-	}
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		log.Fatal("JSON编码失败:", err)
 	}
 
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+
 	if err != nil {
 		log.Fatal("请求失败:", err)
 	}
@@ -62,20 +50,46 @@ func CreateAlarm(c *fiber.Ctx) error {
 		log.Fatal("读取响应失败:", err)
 	}
 
-	log.Println("响应状态:", resp.Status)
-	log.Println("响应内容:", string(body))
-	return c.JSON(fiber.Map{"status": "success", "message": "保存成功", "data": body})
+	if resp.Status == "200" {
+		return "success", body
+	} else {
+		return "error", body
+	}
+
+}
+
+func SendMessageToWeChatWebhook(c *fiber.Ctx) error {
+	data := Message{
+		Msgtype: "text",
+		Text: TextContent{
+			Content: "Hi，我是机器人通知群\n由黄坚强于06月16日添加到群",
+		},
+	}
+	status, body := Send(data)
+
+	if status == "200" {
+		return c.JSON(fiber.Map{"status": "success", "message": "保存成功", "data": body})
+	} else {
+		return c.JSON(fiber.Map{"status": "error", "message": "保存失败", "data": body})
+	}
+}
+
+func CreateAlarm(c *fiber.Ctx) error {
+	var alarm model.Alarm
+
+	if err := c.BodyParser(&alarm); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
+	}
+
+	database.Create(c, "t_alarm", alarm)
+
+	return c.JSON(response.Success(nil, "创建成功"))
 }
 
 func QueryAlarmList(c *fiber.Ctx) error {
-	var queryResult []model.Stock
+	var queryResult []model.Alarm
 
 	result, e := database.QueryPage(c, &queryResult, AlarmCondition{})
-
-	if e != nil {
-		fmt.Println("err=", e)
-		return c.JSON(fiber.Map{"status": "error", "message": "参数格式错误"})
-	}
 
 	if e != nil {
 		fmt.Println("err=", e)
@@ -86,17 +100,9 @@ func QueryAlarmList(c *fiber.Ctx) error {
 }
 
 func DeleteAlarm(c *fiber.Ctx) error {
-	db := database.DBConn
 	id := c.Params("id")
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
 
-	result, e := db.Exec("delete from t_stock where 1=1 and createUser=? and id=?", userId, id)
+	database.DeleteById(c, "t_alarm", id)
 
-	if e != nil {
-		fmt.Println("err=", e)
-		return c.JSON(fiber.Map{"status": "error", "message": "参数格式错误"})
-	}
-
-	return c.JSON(fiber.Map{"status": "success", "message": "保存成功", "data": result})
+	return c.JSON(fiber.Map{"status": "success", "message": "删除成功"})
 }

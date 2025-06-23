@@ -2,8 +2,8 @@ package model
 
 type CreateInfo struct {
 	CreateUser int     `db:"createUser" json:"createUser"`
-	UpdateUser int     `db:"updateUser" json:"updateUser"`
-	CreateTime *string `db:"createTime" json:"createTime"`
+	UpdateUser *int    `db:"updateUser" json:"updateUser"`
+	CreateTime string  `db:"createTime" json:"createTime"`
 	UpdateTime *string `db:"updateTime" json:"updateTime"`
 }
 
@@ -79,5 +79,23 @@ type Account struct {
 	Password string `db:"password" json:"password"`
 	// 对应rmb表字段
 	UserId string `db:"userId" json:"userId"`
+	*CreateInfo
+}
+
+type Alarm struct {
+	// 对应id表字段
+	Id string `db:"id" json:"id"`
+	// 标题
+	Title string `db:"title" json:"title" form:"title"`
+	// 时间 - 日期
+	Date string `db:"date" json:"date"`
+	// 时间 - 小时
+	Time string `db:"time" json:"time"`
+	// 备注
+	Description string `db:"description" json:"description"`
+	// 是否重复
+	IsRepeat string `db:"isRepeat" json:"isRepeat"`
+	// 是否启用
+	IsEnable string `db:"isEnable" json:"isEnable"`
 	*CreateInfo
 }

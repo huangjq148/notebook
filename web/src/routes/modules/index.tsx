@@ -8,6 +8,7 @@ import {
 import { Navigate } from 'react-router-dom';
 import { flattenMenu, generateMenuKeys } from '../utils';
 import lazyLoad from '../utils/lazyLoad';
+import { Router } from '@/global';
 
 const menuRoutes: Router[] = [
   {
