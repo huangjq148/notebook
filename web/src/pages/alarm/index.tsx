@@ -1,43 +1,61 @@
 import styles from './index.module.less';
 
-import { Button, Form, Input, message, Modal, Popconfirm, Radio, Select, Space, Table, TimePicker } from 'antd';
+import { Button, Form, Input, message, Modal, Radio, Select, Space, TimePicker } from 'antd';
 import { useState } from 'react';
 
+import { SearchForm, TextButton, Table, TableColumnType } from '@/components';
 import { useTable } from '@/hooks';
-import { createAlarm, queryAlarmList, deleteAlarm } from '@/services/alarm';
-import { TextButton } from '@/components';
+import { createAlarm, deleteAlarm, queryAlarmList, sendMessageToWeChatWebhook, updateAlarm } from '@/services/alarm';
+import moment from 'moment';
 
 const Alarm = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [form] = Form.useForm();
-  const [conditions] = useState({});
+  const [conditions, setConditions] = useState({});
   const { tableOptions, searchForm } = useTable({
     request: queryAlarmList,
     conditions,
   });
-  const columns = [
+  const [editingRecord, setEditingRecord] = useState<any>();
+  const columns: TableColumnType[] = [
     {
       title: '标题',
       dataIndex: 'title',
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'title',
+      width: 200,
     },
     {
       title: '是否重复',
-      dataIndex: 'title',
+      dataIndex: 'isRepeat',
+      code: 'yesOrNo',
+    },
+    {
+      title: '是否启用',
+      dataIndex: 'isEnable',
+      code: 'yesOrNo',
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createTime',
     },
     {
       title: '操作',
       dataIndex: 'id',
       render: (id: number, record: any) => {
         return (
-          <Space>
+          <Space size="large">
             <TextButton
               onClick={() => {
+                sendMessageToWeChatWebhook({ id: id });
+                message.success('消息已发送');
+              }}
+            >
+              立即发送
+            </TextButton>
+            <TextButton
+              onClick={() => {
+                setEditingRecord(record);
                 setModalOpen(true);
-                form.setFieldsValue(record);
+                form.setFieldsValue({ ...record, time: moment(record.time, 'HH:mm'), date: record.date.split(',') });
               }}
             >
               编辑
@@ -52,8 +70,6 @@ const Alarm = () => {
             >
               删除
             </TextButton>
-
-            <TextButton onClick={() => message.error('查看功能未实现')}>查看</TextButton>
           </Space>
         );
       },
@@ -64,19 +80,31 @@ const Alarm = () => {
     <>
       <Modal
         open={modalOpen}
-        title="创建闹钟"
+        title={`${editingRecord?.id ? '编辑' : '创建'}闹钟`}
         onCancel={() => {
           form.resetFields();
           setModalOpen(false);
+          setEditingRecord(undefined);
         }}
         onOk={async () => {
           await form.validateFields();
           const values = form.getFieldsValue();
-          await createAlarm({ ...values, date: values.date.join(','), time: values.time?.format?.('HH:mm') });
-          message.success('创建成功');
+          if (editingRecord?.id) {
+            await updateAlarm(editingRecord.id, {
+              ...editingRecord,
+              ...values,
+              date: values.date.join(','),
+              time: values.time?.format?.('HH:mm'),
+            });
+            message.success('编辑成功');
+          } else {
+            await createAlarm({ ...values, date: values.date.join(','), time: values.time?.format?.('HH:mm') });
+            message.success('创建成功');
+          }
           setModalOpen(false);
           searchForm();
           form.resetFields();
+          setEditingRecord(undefined);
         }}
       >
         <Form form={form} initialValues={{ isRepeat: '1', isEnable: '1' }} labelCol={{ span: 5 }}>
@@ -123,11 +151,24 @@ const Alarm = () => {
         </Form>
       </Modal>
 
+      <SearchForm>
+        <Space>
+          <Input
+            placeholder="请输入名称"
+            onChange={(event) => {
+              setConditions({ name: event.target.value });
+            }}
+          />
+          <Button type="primary" onClick={() => searchForm()}>
+            查询
+          </Button>
+          <Button type="primary" onClick={() => setModalOpen(true)}>
+            新建
+          </Button>
+        </Space>
+      </SearchForm>
       <div className={styles.container}>
-        <Button type="primary" onClick={() => setModalOpen(true)}>
-          新建
-        </Button>
-        <Table {...tableOptions} columns={columns} />
+        <Table rowKey="id" columns={columns} {...tableOptions} />
       </div>
     </>
   );

@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -50,7 +51,7 @@ func Send(data interface{}) (string, []byte) {
 		log.Fatal("读取响应失败:", err)
 	}
 
-	if resp.Status == "200" {
+	if resp.StatusCode == 200 {
 		return "success", body
 	} else {
 		return "error", body
@@ -59,15 +60,26 @@ func Send(data interface{}) (string, []byte) {
 }
 
 func SendMessageToWeChatWebhook(c *fiber.Ctx) error {
+	id := c.Query("id")
+	var alarmInfo model.Alarm
+
+	if id != "" {
+		intId, err := strconv.Atoi(id)
+		if err != nil {
+			return c.JSON(response.Error("id 错误"))
+		}
+		database.GetById(c, "t_alarm", intId, &alarmInfo)
+	}
+
 	data := Message{
 		Msgtype: "text",
 		Text: TextContent{
-			Content: "Hi，我是机器人通知群\n由黄坚强于06月16日添加到群",
+			Content: alarmInfo.Title,
 		},
 	}
 	status, body := Send(data)
 
-	if status == "200" {
+	if status == "success" {
 		return c.JSON(fiber.Map{"status": "success", "message": "保存成功", "data": body})
 	} else {
 		return c.JSON(fiber.Map{"status": "error", "message": "保存失败", "data": body})
@@ -84,6 +96,29 @@ func CreateAlarm(c *fiber.Ctx) error {
 	database.Create(c, "t_alarm", alarm)
 
 	return c.JSON(response.Success(nil, "创建成功"))
+}
+
+func UpdateAlarm(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var alarm model.Alarm
+
+	if err := c.BodyParser(&alarm); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
+	}
+
+	if id == "" {
+		return c.JSON(fiber.Map{"status": "error", "message": "ID不能为空"})
+	}
+
+	intId, err := strconv.Atoi(id)
+	if err != nil {
+		return c.JSON(fiber.Map{"status": "error", "message": "ID格式错误"})
+	}
+
+	alarm.Id = intId
+	database.Update(c, "t_alarm", alarm)
+
+	return c.JSON(response.Success(nil, "更新成功"))
 }
 
 func QueryAlarmList(c *fiber.Ctx) error {

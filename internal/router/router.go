@@ -67,11 +67,12 @@ func SetupRoutes(app *fiber.App) {
 	stockRouter.Patch("", stock.UpdateStock)
 
 	alarmRouter := authVerifyRouter.Group("/alarm")
+	alarmRouter.Get("/sendMessageToWeChatWebhook", alarm.SendMessageToWeChatWebhook)
 	alarmRouter.Get("", alarm.QueryAlarmList)
 	alarmRouter.Post("", alarm.CreateAlarm)
+	alarmRouter.Put("/:id", alarm.UpdateAlarm)
 	alarmRouter.Delete("/:id", alarm.DeleteAlarm)
 	alarmRouter.Get("/:id", alarm.CreateAlarm)
-	alarmRouter.Get("/sendMessageToWeChatWebhook", alarm.SendMessageToWeChatWebhook)
 
 	// Auth
 	userRouter := authVerifyRouter.Group("/user")

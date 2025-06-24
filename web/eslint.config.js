@@ -9,13 +9,14 @@ export default defineConfig([
   pluginReact.configs.flat.recommended,
   {
     rules: {
-      "no-unused-vars": "warn",
+      "no-unused-vars": "off",
       "no-undef": "off",
       "react/react-in-jsx-scope": "off",
       "react/jsx-uses-react": "off",
       "react/display-name": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/no-unused-vars": "off",
     }
   }
 ]);

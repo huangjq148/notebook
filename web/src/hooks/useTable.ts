@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TablePaginationConfig } from 'antd/es/table';
 import { pickBy } from 'lodash-es';
 
@@ -19,7 +19,7 @@ export default <T>(props: { request: any; conditions: Record<string, any> }) => 
     const { current, pageSize } = pagination;
     setLoading(true);
     const result = await request({
-      ...pickBy(conditions),
+      ...pickBy({ ...conditions, ...(params ?? {}) }),
       current,
       pageSize,
     });
@@ -42,7 +42,7 @@ export default <T>(props: { request: any; conditions: Record<string, any> }) => 
     }
   };
 
-  const handlePageChange = (newPagination: Pagination) => {
+  const handlePageChange = (newPagination: any) => {
     setPagination(newPagination);
   };
 

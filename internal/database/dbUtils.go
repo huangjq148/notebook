@@ -167,7 +167,7 @@ func Update(c *fiber.Ctx, tableName string, data interface{}) (interface{}, erro
 	result, e := DBConn.Exec(sql, conditions...)
 	if e != nil {
 		fmt.Println(e)
-		return nil, errors.New("插入失败")
+		return nil, errors.New("更新失败")
 	}
 	fmt.Println(result.LastInsertId())
 

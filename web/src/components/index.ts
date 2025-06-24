@@ -9,5 +9,7 @@ export { default as PieChart } from './Charts/PieChart';
 export { default as OrderContactInput } from './OrderContactInput';
 export { default as OrderProductInput } from './OrderProductInput';
 export { default as PinyinMatchInput } from './PinyinMatchInput';
+export { default as Table } from './Table';
+export * from './Table';
 
 export { SearchForm, TextButton, RemoteSearchSelect, DateRangePicker, DeleteConfirmButton, Card };

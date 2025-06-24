@@ -1,0 +1,36 @@
+.compare {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  .compareValue {
+    color: #999;
+  }
+
+  .increase {
+    color: #589707;
+  }
+
+  .decrease {
+    color: #d4001a;
+  }
+
+  .noChange {
+    color: #a0a0a0;
+  }
+
+  .changeStatus {
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.cellEllipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block; // 或者 inline-block
+}

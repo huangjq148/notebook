@@ -7,7 +7,7 @@ import {
   TextButton,
 } from '@/components';
 import { useTable } from '@/hooks';
-import { changeOrderStatus, deleteOrder, queryOrder, revokeStockOrder, statistics } from '@/services/order';
+import { deleteOrder, queryOrder, revokeStockOrder, statistics } from '@/services/order';
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Descriptions, FloatButton, Form, message, Modal, Space, Table } from 'antd';
 import { useEffect, useState } from 'react';
@@ -18,6 +18,7 @@ import { copy } from '@/utils';
 import dayjs from 'dayjs';
 import Decimal from 'decimal.js';
 import styles from './index.module.less';
+import { Order } from '@/global';
 
 interface ContactInfo {
   contact?: string;
@@ -81,12 +82,6 @@ export default () => {
     }
     copy(selectedDataStr);
     message.success('复制成功');
-  };
-
-  const handleOrderStatusChange = async (id: number = 0, status: string) => {
-    await changeOrderStatus(id, status);
-    message.success('修改成功');
-    searchForm();
   };
 
   const handleFormSearch = (values: any) => {
@@ -236,7 +231,7 @@ export default () => {
 
   const rowSelection = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: Order[]) => {
-      let result: string[] = [];
+      const result: string[] = [];
       let total = 0;
       selectedRows.map((item) => {
         let sum = 0;

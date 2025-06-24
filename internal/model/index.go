@@ -84,7 +84,7 @@ type Account struct {
 
 type Alarm struct {
 	// 对应id表字段
-	Id string `db:"id" json:"id"`
+	Id int `db:"id" json:"id"`
 	// 标题
 	Title string `db:"title" json:"title" form:"title"`
 	// 时间 - 日期
