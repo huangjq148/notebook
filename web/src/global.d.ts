@@ -57,3 +57,9 @@ declare interface Stock extends CreateInfo {
   sellPrice: string;
   number: number;
 }
+
+declare interface StudentWork extends CreateInfo {
+  id?: number;
+  date: string;
+  content: string;
+}

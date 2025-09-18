@@ -8,6 +8,7 @@ import (
 	"hjq-notebook/internal/api/overview"
 	"hjq-notebook/internal/api/product"
 	"hjq-notebook/internal/api/stock"
+	"hjq-notebook/internal/api/studentWork"
 	"hjq-notebook/internal/api/system"
 	"hjq-notebook/internal/api/user"
 	"hjq-notebook/internal/middleware"
@@ -82,4 +83,12 @@ func SetupRoutes(app *fiber.App) {
 	// Auth
 	systemRouter := authVerifyRouter.Group("/system")
 	systemRouter.Post("/data/transfer", system.TransferData)
+
+	studentWorkRouter := authVerifyRouter.Group("/student-work")
+	studentWorkRouter.Get("", studentWork.QueryStudentWorkList)
+	studentWorkRouter.Post("", studentWork.CreateStudentWork)
+	studentWorkRouter.Get("/:id", studentWork.GetStudentWorkById)
+	studentWorkRouter.Delete("/:id", studentWork.DeleteStudentWork)
+	studentWorkRouter.Put("/:id", studentWork.UpdateStudentWork)
+
 }

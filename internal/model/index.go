@@ -99,3 +99,10 @@ type Alarm struct {
 	IsEnable string `db:"isEnable" json:"isEnable"`
 	*CreateInfo
 }
+
+type StudentWork struct {
+	Id      int    `db:"id" json:"id"`
+	Date    string `db:"date" json:"date"`
+	Content string `db:"content" json:"content"`
+	*CreateInfo
+}

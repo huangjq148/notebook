@@ -54,6 +54,24 @@ const menuRoutes: Router[] = [
     element: lazyLoad('@/pages/alarm'),
   },
   {
+    path: 'student-work',
+    label: '作业管理',
+    icon: <ContactsOutlined />,
+    children: [
+      {
+        path: 'list',
+        label: '作业列表',
+        element: lazyLoad('@/pages/studentWork'),
+      },
+      {
+        path: ':id',
+        label: '科目作业',
+        hideInMenu: true,
+        element: lazyLoad('@/pages/studentWork/subjectWork'),
+      },
+    ],
+  },
+  {
     path: '/',
     hideInMenu: true,
     element: <Navigate to="/overview" />,

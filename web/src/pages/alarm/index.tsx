@@ -22,6 +22,7 @@ const Alarm = () => {
       title: '标题',
       dataIndex: 'title',
       width: 200,
+      ellipsis: true,
     },
     {
       title: '是否重复',

@@ -94,13 +94,7 @@ const Table = (props: Props) => {
           );
         } else {
           const displayVal = getNumToLocaleString(formatFun(val, item.decimal));
-          return (
-            <Tooltip title={displayVal} placement="top">
-              <div style={{ width: item?.width }} className={styles.cellEllipsis}>
-                {displayVal}
-              </div>
-            </Tooltip>
-          );
+          return displayVal;
         }
       },
       align: 'center' as const,
@@ -115,7 +109,7 @@ const Table = (props: Props) => {
       rowKey={rowKey}
       columns={displayColumns}
       dataSource={innerDataSource}
-      scroll={{ x: 'max-content' }}
+      // scroll={{ x: 'max-content' }}
       pagination={
         typeof pagination == 'object'
           ? {

@@ -24,7 +24,7 @@ export default <T>(props: { request: any; conditions: Record<string, any> }) => 
       pageSize,
     });
     setLoading(false);
-    setDataSource(result.content);
+    setDataSource(result.content || []);
     setPagination((val) => ({
       ...val,
       total: result.total,
