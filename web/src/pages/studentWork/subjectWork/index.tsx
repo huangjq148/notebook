@@ -18,12 +18,14 @@ import {
 import type { Key } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
 const { Dragger } = Upload;
 
 const SUBJECTS = ['语文', '数学', '英语'];
 
 type Content = {
+  id: string;
   content: string;
   completed: boolean;
 };
@@ -183,7 +185,7 @@ const SubjectWork = () => {
                             onChange={(e) => {
                               const newDataSource = { ...dataSource };
                               newDataSource[subject] = newDataSource[subject].map((i) => {
-                                if (i.content === item.content) {
+                                if (i.id === item.id) {
                                   return { ...i, completed: e.target.checked };
                                 }
                                 return i;
@@ -197,7 +199,7 @@ const SubjectWork = () => {
                           <DeleteOutlined
                             onClick={() => {
                               const newDataSource = { ...dataSource };
-                              newDataSource[subject] = newDataSource[subject].filter((i) => i.content !== item.content);
+                              newDataSource[subject] = newDataSource[subject].filter((i) => i.id !== item.id);
                               setDataSource(newDataSource);
                             }}
                           />
@@ -226,7 +228,10 @@ const SubjectWork = () => {
           onFinish={() => {
             const values = form.getFieldsValue();
             const newDataSource = { ...dataSource };
-            newDataSource[modalOption.subject] = [...(newDataSource[modalOption.subject] || []), values];
+            newDataSource[modalOption.subject] = [
+              ...(newDataSource[modalOption.subject] || []),
+              { id: uuidv4(), ...values },
+            ];
             setDataSource(newDataSource);
             setModalOption({ ...modalOption, open: false });
           }}
