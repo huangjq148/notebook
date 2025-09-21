@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import EditPage from './Edit';
 import styles from './index.module.less';
 
+import { Product, Stock } from '@/global.d';
+
 interface Statistics {
   buyMoney: number;
   sellMoney: number;

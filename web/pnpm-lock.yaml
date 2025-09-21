@@ -65,6 +65,9 @@ dependencies:
   recharts:
     specifier: ^2.3.2
     version: 2.15.0(react-dom@19.1.0)(react@19.1.0)
+  uuid:
+    specifier: ^13.0.0
+    version: 13.0.0
   zustand:
     specifier: ^4.1.4
     version: 4.5.5(@types/react@19.1.8)(react@19.1.0)
@@ -4960,6 +4963,11 @@ packages:
     resolution: {integrity: sha512-0Pm9hTQ3se5ll1XihRic3FDIku70C+iHUdT/W926rSgHV5QgXsYbKZN8MSC3tJtSkhuROzvsQjAaFENRXr+19A==}
     dependencies:
       inherits: 2.0.3
+    dev: false
+
+  /uuid@13.0.0:
+    resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
+    hasBin: true
     dev: false
 
   /victory-vendor@36.9.2:

@@ -1,7 +1,7 @@
 import { PlayCircleOutlined, StopOutlined } from '@ant-design/icons';
 import { FloatButton } from 'antd';
 import classnames from 'classnames';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import { html } from 'pinyin-pro';
 
@@ -54,6 +54,14 @@ const Speak = () => {
       }
     };
   }
+
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+      setCurrentRowIndex(undefined);
+      setIsSpeaking(false);
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
