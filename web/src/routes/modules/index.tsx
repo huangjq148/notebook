@@ -61,13 +61,14 @@ const menuRoutes: Router[] = [
       {
         path: 'list',
         label: '作业列表',
-        element: lazyLoad('@/pages/studentWork'),
+        element: lazyLoad('@/pages/studentWork/manage'),
       },
       {
         path: ':id',
         label: '科目作业',
         hideInMenu: true,
-        element: lazyLoad('@/pages/studentWork/subjectWork'),
+        element: lazyLoad('@/pages/studentWork/manage/subjectWork'),
+      },
       },
     ],
   },
