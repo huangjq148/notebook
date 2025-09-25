@@ -1,25 +1,42 @@
 import { Card } from '@/components';
-import { Button, Form, Input, InputNumber, Radio, Space } from 'antd';
+import { Button, Checkbox, Empty, Form, Input, InputNumber, Radio, Space } from 'antd';
 import React, { useRef, useState } from 'react';
 import styles from './index.module.less';
+
+const charMap = {
+  add: '+',
+  sub: '-',
+  mul: '×',
+  div: '÷',
+};
+const opList = ['+', '-', '×', '÷'];
 
 const GenerateCalculator = () => {
   const [form] = Form.useForm();
   const [list, setList] = useState<string[]>([]);
   const printAreaRef = useRef<HTMLDivElement>(null);
 
-  const onSubmit = (values: { count: number; range: number }) => {
-    const { count, range } = values;
+  const onSubmit = (values: { count: number; range: number; char: string[] }) => {
+    const { count, range, char } = values;
 
     setList([]);
 
     const newList: string[] = [];
 
     while (newList.length < count) {
+      const charLength = char.length;
+      const op = opList[Math.floor(Math.random() * 10) % charLength];
       const result = (Math.ceil(Math.random() * 1000) % (range - 1)) + 1;
-      const number1 = Math.ceil(Math.random() * 1000) % result;
-      const number2 = result - number1;
-      newList.push(`${number1} + ${number2} = `);
+      let number1 = Math.ceil(Math.random() * 1000) % result;
+      let number2 = result - number1;
+
+      if (op === '-' && number2 > number1) {
+        const tmp = number1;
+        number1 = number2;
+        number2 = tmp;
+      }
+
+      newList.push(`${number1} ${op} ${number2} = `);
     }
 
     setList(newList);
@@ -69,7 +86,7 @@ const GenerateCalculator = () => {
       <div>
         <div>
           <Form layout="inline" form={form} initialValues={{ count: 120 }} onFinish={onSubmit}>
-            <Form.Item label="数量" name="count">
+            <Form.Item label="数量" name="count" rules={[{ required: true, message: '请选择数量' }]}>
               <Radio.Group>
                 <Radio value={40}>40</Radio>
                 <Radio value={60}>60</Radio>
@@ -77,8 +94,30 @@ const GenerateCalculator = () => {
                 <Radio value={120}>120</Radio>
               </Radio.Group>
             </Form.Item>
-            <Form.Item label="范围" name="range">
+            <Form.Item label="范围" name="range" rules={[{ required: true, message: '请输入范围' }]}>
               <InputNumber min={1}></InputNumber>
+            </Form.Item>
+            <Form.Item label="运算方式" name="char" rules={[{ required: true, message: '请选择运算方式' }]}>
+              <Checkbox.Group
+                options={[
+                  {
+                    value: 'add',
+                    label: '加法',
+                  },
+                  {
+                    value: 'sub',
+                    label: '减法',
+                  },
+                  {
+                    value: 'mul',
+                    label: '乘法',
+                  },
+                  {
+                    value: 'div',
+                    label: '除法',
+                  },
+                ]}
+              ></Checkbox.Group>
             </Form.Item>
             <Button type="primary" htmlType="submit">
               生成
@@ -97,14 +136,19 @@ const GenerateCalculator = () => {
               <span>正确：_____ /{list.length}</span>
             </div>{' '}
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', width: '100%', height: '100%' }}>
-            {list.map((item, index) => (
-              <div key={index} className={styles.printItem} style={{ width: '33%', fontSize: 16 }}>
-                {item}
-              </div>
-            ))}
-          </div>
-          <div></div>
+          {list.length ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', width: '100%', height: '100%' }}>
+              {list.map((item, index) => (
+                <div key={index} className={styles.printItem} style={{ width: '33%', fontSize: 16 }}>
+                  {item}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ padding: 40 }}>
+              <Empty description="请先选择生成参数" />
+            </div>
+          )}
         </div>
       </div>
     </Card>
