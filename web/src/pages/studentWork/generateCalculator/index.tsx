@@ -1,15 +1,7 @@
 import { Card } from '@/components';
-import { Button, Checkbox, Empty, Form, Input, InputNumber, Radio, Space } from 'antd';
-import React, { useRef, useState } from 'react';
+import { Button, Checkbox, Empty, Form, InputNumber, Radio } from 'antd';
+import { useRef, useState } from 'react';
 import styles from './index.module.less';
-
-const charMap = {
-  add: '+',
-  sub: '-',
-  mul: '×',
-  div: '÷',
-};
-const opList = ['+', '-', '×', '÷'];
 
 const GenerateCalculator = () => {
   const [form] = Form.useForm();
@@ -25,12 +17,16 @@ const GenerateCalculator = () => {
 
     while (newList.length < count) {
       const charLength = char.length;
-      const op = opList[Math.floor(Math.random() * 10) % charLength];
-      const result = (Math.ceil(Math.random() * 1000) % (range - 1)) + 1;
-      let number1 = Math.ceil(Math.random() * 1000) % result;
+      const op = char[Math.floor(Math.random() * 10) % charLength];
+      const result = (Math.ceil(Math.random() * 1000) % (range - 3)) + 3;
+      let number1 = (Math.ceil(Math.random() * 1000) % (result - 2)) + 2;
       let number2 = result - number1;
 
-      if (op === '-' && number2 > number1) {
+      if (Number.isNaN(number1) || Number.isNaN(number2)) {
+        debugger;
+      }
+
+      if (['-', '÷'].includes(op) && number2 > number1) {
         const tmp = number1;
         number1 = number2;
         number2 = tmp;
@@ -85,7 +81,12 @@ const GenerateCalculator = () => {
     <Card header="生成计算题">
       <div>
         <div>
-          <Form layout="inline" form={form} initialValues={{ count: 120 }} onFinish={onSubmit}>
+          <Form
+            layout="inline"
+            form={form}
+            initialValues={{ count: 120, range: 20, char: ['add'] }}
+            onFinish={onSubmit}
+          >
             <Form.Item label="数量" name="count" rules={[{ required: true, message: '请选择数量' }]}>
               <Radio.Group>
                 <Radio value={40}>40</Radio>
@@ -101,21 +102,21 @@ const GenerateCalculator = () => {
               <Checkbox.Group
                 options={[
                   {
-                    value: 'add',
+                    value: '+',
                     label: '加法',
                   },
                   {
-                    value: 'sub',
+                    value: '-',
                     label: '减法',
                   },
-                  {
-                    value: 'mul',
-                    label: '乘法',
-                  },
-                  {
-                    value: 'div',
-                    label: '除法',
-                  },
+                  // {
+                  //   value: '×',
+                  //   label: '乘法',
+                  // },
+                  // {
+                  //   value:  '÷',
+                  //   label: '除法',
+                  // },
                 ]}
               ></Checkbox.Group>
             </Form.Item>
@@ -140,7 +141,8 @@ const GenerateCalculator = () => {
             <div style={{ display: 'flex', flexWrap: 'wrap', width: '100%', height: '100%' }}>
               {list.map((item, index) => (
                 <div key={index} className={styles.printItem} style={{ width: '33%', fontSize: 16 }}>
-                  {item}
+                  <span style={{ color: '#ccc', fontSize: 12 }}>{index + 1}、</span>
+                  <span>{item}</span>
                 </div>
               ))}
             </div>
