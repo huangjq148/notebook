@@ -1,3 +1,5 @@
+import { Router } from '@/global';
+
 export const generateMenuKeys = (menu: any[], parentPath = '') => {
   return menu.map((item: any) => {
     let fullPath = parentPath ? `${parentPath}/${item.path}` : `/${item.path}`;
@@ -16,9 +18,9 @@ export const generateMenuKeys = (menu: any[], parentPath = '') => {
 };
 
 export const flattenMenu = (router: Router[], params = {}): Router[] => {
-  return router
+  const result: any = router
     .filter((item) => !item.hideInMenu)
-    .flatMap((item) => {
+    .flatMap((item: any) => {
       if (item.flatMenu) {
         // 如果当前项被过滤掉，但有 children，则提升 children
         return item.children ? flattenMenu(item.children, params) : [];
@@ -35,4 +37,6 @@ export const flattenMenu = (router: Router[], params = {}): Router[] => {
         children: item.children ? flattenMenu(item.children, params) : undefined,
       };
     });
+
+  return result;
 };

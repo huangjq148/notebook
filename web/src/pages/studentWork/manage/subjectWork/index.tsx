@@ -115,7 +115,7 @@ const SubjectWork = () => {
         content: JSON.stringify(dataSource),
       });
       message.success('保存成功');
-      navigate('/student-work/list');
+      navigate('/student-work/manage');
     } finally {
       setLoading(false);
     }
@@ -134,7 +134,9 @@ const SubjectWork = () => {
   };
 
   useEffect(() => {
-    loadData();
+    if (id) {
+      loadData();
+    }
   }, [id]);
 
   return (

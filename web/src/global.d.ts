@@ -6,6 +6,8 @@ declare type Router = RouteObject & {
   label?: string;
   hideInMenu?: boolean;
   icon?: React.ReactNode;
+  flatMenu?: boolean;
+  key?: string;
 };
 
 declare interface CreateInfo {

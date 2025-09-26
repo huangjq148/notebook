@@ -59,20 +59,38 @@ const menuRoutes: Router[] = [
     icon: <ContactsOutlined />,
     children: [
       {
-        path: 'list',
-        label: '作业列表',
-        element: lazyLoad('@/pages/studentWork/manage'),
+        path: 'manage',
+        flatMenu: true,
+        children: [
+          {
+            path: '',
+            label: '作业列表',
+            element: lazyLoad('@/pages/studentWork/manage'),
+          },
+          {
+            path: ':id',
+            label: '科目作业',
+            hideInMenu: true,
+            element: lazyLoad('@/pages/studentWork/manage/subjectWork'),
+          },
+        ],
       },
       {
-        path: ':id',
-        label: '科目作业',
-        hideInMenu: true,
-        element: lazyLoad('@/pages/studentWork/manage/subjectWork'),
-      },
-      {
-        path: 'generateCalculator',
-        label: '生成计算题',
-        element: lazyLoad('@/pages/studentWork/generateCalculator'),
+        path: 'calculator-manage',
+        flatMenu: true,
+        children: [
+          {
+            path: 'list',
+            label: '计算题',
+            element: lazyLoad('@/pages/studentWork/calculatorManage'),
+          },
+          {
+            path: 'create',
+            label: '生成计算题',
+            hideInMenu: true,
+            element: lazyLoad('@/pages/studentWork/generateCalculator'),
+          },
+        ],
       },
     ],
   },
@@ -83,6 +101,6 @@ const menuRoutes: Router[] = [
   },
 ];
 
-export const routeWithKey = generateMenuKeys(flattenMenu(menuRoutes));
+export const routeWithKey = flattenMenu(generateMenuKeys(menuRoutes));
 
 export default menuRoutes;

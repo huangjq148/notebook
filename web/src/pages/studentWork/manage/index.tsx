@@ -44,7 +44,7 @@ const StudentWork = () => {
             </TextButton>
             <TextButton
               onClick={() => {
-                navigate(`/student-work/${id}`);
+                navigate(`/student-work/manage/${id}`);
               }}
             >
               学科作业
