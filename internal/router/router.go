@@ -3,6 +3,7 @@ package router
 import (
 	"hjq-notebook/internal/api/alarm"
 	"hjq-notebook/internal/api/auth"
+	"hjq-notebook/internal/api/calculator"
 	"hjq-notebook/internal/api/contact"
 	"hjq-notebook/internal/api/order"
 	"hjq-notebook/internal/api/overview"
@@ -91,4 +92,10 @@ func SetupRoutes(app *fiber.App) {
 	studentWorkRouter.Delete("/:id", studentWork.DeleteStudentWork)
 	studentWorkRouter.Put("/:id", studentWork.UpdateStudentWork)
 
+	calculatorRouter := authVerifyRouter.Group("/calculator")
+	calculatorRouter.Get("", calculator.QueryCalculatorList)
+	calculatorRouter.Get("/:id", calculator.GetCalculatorById)
+	calculatorRouter.Post("", calculator.CreateCalculator)
+	calculatorRouter.Delete("/:id", calculator.DeleteCalculator)
+	calculatorRouter.Patch("", calculator.UpdateCalculator)
 }

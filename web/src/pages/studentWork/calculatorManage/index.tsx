@@ -1,18 +1,23 @@
-import { SearchForm, TableColumnType } from '@/components';
+import { SearchForm, TableColumnType, TextButton } from '@/components';
 import { useTable } from '@/hooks';
-import { getStudentWorkList } from '@/services/studentWork';
-import { Button, Card, Form, Input, Space, Table } from 'antd';
+import { getCalculatorList, deleteCalculator } from '@/services/calculator';
+import { Button, Card, Input, message, Space, Table } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const CalculatorManage = () => {
-  const [form] = Form.useForm();
   const [conditions, setConditions] = useState({});
   const { tableOptions, searchForm } = useTable({
-    request: getStudentWorkList,
+    request: getCalculatorList,
     conditions,
   });
   const navigate = useNavigate();
+
+  const handleDelete = async (id: number) => {
+    await deleteCalculator(id);
+    message.success('删除成功');
+    searchForm();
+  };
 
   const columns: TableColumnType[] = [
     { title: 'ID', dataIndex: 'id' },
@@ -21,14 +26,12 @@ const CalculatorManage = () => {
       dataIndex: 'id',
       render: (id: number) => {
         return (
-          <Button
-            type="primary"
-            onClick={() => {
-              navigate(`/student-work/calculator-manage/${id}`);
-            }}
-          >
-            详情
-          </Button>
+          <Space>
+            <TextButton onClick={() => navigate(`/student-work/calculator-manage/${id}`)}>详情</TextButton>
+            <TextButton danger onClick={() => handleDelete(id)}>
+              删除
+            </TextButton>
+          </Space>
         );
       },
     },
@@ -41,7 +44,7 @@ const CalculatorManage = () => {
           <Input
             placeholder="请输入ID"
             onChange={(event) => {
-              setConditions({ name: event.target.value });
+              setConditions({ id: event.target.value });
             }}
           />
           <Button type="primary" onClick={() => searchForm()}>

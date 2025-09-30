@@ -106,3 +106,12 @@ type StudentWork struct {
 	Content string `db:"content" json:"content"`
 	*CreateInfo
 }
+
+type Calculator struct {
+	Id          int    `db:"id" json:"id"`
+	Operations  string `db:"operations" json:"operations"`
+	AnswerRange int    `db:"answerRange" json:"answerRange"`
+	Count       int    `db:"count" json:"count"`
+	Content     string `db:"content" json:"content"`
+	*CreateInfo
+}

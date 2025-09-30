@@ -1,24 +1,31 @@
 import { Card } from '@/components';
-import { Button, Checkbox, Empty, Form, InputNumber, Radio } from 'antd';
-import { useRef, useState } from 'react';
+import { Button, Checkbox, Empty, Form, InputNumber, message, Radio } from 'antd';
+import { useEffect, useRef, useState } from 'react';
 import styles from './index.module.less';
+import { useNavigate, useParams } from 'react-router-dom';
+import { createCalculator, queryCalculatorById } from '@/services/calculator';
 
 const GenerateCalculator = () => {
   const [form] = Form.useForm();
   const [list, setList] = useState<string[]>([]);
   const printAreaRef = useRef<HTMLDivElement>(null);
+  const { id } = useParams();
+  const [loading, setLoading] = useState(false);
+  const [dataSource, setDataSource] = useState<any>({});
+  const [showAnswer, setShowAnswer] = useState(false);
+  const navigator = useNavigate();
 
-  const onSubmit = (values: { count: number; range: number; char: string[] }) => {
-    const { count, range, char } = values;
+  const onSubmit = (values: { count: number; answerRange: number; operations: string[] }) => {
+    const { count, answerRange, operations } = values;
 
     setList([]);
 
     const newList: string[] = [];
 
     while (newList.length < count) {
-      const charLength = char.length;
-      const op = char[Math.floor(Math.random() * 10) % charLength];
-      const result = (Math.ceil(Math.random() * 1000) % (range - 3)) + 3;
+      const operationsLength = operations.length;
+      const op = operations[Math.floor(Math.random() * 10) % operationsLength];
+      const result = (Math.ceil(Math.random() * 1000) % (answerRange - 3)) + 3;
       let number1 = (Math.ceil(Math.random() * 1000) % (result - 2)) + 2;
       let number2 = result - number1;
 
@@ -77,6 +84,58 @@ const GenerateCalculator = () => {
     };
   }
 
+  const save = async () => {
+    if (!list?.length) {
+      message.error('请先生成打印内容');
+      return;
+    }
+    try {
+      setLoading(true);
+      const values = form.getFieldsValue();
+      await createCalculator({
+        ...dataSource,
+        count: values.count,
+        answerRange: values.answerRange,
+        operations: values.operations.join(','),
+        content: list.join(','),
+      });
+      message.success('保存成功');
+      setShowAnswer(false);
+      navigator('/student-work/calculator-manage/list');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const res = await queryCalculatorById(Number(id));
+
+      const content = res.content.split(',');
+      const operations = res.operations.split(',');
+      setDataSource(content);
+      form.setFieldsValue({
+        count: res.count,
+        answerRange: res.answerRange,
+        operations: operations,
+      });
+      setList(content);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateResult = (str: string) => {
+    return eval(str.replace('=', ''));
+  };
+
+  useEffect(() => {
+    if (id) {
+      loadData();
+    }
+  }, [id]);
+
   return (
     <Card header="生成计算题">
       <div>
@@ -84,7 +143,7 @@ const GenerateCalculator = () => {
           <Form
             layout="inline"
             form={form}
-            initialValues={{ count: 120, range: 20, char: ['add'] }}
+            initialValues={{ count: 120, answerRange: 20, operations: ['+'] }}
             onFinish={onSubmit}
           >
             <Form.Item label="数量" name="count" rules={[{ required: true, message: '请选择数量' }]}>
@@ -95,10 +154,10 @@ const GenerateCalculator = () => {
                 <Radio value={120}>120</Radio>
               </Radio.Group>
             </Form.Item>
-            <Form.Item label="范围" name="range" rules={[{ required: true, message: '请输入范围' }]}>
+            <Form.Item label="范围" name="answerRange" rules={[{ required: true, message: '请输入范围' }]}>
               <InputNumber min={1}></InputNumber>
             </Form.Item>
-            <Form.Item label="运算方式" name="char" rules={[{ required: true, message: '请选择运算方式' }]}>
+            <Form.Item label="运算方式" name="operations" rules={[{ required: true, message: '请选择运算方式' }]}>
               <Checkbox.Group
                 options={[
                   {
@@ -120,13 +179,21 @@ const GenerateCalculator = () => {
                 ]}
               ></Checkbox.Group>
             </Form.Item>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" disabled={loading}>
               生成
             </Button>
-            <Button onClick={printArea} style={{ marginLeft: 10 }}>
+            <Button onClick={printArea} style={{ marginLeft: 10 }} disabled={loading}>
               打印
             </Button>
+            <Button onClick={save} style={{ marginLeft: 10 }} disabled={loading}>
+              保存
+            </Button>
           </Form>
+        </div>
+        <div>
+          <Checkbox checked={showAnswer} onChange={(e) => setShowAnswer(e.target.checked)}>
+            显示答案
+          </Checkbox>
         </div>
         <div ref={printAreaRef} style={{ padding: 20, border: '1px solid #ccc', marginTop: 20, paddingTop: 40 }}>
           <div style={{ marginTop: -20, marginBottom: 5 }}>
@@ -142,7 +209,10 @@ const GenerateCalculator = () => {
               {list.map((item, index) => (
                 <div key={index} className={styles.printItem} style={{ width: '33%', fontSize: 16 }}>
                   <span style={{ color: '#ccc', fontSize: 12 }}>{index + 1}、</span>
-                  <span>{item}</span>
+                  <span>
+                    {item}
+                    {showAnswer && <span style={{ color: 'blue', marginLeft: 4 }}>{calculateResult(item)}</span>}
+                  </span>
                 </div>
               ))}
             </div>

@@ -90,6 +90,12 @@ const menuRoutes: Router[] = [
             hideInMenu: true,
             element: lazyLoad('@/pages/studentWork/generateCalculator'),
           },
+          {
+            path: ':id',
+            label: '计算题编辑',
+            hideInMenu: true,
+            element: lazyLoad('@/pages/studentWork/generateCalculator'),
+          },
         ],
       },
     ],
