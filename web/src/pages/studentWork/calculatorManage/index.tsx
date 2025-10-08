@@ -21,6 +21,7 @@ const CalculatorManage = () => {
 
   const columns: TableColumnType[] = [
     { title: 'ID', dataIndex: 'id' },
+    { title: '创建日期', dataIndex: 'createTime' },
     {
       title: '操作',
       dataIndex: 'id',

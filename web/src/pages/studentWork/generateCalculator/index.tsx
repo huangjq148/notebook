@@ -29,14 +29,9 @@ const GenerateCalculator = () => {
       let number1 = (Math.ceil(Math.random() * 1000) % (result - 2)) + 2;
       let number2 = result - number1;
 
-      if (Number.isNaN(number1) || Number.isNaN(number2)) {
-        debugger;
-      }
-
       if (['-', '÷'].includes(op) && number2 > number1) {
-        const tmp = number1;
-        number1 = number2;
-        number2 = tmp;
+        number2 = number1;
+        number1 = result - number1;
       }
 
       newList.push(`${number1} ${op} ${number2} = `);
