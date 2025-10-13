@@ -4,9 +4,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { databaseConfig } from './config/database.config';
 import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(databaseConfig), UsersModule],
+  imports: [TypeOrmModule.forRoot(databaseConfig), AuthModule, UsersModule],
   controllers: [AppController],
   providers: [AppService],
 })

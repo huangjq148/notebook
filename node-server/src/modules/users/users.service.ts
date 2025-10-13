@@ -14,6 +14,10 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
+  async findByName(realname: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({ realname });
+  }
+
   async findOne(id: number): Promise<User | null> {
     return this.usersRepository.findOneBy({ id });
   }
