@@ -30,7 +30,7 @@ export const createCalculator = async (data: Calculator): Promise<void> => {
 
 export const updateCalculator = async (data: Calculator): Promise<void> => {
   return request(`/calculator/${data.id}`, {
-    method: 'PUT',
+    method: 'PATCH',
     data,
   });
 };

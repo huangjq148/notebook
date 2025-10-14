@@ -36,7 +36,7 @@ export const updateAlarm = (id: number, data: {
   description: string;
 }): Promise<{ status: string }> => {
   return request(`/alarm/${id}`, {
-    method: 'PUT',
+    method: 'PATCH',
     data,
   });
 } 

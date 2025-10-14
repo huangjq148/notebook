@@ -381,7 +381,6 @@ export default () => {
 
       <Modal
         open={contactOptions.open}
-        footer={null}
         cancelText="asd"
         onCancel={() =>
           setContactOptions({
@@ -391,22 +390,24 @@ export default () => {
         }
         destroyOnClose
         title="客户信息"
+        footer={
+          <Button
+            onClick={() =>
+              setContactOptions({
+                open: false,
+                data: {},
+              })
+            }
+          >
+            确定
+          </Button>
+        }
       >
         <Descriptions column={1}>
           <Descriptions.Item label="姓名">{contactOptions.data.contact}</Descriptions.Item>
           <Descriptions.Item label="电话">{contactOptions.data.phone}</Descriptions.Item>
           <Descriptions.Item label="地址">{contactOptions.data.address}</Descriptions.Item>
         </Descriptions>
-        <Button
-          onClick={() =>
-            setContactOptions({
-              open: false,
-              data: {},
-            })
-          }
-        >
-          确定
-        </Button>
       </Modal>
     </div>
   );

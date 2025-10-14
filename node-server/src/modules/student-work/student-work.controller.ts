@@ -4,7 +4,7 @@ import {
   Post,
   Body,
   Param,
-  Put,
+  Patch,
   Delete,
 } from '@nestjs/common';
 import { StudentWorkService } from './student-work.service';
@@ -30,7 +30,7 @@ export class StudentWorkController {
     return this.studentWorkService.create(studentWork);
   }
 
-  @Put(':id')
+  @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() studentWork: Partial<StudentWork>,

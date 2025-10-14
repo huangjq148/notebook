@@ -72,7 +72,7 @@ func SetupRoutes(app *fiber.App) {
 	alarmRouter.Get("/sendMessageToWeChatWebhook", alarm.SendMessageToWeChatWebhook)
 	alarmRouter.Get("", alarm.QueryAlarmList)
 	alarmRouter.Post("", alarm.CreateAlarm)
-	alarmRouter.Put("/:id", alarm.UpdateAlarm)
+	alarmRouter.Patch("/:id", alarm.UpdateAlarm)
 	alarmRouter.Delete("/:id", alarm.DeleteAlarm)
 	alarmRouter.Get("/:id", alarm.CreateAlarm)
 
@@ -90,7 +90,7 @@ func SetupRoutes(app *fiber.App) {
 	studentWorkRouter.Post("", studentWork.CreateStudentWork)
 	studentWorkRouter.Get("/:id", studentWork.GetStudentWorkById)
 	studentWorkRouter.Delete("/:id", studentWork.DeleteStudentWork)
-	studentWorkRouter.Put("/:id", studentWork.UpdateStudentWork)
+	studentWorkRouter.Patch("/:id", studentWork.UpdateStudentWork)
 
 	calculatorRouter := authVerifyRouter.Group("/calculator")
 	calculatorRouter.Get("", calculator.QueryCalculatorList)

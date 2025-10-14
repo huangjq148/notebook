@@ -4,7 +4,7 @@ import {
   Post,
   Body,
   Param,
-  Put,
+  Patch,
   Delete,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
@@ -21,7 +21,7 @@ export class ProductController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Product | null> {
+  findOne(@Param('id') id: string): Promise<QueryResult<Product | null>> {
     return this.productService.findOne(+id);
   }
 
@@ -30,7 +30,7 @@ export class ProductController {
     return this.productService.create(product);
   }
 
-  @Put(':id')
+  @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() product: Partial<Product>,

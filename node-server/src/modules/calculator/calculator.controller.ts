@@ -4,7 +4,7 @@ import {
   Post,
   Body,
   Param,
-  Put,
+  Patch,
   Delete,
 } from '@nestjs/common';
 import { CalculatorService } from './calculator.service';
@@ -30,7 +30,7 @@ export class CalculatorController {
     return this.calculatorService.create(calculator);
   }
 
-  @Put(':id')
+  @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() calculator: Partial<Calculator>,

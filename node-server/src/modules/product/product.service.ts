@@ -16,8 +16,9 @@ export class ProductService {
     return ResponseResult.page<Product>(queryResult);
   }
 
-  async findOne(id: number): Promise<Product | null> {
-    return this.productRepository.findOne({ where: { id } });
+  async findOne(id: number): Promise<QueryResult<Product | null>> {
+    const queryResult = await this.productRepository.findOne({ where: { id } });
+    return ResponseResult.success<Product | null>(queryResult);
   }
 
   async create(product: Partial<Product>): Promise<Product> {

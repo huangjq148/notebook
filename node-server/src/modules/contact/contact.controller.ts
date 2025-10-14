@@ -4,7 +4,7 @@ import {
   Post,
   Body,
   Param,
-  Put,
+  Patch,
   Delete,
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
@@ -30,7 +30,7 @@ export class ContactController {
     return this.contactService.create(contact);
   }
 
-  @Put(':id')
+  @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() contact: Partial<Contact>,

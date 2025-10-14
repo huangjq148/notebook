@@ -30,7 +30,7 @@ export const queryOrderById = async (id: number): Promise<Order> => {
 
 export const updateOrder = async (data: Order): Promise<void> => {
   return request(`/order/${data.id}`, {
-    method: 'PUT',
+    method: 'PATCH',
     data,
   });
 };
@@ -43,7 +43,7 @@ export const deleteOrder = async (id: number): Promise<void> => {
 
 export const changeOrderStatus = async (id: number, status: string): Promise<void> => {
   return request(`/order/${id}/status/${status}`, {
-    method: 'PUT',
+    method: 'PATCH',
   });
 };
 

@@ -4,7 +4,7 @@ import {
   Post,
   Body,
   Param,
-  Put,
+  Patch,
   Delete,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
@@ -45,7 +45,7 @@ export class OrderController {
     return this.orderService.create(order);
   }
 
-  @Put(':id')
+  @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() order: Partial<Order>,

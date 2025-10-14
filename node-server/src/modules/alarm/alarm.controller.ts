@@ -4,7 +4,7 @@ import {
   Post,
   Body,
   Param,
-  Put,
+  Patch,
   Delete,
 } from '@nestjs/common';
 import { AlarmService } from './alarm.service';
@@ -30,7 +30,7 @@ export class AlarmController {
     return this.alarmService.create(alarm);
   }
 
-  @Put(':id')
+  @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() alarm: Partial<Alarm>,

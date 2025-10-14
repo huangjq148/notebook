@@ -28,7 +28,7 @@ export const createStudentWork = async (data: StudentWork): Promise<void> => {
 
 export const updateStudentWork = async (data: StudentWork): Promise<void> => {
   return request(`/student-work/${data.id}`, {
-    method: 'PUT',
+    method: 'PATCH',
     data,
   });
 };
