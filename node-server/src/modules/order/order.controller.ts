@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { Order, OrderStats } from './order.entity';
-import { QueryResult } from 'src/utils';
+import { QueryResult, ResponseResult } from 'src/utils';
 
 @Controller('order')
 export class OrderController {
@@ -46,8 +46,17 @@ export class OrderController {
   }
 
   @Delete('revoke/stock/:id')
-  revokeStock(@Param('id') id: string): Promise<QueryResult<any>> {
-    return this.orderService.revokeStock(+id);
+  async revokeStock(@Param('id') id: string): Promise<QueryResult<any>> {
+    let result: QueryResult<any>;
+
+    try {
+      const message = await this.orderService.revokeStock(+id);
+      result = ResponseResult.successMessage<string>(message);
+    } catch (e) {
+      result = ResponseResult.error<string>('');
+    }
+
+    return result;
   }
 
   @Patch(':id')

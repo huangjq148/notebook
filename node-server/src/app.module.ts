@@ -12,6 +12,7 @@ import { OrderModule } from './modules/order/order.module';
 import { StudentWorkModule } from './modules/student-work/student-work.module';
 import { ProductModule } from './modules/product/product.module';
 import { StockModule } from './modules/stock/stock.module';
+import { UserAccountModule } from './modules/user-account/user-account.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { StockModule } from './modules/stock/stock.module';
     StudentWorkModule,
     ProductModule,
     StockModule,
+    UserAccountModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -20,10 +20,10 @@ export class OrderService {
     private readonly stockRepository: Repository<Stock>,
   ) {}
 
-  async revokeStock(id: number): Promise<QueryResult<any>> {
+  async revokeStock(id: number): Promise<string> {
     const order = await this.orderRepository.findOne({ where: { id } });
     if (!order) {
-      return ResponseResult.error('订单不存在');
+      throw new Error('订单不存在');
     }
     await this.stockRepository.increment(
       { id: order.stockId },
@@ -31,7 +31,7 @@ export class OrderService {
       order.number,
     );
     await this.orderRepository.delete(id);
-    return ResponseResult.successMessage('订单已撤销');
+    return '订单已撤销';
   }
 
   async findAll(): Promise<QueryResult<Order>> {

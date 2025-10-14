@@ -5,19 +5,25 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from '../../authorization/jwt/jwt.strategy';
 import { AuthController } from './auth.controller';
-import { UsersService } from '../users/users.service';
-import { UsersModule } from '../users/users.module';
+// import { UsersService } from '../users/users.service';
+// import { UsersModule } from '../users/users.module';
+import { UserAccountModule } from '../user-account/user-account.module';
+import { UserAccountService } from '../user-account/user-account.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserAccount } from '../user-account/user-account.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([UserAccount]),
     PassportModule,
     JwtModule.register({
       secret: 'SECRET_KEY', // 建议使用 .env 读取
       signOptions: { expiresIn: '24h' },
     }),
-    UsersModule, // 👈 必须导入，否则 UsersService 注入失败
+    // UsersModule, // 👈 必须导入，否则 UsersService 注入失败
+    UserAccountModule,
   ],
-  providers: [AuthService, JwtStrategy, UsersService],
+  providers: [AuthService, JwtStrategy, UserAccountService],
   controllers: [AuthController],
 })
 export class AuthModule {}

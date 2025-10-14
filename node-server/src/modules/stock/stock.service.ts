@@ -6,6 +6,11 @@ import { ResponseResult, QueryResult } from 'src/utils';
 
 @Injectable()
 export class StockService {
+  constructor(
+    @InjectRepository(Stock)
+    private readonly stockRepository: Repository<Stock>,
+  ) {}
+
   async statistics(): Promise<QueryResult<StockStatus>> {
     const result = (await this.stockRepository
       .createQueryBuilder('t')
@@ -19,10 +24,6 @@ export class StockService {
     };
     return ResponseResult.success<StockStatus>(result);
   }
-  constructor(
-    @InjectRepository(Stock)
-    private readonly stockRepository: Repository<Stock>,
-  ) {}
 
   async findAll(): Promise<QueryResult<Stock>> {
     const queryResult = await this.stockRepository.findAndCount();
