@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import { inspectorServer } from '@react-dev-inspector/vite-plugin';
+import { proxy } from './proxy';
 
 function pathResolve(dir: string) {
   return resolve(__dirname, '.', dir);
@@ -27,13 +28,6 @@ export default defineConfig({
   server: {
     port: 8001,
     host: true,
-    proxy: {
-      '/api/': {
-        target: `http://localhost:3000/`,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-        // target: `http://${config.VITE_APP_SERVER}:${config.VITE_APP_SERVER_PORT}`,
-        changeOrigin: true,
-      },
-    },
+    proxy,
   },
 });

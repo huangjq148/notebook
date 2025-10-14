@@ -53,3 +53,10 @@ export class Order {
   @Column({ length: 40, nullable: true })
   orderTime: string;
 }
+
+export interface OrderStats {
+  buyMoney: string; // SUM 函数通常返回字符串
+  sellMoney: string;
+  number: string;
+  otherCost: string;
+}

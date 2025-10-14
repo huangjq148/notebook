@@ -10,6 +10,7 @@ import { AlarmModule } from './modules/alarm/alarm.module';
 import { CalculatorModule } from './modules/calculator/calculator.module';
 import { OrderModule } from './modules/order/order.module';
 import { StudentWorkModule } from './modules/student-work/student-work.module';
+import { ProductModule } from './modules/product/product.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { StudentWorkModule } from './modules/student-work/student-work.module';
     CalculatorModule,
     OrderModule,
     StudentWorkModule,
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [AppService],

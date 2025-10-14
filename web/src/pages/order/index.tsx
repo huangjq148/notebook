@@ -213,7 +213,7 @@ export default () => {
           ) : (
             <TextButton onClick={() => handleOrderStatusChange(record.id, "1")}>未完成</TextButton>
           )} */}
-          <DeleteConfirmButton
+          {/* <DeleteConfirmButton
             onConfirm={() => {
               if (record.stockId) {
                 handleRevokeOutStock(record);
@@ -223,7 +223,24 @@ export default () => {
             }}
           >
             {record.stockId ? <TextButton>撤销出库</TextButton> : <TextButton>删除</TextButton>}
-          </DeleteConfirmButton>
+          </DeleteConfirmButton> */}
+          {record.stockId ? (
+            <TextButton
+              onClick={() => {
+                handleRevokeOutStock(record);
+              }}
+            >
+              撤销出库
+            </TextButton>
+          ) : (
+            <TextButton
+              onClick={() => {
+                handleOrderDelete(record.id);
+              }}
+            >
+              删除
+            </TextButton>
+          )}
         </Space>
       ),
     },

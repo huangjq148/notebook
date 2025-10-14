@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Calculator } from './calculator.entity';
+import { ResponseResult, QueryResult } from 'src/utils';
 
 @Injectable()
 export class CalculatorService {
@@ -10,8 +11,9 @@ export class CalculatorService {
     private readonly calculatorRepository: Repository<Calculator>,
   ) {}
 
-  async findAll(): Promise<Calculator[]> {
-    return this.calculatorRepository.find();
+  async findAll(): Promise<QueryResult<Calculator>> {
+    const result = await this.calculatorRepository.findAndCount();
+    return ResponseResult.page<Calculator>(result);
   }
 
   async findOne(id: number): Promise<Calculator | null> {

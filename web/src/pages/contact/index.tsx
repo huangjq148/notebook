@@ -5,6 +5,7 @@ import { Button, Form, Input, message, Modal, Space, Table } from 'antd';
 import { useState } from 'react';
 import EditPage from './Edit';
 import styles from './index.module.less';
+import { Contact } from '@/global';
 
 export default () => {
   const [conditions, setConditions] = useState({});
@@ -26,7 +27,7 @@ export default () => {
   const columns = [
     {
       title: '姓名',
-      dataIndex: 'name',
+      dataIndex: 'realname',
     },
     {
       title: '电话',

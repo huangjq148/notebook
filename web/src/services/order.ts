@@ -1,3 +1,4 @@
+import { Order } from '@/global';
 import request from '@/utils/request';
 
 export const createOrder = async (data: Order): Promise<void> => {
@@ -28,8 +29,8 @@ export const queryOrderById = async (id: number): Promise<Order> => {
 };
 
 export const updateOrder = async (data: Order): Promise<void> => {
-  return request(`/order`, {
-    method: 'PATCH',
+  return request(`/order/${data.id}`, {
+    method: 'PUT',
     data,
   });
 };
@@ -42,7 +43,7 @@ export const deleteOrder = async (id: number): Promise<void> => {
 
 export const changeOrderStatus = async (id: number, status: string): Promise<void> => {
   return request(`/order/${id}/status/${status}`, {
-    method: 'PATCH',
+    method: 'PUT',
   });
 };
 

@@ -9,14 +9,14 @@ import {
 } from '@nestjs/common';
 import { StudentWorkService } from './student-work.service';
 import { StudentWork } from './student-work.entity';
-import { PageResult } from 'src/utils';
+import { QueryResult } from 'src/utils';
 
 @Controller('student-work')
 export class StudentWorkController {
   constructor(private readonly studentWorkService: StudentWorkService) {}
 
   @Get()
-  findAll(): Promise<PageResult<StudentWork>> {
+  findAll(): Promise<QueryResult<StudentWork>> {
     return this.studentWorkService.findAll();
   }
 

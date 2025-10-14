@@ -1,8 +1,8 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { join } from 'path';
+// import { join } from 'path';
 
 // 根据环境选择不同的数据库配置
-const isDevelopment = process.env.NODE_ENV !== 'production';
+// const isDevelopment = process.env.NODE_ENV !== 'production';
 
 export const databaseConfig: TypeOrmModuleOptions = {
   // 生产环境使用MySQL
