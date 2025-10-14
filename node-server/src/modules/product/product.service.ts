@@ -26,12 +26,17 @@ export class ProductService {
     return this.productRepository.save(newProduct);
   }
 
-  async update(id: number, product: Partial<Product>): Promise<Product | null> {
+  async update(
+    id: number,
+    product: Partial<Product>,
+  ): Promise<QueryResult<Product | null>> {
     await this.productRepository.update(id, product);
-    return this.productRepository.findOne({ where: { id } });
+    const queryResult = await this.productRepository.findOne({ where: { id } });
+    return ResponseResult.success<Product | null>(queryResult);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<QueryResult<string>> {
     await this.productRepository.delete(id);
+    return ResponseResult.successMessage<string>('删除成功');
   }
 }

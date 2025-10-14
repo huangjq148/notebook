@@ -1,5 +1,5 @@
 export type QueryResult<T> = {
-  data:
+  data?:
     | T
     | {
         content?: T[];
@@ -29,7 +29,15 @@ export class ResponseResult {
     };
   }
 
-  static error(message: string): QueryResult<any> {
+  static successMessage<I>(message: string): QueryResult<I> {
+    return {
+      message: message || '查询成功',
+      status: 'success',
+    };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static error<T>(message: string): QueryResult<string> {
     return {
       data: {},
       message,

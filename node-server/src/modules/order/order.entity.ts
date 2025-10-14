@@ -23,8 +23,8 @@ export class Order {
   @Column({ length: 20, nullable: true, default: '0' })
   sellPrice: string;
 
-  @Column({ length: 20, nullable: true, default: '0' })
-  number: string;
+  @Column({ nullable: false })
+  number: number;
 
   @Column({ length: 255, nullable: true })
   remark: string;

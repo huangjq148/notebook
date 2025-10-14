@@ -34,12 +34,12 @@ export class ProductController {
   update(
     @Param('id') id: string,
     @Body() product: Partial<Product>,
-  ): Promise<Product | null> {
+  ): Promise<QueryResult<Product | null>> {
     return this.productService.update(+id, product);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
+  remove(@Param('id') id: string): Promise<QueryResult<string>> {
     return this.productService.remove(+id);
   }
 }

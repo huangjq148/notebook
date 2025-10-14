@@ -1,3 +1,4 @@
+import { Stock } from '@/global';
 import request from '@/utils/request';
 
 export const createStock = async (data: Stock): Promise<void> => {
@@ -28,7 +29,7 @@ export const queryStockById = async (id: number): Promise<Stock> => {
 };
 
 export const updateStock = async (data: Stock): Promise<void> => {
-  return request(`/stock`, {
+  return request(`/stock/${data.id}`, {
     method: 'PATCH',
     data,
   });

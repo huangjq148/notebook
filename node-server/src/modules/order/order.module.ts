@@ -7,12 +7,15 @@ import { Product } from '../product/product.entity';
 import { ProductModule } from '../product/product.module';
 import { Contact } from '../contact/contact.entity';
 import { ContactModule } from '../contact/contact.module';
+import { Stock } from '../stock/stock.entity';
+import { StockModule } from '../stock/stock.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, Product, Contact]),
+    TypeOrmModule.forFeature([Order, Product, Contact, Stock]),
     ProductModule,
     ContactModule,
+    StockModule,
   ],
   controllers: [OrderController],
   providers: [OrderService],

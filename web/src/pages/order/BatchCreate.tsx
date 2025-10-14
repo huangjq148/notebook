@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import ContactList from './ContactList';
 import styles from './index.module.less';
 import ProductList from './ProductList';
+import { Contact, Order, Product } from '@/global';
 
 type Props = {
   id?: number;

@@ -1,27 +1,21 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity('t_alarm')
-export class Alarm {
+@Entity('t_stock')
+export class Stock {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ length: 255, nullable: true })
-  title: string;
+  name: string;
 
   @Column({ length: 255, nullable: true })
-  date: string;
+  buyPrice: string;
 
   @Column({ length: 255, nullable: true })
-  time: string;
+  sellPrice: string;
 
-  @Column({ length: 255, nullable: true })
-  description: string;
-
-  @Column({ length: 1, nullable: true })
-  isEnable: string;
-
-  @Column({ length: 1, nullable: true })
-  isRepeat: string;
+  @Column({ nullable: true })
+  number: number;
 
   @Column({ nullable: true })
   createUser: number;
@@ -34,4 +28,9 @@ export class Alarm {
 
   @Column({ length: 20, nullable: true })
   updateTime: string;
+}
+
+export interface StockStatus {
+  buyMoney: number;
+  sellMoney: number;
 }

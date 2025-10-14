@@ -237,6 +237,7 @@ export default () => {
               onClick={() => {
                 handleOrderDelete(record.id);
               }}
+              danger
             >
               删除
             </TextButton>

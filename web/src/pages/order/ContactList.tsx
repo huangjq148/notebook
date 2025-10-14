@@ -5,6 +5,7 @@ import { Button, Form, Input, message, Modal, Space, Table } from 'antd';
 import { useState } from 'react';
 import EditPage from '@/pages/contact/Edit';
 import styles from './index.module.less';
+import { Contact } from '@/global';
 
 type Props = {
   onRowSelect: (val: Contact) => void;
@@ -34,7 +35,7 @@ export default (props: Props) => {
   const columns = [
     {
       title: '姓名',
-      dataIndex: 'name',
+      dataIndex: 'realname',
     },
     {
       title: '电话',

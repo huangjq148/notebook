@@ -41,8 +41,13 @@ export class OrderController {
   }
 
   @Post()
-  create(@Body() order: Partial<Order>): Promise<Order> {
+  create(@Body() order: Partial<Order>): Promise<QueryResult<Order | string>> {
     return this.orderService.create(order);
+  }
+
+  @Delete('revoke/stock/:id')
+  revokeStock(@Param('id') id: string): Promise<QueryResult<any>> {
+    return this.orderService.revokeStock(+id);
   }
 
   @Patch(':id')

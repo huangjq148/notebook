@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { TextButton } from '@/components';
 import EditPage from './Edit';
 import styles from './index.module.less';
+import { Product } from '@/global';
 
 export default () => {
   const [conditions, setConditions] = useState({});
@@ -44,9 +45,10 @@ export default () => {
       render: (record: Product) => (
         <Space size="middle">
           <TextButton onClick={() => handleEditClick(record.id)}>编辑</TextButton>
-          <DeleteConfirmButton onConfirm={() => handleProductDelete(record.id)}>
+          {/* <DeleteConfirmButton onConfirm={() => handleProductDelete(record.id)}>
             <TextButton>删除</TextButton>
-          </DeleteConfirmButton>
+          </DeleteConfirmButton> */}
+          <TextButton danger onClick={() => handleProductDelete(record.id)}>删除</TextButton>
         </Space>
       ),
     },

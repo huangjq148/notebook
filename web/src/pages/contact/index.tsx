@@ -79,7 +79,7 @@ export default () => {
     <div>
       <SearchForm>
         <Form onFinish={handleFormSearch} layout="inline">
-          <Form.Item label="姓名" name="name">
+          <Form.Item label="姓名" name="realname">
             <Input allowClear placeholder="联系人姓名" />
           </Form.Item>
           <Form.Item label="电话" name="phone">
