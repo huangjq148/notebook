@@ -8,28 +8,28 @@ import {
   UseGuards,
   Patch,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { User } from '../../entities/user.entity';
+import { UserService } from './user.service';
+import { User } from './user.entity';
 import { JwtAuthGuard } from '../../authorization/jwt/jwt.guard';
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+export class UserController {
+  constructor(private readonly userService: UserService) {}
 
   @Get()
   findAll(): Promise<User[]> {
-    return this.usersService.findAll();
+    return this.userService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string): Promise<User | null> {
-    return this.usersService.findOne(+id);
+    return this.userService.findOne(+id);
   }
 
   @Post()
   create(@Body() user: Partial<User>): Promise<User> {
-    return this.usersService.create(user);
+    return this.userService.create(user);
   }
 
   @Patch(':id')
@@ -37,11 +37,11 @@ export class UsersController {
     @Param('id') id: string,
     @Body() user: Partial<User>,
   ): Promise<User | null> {
-    return this.usersService.update(+id, user);
+    return this.userService.update(+id, user);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string): Promise<void> {
-    return this.usersService.remove(+id);
+    return this.userService.remove(+id);
   }
 }

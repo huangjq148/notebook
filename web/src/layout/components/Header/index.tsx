@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { getTokenList } from '@/utils';
 import { setToken, deleteCatchToken } from '@/utils';
 
-const LayoutHeader = (props: { collapsed: boolean; setCollapsed: Function }) => {
+const LayoutHeader = (props: { collapsed: boolean; setCollapsed: (val: boolean) => void }) => {
   const { collapsed, setCollapsed } = props;
   const navigate = useNavigate();
   const {
@@ -94,7 +94,7 @@ const LayoutHeader = (props: { collapsed: boolean; setCollapsed: Function }) => 
       >
         <Space>
           <UserOutlined />
-          <span className={styles.userInfo}>{userInfo.name ?? '-'} </span>
+          <span className={styles.userInfo}>{userInfo.realname ?? '-'} </span>
         </Space>
       </Dropdown>
     );
@@ -126,10 +126,16 @@ const LayoutHeader = (props: { collapsed: boolean; setCollapsed: Function }) => 
             <List.Item
               key={item.username}
               onClick={() => {
-                item.username !== userInfo.username && setSelectUser(item);
+                if (item.username !== userInfo.username) {
+                  setSelectUser(item);
+                }
               }}
               actions={[
-                <span className={styles.deleteButton} onClick={(e) => handleDeleteTokenCatch(e, item.username)}>
+                <span
+                  key={item.username}
+                  className={styles.deleteButton}
+                  onClick={(e) => handleDeleteTokenCatch(e, item.username)}
+                >
                   删除
                 </span>,
               ]}

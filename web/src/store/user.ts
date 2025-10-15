@@ -2,6 +2,7 @@ import create from 'zustand';
 import { message } from 'antd';
 import { fetchUserInfo } from '@/services/user';
 import { removeToken } from '@/utils';
+import { UserInfo } from '@/global';
 
 export interface UserInfoModel {
   /** 用户信息 */
@@ -18,7 +19,7 @@ export default create(
   (set: (params: Partial<UserInfoModel>) => void, get: () => Required<UserInfoModel>): UserInfoModel => ({
     userInfo: {
       id: '',
-      name: '-',
+      realname: '-',
       createUser: '',
       updateUser: '',
       createTime: '',

@@ -1,5 +1,9 @@
 // auth/jwt.guard.ts
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
@@ -9,7 +13,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest(err, user, info, context) {
+  handleRequest(err, user, info) {
     if (err || !user) {
       console.error('❌ JWT 验证失败:', err || info?.message);
       throw err || new UnauthorizedException('Token 无效或过期');

@@ -21,15 +21,15 @@ export class AuthController {
   async login(
     @Body() body: { username: string; password: string },
   ): Promise<QueryResult<{ access_token: string }>> {
-    const user = await this.authService.validateUser(
+    const userAccount = await this.authService.validateUser(
       body.username,
       body.password,
     );
-    if (!user) {
+    if (!userAccount) {
       throw new Error('用户名或密码错误');
     }
 
-    const token = this.authService.login(user);
+    const token = this.authService.login(userAccount);
 
     return ResponseResult.success<{ access_token: string }>(token);
   }
@@ -38,6 +38,6 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req: { user: Partial<UserAccount> }): any {
-    return req.user; // 会自动注入JWT中的payload
+    return ResponseResult.success(req.user); // 会自动注入JWT中的payload
   }
 }

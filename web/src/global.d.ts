@@ -19,7 +19,7 @@ declare interface CreateInfo {
 
 declare interface UserInfo extends CreateInfo {
   id: string;
-  name?: string;
+  realname?: string;
   // 账号用户名
   username?: string;
 }

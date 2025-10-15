@@ -45,7 +45,6 @@ axios.interceptors.response.use(
       code: number;
     }>,
   ) => {
-    debugger
     if (error?.response?.data.code === 401 || error.status === 401) {
       window.location.href = '/login';
     }
