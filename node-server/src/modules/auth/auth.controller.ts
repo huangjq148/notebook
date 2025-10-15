@@ -10,6 +10,7 @@ import {
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../authorization/jwt/jwt.guard';
 import { QueryResult, ResponseResult } from 'src/utils';
+import { UserAccount } from '../user-account/user-account.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -19,7 +20,7 @@ export class AuthController {
   @Post('login')
   async login(
     @Body() body: { username: string; password: string },
-  ): Promise<QueryResult<string>> {
+  ): Promise<QueryResult<{ access_token: string }>> {
     const user = await this.authService.validateUser(
       body.username,
       body.password,
@@ -30,14 +31,13 @@ export class AuthController {
 
     const token = this.authService.login(user);
 
-    return ResponseResult.success<string>(token.access_token);
+    return ResponseResult.success<{ access_token: string }>(token);
   }
 
   // 测试受保护接口
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req): any {
-    debugger
+  getProfile(@Request() req: { user: Partial<UserAccount> }): any {
     return req.user; // 会自动注入JWT中的payload
   }
 }
