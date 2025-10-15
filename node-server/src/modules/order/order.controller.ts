@@ -16,33 +16,49 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Get()
-  findAll(): Promise<QueryResult<Order>> {
-    return this.orderService.findAll();
+  async queryPage(): Promise<QueryResult<Order>> {
+    const queryResult = await this.orderService.queryPage();
+
+    return ResponseResult.page<Order>(queryResult);
   }
 
   @Get('products')
-  products(): Promise<QueryResult<string[]>> {
-    return this.orderService.products();
+  async products(): Promise<QueryResult<string[]>> {
+    const productNames = await this.orderService.productNames();
+    return ResponseResult.success<string[]>(productNames);
   }
 
   @Get('contacts')
-  sales(): Promise<QueryResult<string[]>> {
-    return this.orderService.contacts();
+  async contacts(): Promise<QueryResult<string[]>> {
+    const contactNames = await this.orderService.contactNames();
+    return ResponseResult.success<string[]>(contactNames);
   }
 
   @Get('statistics')
-  statistics(): Promise<QueryResult<OrderStats>> {
-    return this.orderService.statistics();
+  async statistics(): Promise<QueryResult<OrderStats>> {
+    const orderStats = await this.orderService.statistics();
+
+    return ResponseResult.success<OrderStats>(orderStats);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<QueryResult<Order | null>> {
-    return this.orderService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<QueryResult<Order | null>> {
+    const queryResult = await this.orderService.findOne(+id);
+    return ResponseResult.success<Order | null>(queryResult);
   }
 
   @Post()
-  create(@Body() order: Partial<Order>): Promise<QueryResult<Order | string>> {
-    return this.orderService.create(order);
+  async create(
+    @Body() order: Partial<Order>,
+  ): Promise<QueryResult<Order | string>> {
+    let response: QueryResult<Order | string>;
+    try {
+      const result = await this.orderService.create(order);
+      response = ResponseResult.success<Order | string>(result);
+    } catch (e) {
+      response = ResponseResult.error<string>(e?.message ?? '操作失败');
+    }
+    return response;
   }
 
   @Delete('revoke/stock/:id')
@@ -52,23 +68,27 @@ export class OrderController {
     try {
       const message = await this.orderService.revokeStock(+id);
       result = ResponseResult.successMessage<string>(message);
-    } catch (e) {
-      result = ResponseResult.error<string>('');
+    } catch (e: any) {
+      result = ResponseResult.error<string>(e?.message ?? '操作失败');
     }
 
     return result;
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() order: Partial<Order>,
   ): Promise<QueryResult<Order | null>> {
-    return this.orderService.update(+id, order);
+    const result = await this.orderService.update(+id, order);
+    return ResponseResult.success<Order | null>(result);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<QueryResult<any>> {
-    return this.orderService.remove(+id);
+  async remove(@Param('id') id: string): Promise<QueryResult<any>> {
+    const result = ResponseResult.successMessage<string>(
+      await this.orderService.remove(+id),
+    );
+    return result;
   }
 }

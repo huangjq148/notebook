@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryResult, ResponseResult } from 'src/utils';
 import { Repository } from 'typeorm';
 import { Contact } from '../contact/contact.entity';
 import { Product } from '../product/product.entity';
-import { Order, OrderStats } from './order.entity';
 import { Stock } from '../stock/stock.entity';
+import { Order, OrderStats } from './order.entity';
 
 @Injectable()
 export class OrderService {
@@ -34,31 +33,31 @@ export class OrderService {
     return '订单已撤销';
   }
 
-  async findAll(): Promise<QueryResult<Order>> {
+  async queryPage(): Promise<[Order[], number]> {
     const queryResult = await this.orderRepository.findAndCount({
       order: { id: 'DESC' },
     });
-    return ResponseResult.page<Order>(queryResult);
+    return queryResult;
   }
 
-  async findOne(id: number): Promise<QueryResult<Order | null>> {
+  async findOne(id: number): Promise<Order | null> {
     const queryResult = await this.orderRepository.findOne({ where: { id } });
-    return ResponseResult.success<Order | null>(queryResult);
+    return queryResult;
   }
 
-  async create(order: Partial<Order>): Promise<QueryResult<Order | string>> {
+  async create(order: Partial<Order>): Promise<Order | string> {
     if (!order.number) {
-      return ResponseResult.error('请输入购买数量');
+      throw new Error('请输入购买数量');
     }
     if (order.stockId) {
       const stock = await this.stockRepository.findOne({
         where: { id: order.stockId },
       });
       if (!stock) {
-        return ResponseResult.error('无此商品');
+        throw new Error('无此商品');
       }
       if (stock.number < order.number) {
-        return ResponseResult.error('库存不足');
+        throw new Error('库存不足');
       }
       await this.stockRepository.decrement(
         { id: order.stockId },
@@ -68,38 +67,31 @@ export class OrderService {
     }
     const newOrder = this.orderRepository.create(order);
     const queryResult = await this.orderRepository.save(newOrder);
-    return ResponseResult.success<Order>(queryResult);
+    return queryResult;
   }
 
-  async update(
-    id: number,
-    order: Partial<Order>,
-  ): Promise<QueryResult<Order | null>> {
+  async update(id: number, order: Partial<Order>): Promise<Order | null> {
     await this.orderRepository.update(id, order);
     const queryResult = await this.orderRepository.findOne({ where: { id } });
-    return ResponseResult.success<Order | null>(queryResult);
+    return queryResult;
   }
 
-  async remove(id: number): Promise<QueryResult<any>> {
+  async remove(id: number): Promise<string> {
     await this.orderRepository.delete(id);
-    return ResponseResult.success<any>({});
+    return '操作成功';
   }
 
-  async products(): Promise<QueryResult<string[]>> {
+  async productNames(): Promise<string[]> {
     const queryResult = await this.productRepository.find();
-    return ResponseResult.success<string[]>(
-      queryResult.map((item) => item.name),
-    );
+    return queryResult.map((item) => item.name);
   }
 
-  async contacts(): Promise<QueryResult<string[]>> {
+  async contactNames(): Promise<string[]> {
     const queryResult = await this.contactRepository.find();
-    return ResponseResult.success<string[]>(
-      queryResult.map((item) => item.realname),
-    );
+    return queryResult.map((item) => item.realname);
   }
 
-  async statistics(): Promise<QueryResult<OrderStats>> {
+  async statistics(): Promise<OrderStats> {
     const result = (await this.orderRepository
       .createQueryBuilder('t')
       .select([
@@ -114,6 +106,6 @@ export class OrderService {
       number: '0',
       otherCost: '0',
     };
-    return ResponseResult.success<OrderStats>(result);
+    return result;
   }
 }
