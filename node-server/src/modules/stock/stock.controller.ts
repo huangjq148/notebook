@@ -9,42 +9,50 @@ import {
 } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { Stock, StockStatus } from './stock.entity';
-import { QueryResult } from 'src/utils';
+import { QueryResult, ResponseResult } from 'src/utils';
 
 @Controller('stock')
 export class StockController {
   constructor(private readonly stockService: StockService) {}
 
   @Get()
-  findAll(): Promise<QueryResult<Stock>> {
-    return this.stockService.findAll();
+  async queryPage(): Promise<QueryResult<Stock>> {
+    const queryResult = await this.stockService.queryPage();
+    return ResponseResult.page<Stock>(queryResult);
   }
 
   @Get('statistics')
-  statistics(): Promise<QueryResult<StockStatus>> {
-    return this.stockService.statistics();
+  async statistics(): Promise<QueryResult<StockStatus>> {
+    const result = await this.stockService.statistics();
+    return ResponseResult.success<StockStatus>(result);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<QueryResult<Stock | null>> {
-    return this.stockService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<QueryResult<Stock | null>> {
+    const queryResult = await this.stockService.findOne(+id);
+    return ResponseResult.success<Stock | null>(queryResult);
   }
 
   @Post()
-  create(@Body() stock: Partial<Stock>): Promise<QueryResult<Stock>> {
-    return this.stockService.create(stock);
+  async create(@Body() stock: Partial<Stock>): Promise<QueryResult<Stock>> {
+    const queryResult = await this.stockService.create(stock);
+    return ResponseResult.success<Stock>(queryResult);
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() stock: Partial<Stock>,
   ): Promise<QueryResult<Stock | null>> {
-    return this.stockService.update(+id, stock);
+    const queryResult = await this.stockService.update(+id, stock);
+    return ResponseResult.success<Stock | null>(queryResult);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<QueryResult<string>> {
-    return this.stockService.remove(+id);
+  async remove(@Param('id') id: string): Promise<QueryResult<string>> {
+    const affected = await this.stockService.remove(+id);
+    return affected > 0
+      ? ResponseResult.successMessage('删除成功')
+      : ResponseResult.error('删除失败');
   }
 }

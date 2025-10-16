@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Stock, StockStatus } from './stock.entity';
-import { ResponseResult, QueryResult } from 'src/utils';
 
 @Injectable()
 export class StockService {
@@ -11,7 +10,7 @@ export class StockService {
     private readonly stockRepository: Repository<Stock>,
   ) {}
 
-  async statistics(): Promise<QueryResult<StockStatus>> {
+  async statistics(): Promise<StockStatus> {
     const result = (await this.stockRepository
       .createQueryBuilder('t')
       .select([
@@ -22,36 +21,31 @@ export class StockService {
       buyMoney: 0,
       sellMoney: 0,
     };
-    return ResponseResult.success<StockStatus>(result);
+    return result;
   }
 
-  async findAll(): Promise<QueryResult<Stock>> {
+  async queryPage(): Promise<[Stock[], number]> {
     const queryResult = await this.stockRepository.findAndCount();
-    return ResponseResult.page<Stock>(queryResult);
+    return queryResult;
   }
 
-  async findOne(id: number): Promise<QueryResult<Stock | null>> {
+  async findOne(id: number): Promise<Stock | null> {
     const queryResult = await this.stockRepository.findOne({ where: { id } });
-    return ResponseResult.success<Stock | null>(queryResult);
+    return queryResult;
   }
 
-  async create(stock: Partial<Stock>): Promise<QueryResult<Stock>> {
+  async create(stock: Partial<Stock>): Promise<Stock> {
     const newStock = this.stockRepository.create(stock);
-    const queryResult = await this.stockRepository.save(newStock);
-    return ResponseResult.success<Stock>(queryResult);
+    return await this.stockRepository.save(newStock);
   }
 
-  async update(
-    id: number,
-    stock: Partial<Stock>,
-  ): Promise<QueryResult<Stock | null>> {
+  async update(id: number, stock: Partial<Stock>): Promise<Stock | null> {
     await this.stockRepository.update(id, stock);
-    const queryResult = await this.stockRepository.findOne({ where: { id } });
-    return ResponseResult.success<Stock | null>(queryResult);
+    return this.stockRepository.findOne({ where: { id } });
   }
 
-  async remove(id: number): Promise<QueryResult<string>> {
-    await this.stockRepository.delete(id);
-    return ResponseResult.successMessage('删除成功');
+  async remove(id: number): Promise<number> {
+    const result = await this.stockRepository.delete(id);
+    return result?.affected ?? 0;
   }
 }
