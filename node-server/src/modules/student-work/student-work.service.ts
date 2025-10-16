@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { StudentWork } from './student-work.entity';
-import { ResponseResult, QueryResult } from '../../utils';
 
 @Injectable()
 export class StudentWorkService {
@@ -11,9 +10,10 @@ export class StudentWorkService {
     private readonly studentWorkRepository: Repository<StudentWork>,
   ) {}
 
-  async findAll(): Promise<QueryResult<StudentWork>> {
+  async queryPage(): Promise<[StudentWork[], number]> {
     const result = await this.studentWorkRepository.findAndCount();
-    return ResponseResult.page<StudentWork>(result);
+
+    return result;
   }
 
   async findOne(id: number): Promise<StudentWork | null> {

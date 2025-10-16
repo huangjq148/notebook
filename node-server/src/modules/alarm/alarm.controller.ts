@@ -9,15 +9,17 @@ import {
 } from '@nestjs/common';
 import { AlarmService } from './alarm.service';
 import { Alarm } from './alarm.entity';
-import { QueryResult } from 'src/utils';
+import { QueryResult, ResponseResult } from 'src/utils';
 
 @Controller('alarm')
 export class AlarmController {
   constructor(private readonly alarmService: AlarmService) {}
 
   @Get()
-  findAll(): Promise<QueryResult<Alarm>> {
-    return this.alarmService.findAll();
+  async findAll(): Promise<QueryResult<Alarm>> {
+    const queryResult = await this.alarmService.queryPage();
+
+    return ResponseResult.page<Alarm>(queryResult);
   }
 
   @Get(':id')

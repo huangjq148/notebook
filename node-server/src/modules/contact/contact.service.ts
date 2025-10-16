@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Contact } from './contact.entity';
-import { ResponseResult, QueryResult } from 'src/utils';
 
 @Injectable()
 export class ContactService {
@@ -11,9 +10,9 @@ export class ContactService {
     private readonly contactRepository: Repository<Contact>,
   ) {}
 
-  async findAll(): Promise<QueryResult<Contact>> {
+  async findAll(): Promise<[Contact[], number]> {
     const queryResult = await this.contactRepository.findAndCount();
-    return ResponseResult.page<Contact>(queryResult);
+    return queryResult;
   }
 
   async findOne(id: number): Promise<Contact | null> {

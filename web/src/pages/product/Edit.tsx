@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, message } from 'antd';
 import { createProduct, updateProduct, queryProductById } from '@/services/product';
+import { Product } from '@/global';
 
 type Props = {
   id?: number;
@@ -12,16 +13,20 @@ export default (props: Props) => {
   const [formRef] = Form.useForm();
 
   const handleFormSubmit = async (values: Product) => {
-    if (props.id) {
-      await updateProduct({
-        ...oldData,
-        ...values,
-      });
-    } else {
-      await createProduct(values);
+    try {
+      if (props.id) {
+        await updateProduct({
+          ...oldData,
+          ...values,
+        });
+      } else {
+        await createProduct(values);
+      }
+      message.success('保存成功');
+      props?.onSubmit?.();
+    } catch (e) {
+      message.error("操作失败，请稍后重试");
     }
-    message.success('保存成功');
-    props?.onSubmit?.();
   };
 
   const loadData = async () => {
@@ -48,7 +53,9 @@ export default (props: Props) => {
         <Input placeholder="售价" />
       </Form.Item>
       <Form.Item>
-        <Button htmlType="submit">保存</Button>
+        <Button type="primary" htmlType="submit">
+          保存
+        </Button>
       </Form.Item>
     </Form>
   );

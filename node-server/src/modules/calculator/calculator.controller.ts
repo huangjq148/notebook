@@ -9,15 +9,16 @@ import {
 } from '@nestjs/common';
 import { CalculatorService } from './calculator.service';
 import { Calculator } from './calculator.entity';
-import { QueryResult } from 'src/utils';
+import { QueryResult, ResponseResult } from 'src/utils';
 
 @Controller('calculator')
 export class CalculatorController {
   constructor(private readonly calculatorService: CalculatorService) {}
 
   @Get()
-  findAll(): Promise<QueryResult<Calculator>> {
-    return this.calculatorService.findAll();
+  async findAll(): Promise<QueryResult<Calculator>> {
+    const result = await this.calculatorService.findAll();
+    return ResponseResult.page<Calculator>(result);
   }
 
   @Get(':id')

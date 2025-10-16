@@ -9,15 +9,16 @@ import {
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
 import { Contact } from './contact.entity';
-import { QueryResult } from 'src/utils';
+import { QueryResult, ResponseResult } from 'src/utils';
 
 @Controller('contact')
 export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Get()
-  findAll(): Promise<QueryResult<Contact>> {
-    return this.contactService.findAll();
+  async findAll(): Promise<QueryResult<Contact>> {
+    const queryResult = await this.contactService.findAll();
+    return ResponseResult.page<Contact>(queryResult);
   }
 
   @Get(':id')

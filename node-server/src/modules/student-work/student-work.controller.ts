@@ -9,15 +9,16 @@ import {
 } from '@nestjs/common';
 import { StudentWorkService } from './student-work.service';
 import { StudentWork } from './student-work.entity';
-import { QueryResult } from 'src/utils';
+import { QueryResult, ResponseResult } from 'src/utils';
 
 @Controller('student-work')
 export class StudentWorkController {
   constructor(private readonly studentWorkService: StudentWorkService) {}
 
   @Get()
-  findAll(): Promise<QueryResult<StudentWork>> {
-    return this.studentWorkService.findAll();
+  async queryPage(): Promise<QueryResult<StudentWork>> {
+    const result = await this.studentWorkService.queryPage();
+    return ResponseResult.page<StudentWork>(result);
   }
 
   @Get(':id')

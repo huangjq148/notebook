@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './product.entity';
-import { ResponseResult, QueryResult } from 'src/utils';
 
 @Injectable()
 export class ProductService {
@@ -11,14 +10,14 @@ export class ProductService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async findAll(): Promise<QueryResult<Product>> {
+  async queryPage(): Promise<[Product[], number]> {
     const queryResult = await this.productRepository.findAndCount();
-    return ResponseResult.page<Product>(queryResult);
+    return queryResult;
   }
 
-  async findOne(id: number): Promise<QueryResult<Product | null>> {
+  async findOne(id: number): Promise<Product | null> {
     const queryResult = await this.productRepository.findOne({ where: { id } });
-    return ResponseResult.success<Product | null>(queryResult);
+    return queryResult;
   }
 
   async create(product: Partial<Product>): Promise<Product> {
@@ -26,17 +25,14 @@ export class ProductService {
     return this.productRepository.save(newProduct);
   }
 
-  async update(
-    id: number,
-    product: Partial<Product>,
-  ): Promise<QueryResult<Product | null>> {
+  async update(id: number, product: Partial<Product>): Promise<Product | null> {
     await this.productRepository.update(id, product);
     const queryResult = await this.productRepository.findOne({ where: { id } });
-    return ResponseResult.success<Product | null>(queryResult);
+    return queryResult;
   }
 
-  async remove(id: number): Promise<QueryResult<string>> {
-    await this.productRepository.delete(id);
-    return ResponseResult.successMessage<string>('删除成功');
+  async remove(id: number): Promise<number> {
+    const result = await this.productRepository.delete(id);
+    return result?.affected ?? 0;
   }
 }

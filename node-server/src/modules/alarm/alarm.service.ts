@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Alarm } from './alarm.entity';
-import { ResponseResult, QueryResult } from 'src/utils';
 
 @Injectable()
 export class AlarmService {
@@ -11,9 +10,9 @@ export class AlarmService {
     private readonly alarmRepository: Repository<Alarm>,
   ) {}
 
-  async findAll(): Promise<QueryResult<Alarm>> {
+  async queryPage(): Promise<[Alarm[], number]> {
     const queryResult = await this.alarmRepository.findAndCount();
-    return ResponseResult.page<Alarm>(queryResult);
+    return queryResult;
   }
 
   async findOne(id: number): Promise<Alarm | null> {

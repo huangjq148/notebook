@@ -9,20 +9,28 @@ import {
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Product } from './product.entity';
-import { QueryResult } from 'src/utils';
+import { QueryResult, ResponseResult } from 'src/utils';
 
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Get()
-  findAll(): Promise<QueryResult<Product>> {
-    return this.productService.findAll();
+  async queryPage(): Promise<QueryResult<Product>> {
+    const queryResult = await this.productService.queryPage();
+    return ResponseResult.page<Product>(queryResult);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<QueryResult<Product | null>> {
-    return this.productService.findOne(+id);
+  async findOne(
+    @Param('id') id: string,
+  ): Promise<QueryResult<Product | string>> {
+    const queryResult = await this.productService.findOne(+id);
+    if (queryResult) {
+      return ResponseResult.success<Product>(queryResult);
+    } else {
+      return ResponseResult.error('未找到该商品');
+    }
   }
 
   @Post()
@@ -31,15 +39,25 @@ export class ProductController {
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() product: Partial<Product>,
-  ): Promise<QueryResult<Product | null>> {
-    return this.productService.update(+id, product);
+  ): Promise<QueryResult<Product | string>> {
+    const queryResult = await this.productService.update(+id, product);
+    if (queryResult) {
+      return ResponseResult.success<Product>(queryResult);
+    } else {
+      return ResponseResult.error('更新失败');
+    }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<QueryResult<string>> {
-    return this.productService.remove(+id);
+  async remove(@Param('id') id: string): Promise<QueryResult<string>> {
+    const queryResult = await this.productService.remove(+id);
+    if (queryResult) {
+      return ResponseResult.successMessage<string>('删除成功');
+    } else {
+      return ResponseResult.error('删除失败，数据不存在');
+    }
   }
 }
