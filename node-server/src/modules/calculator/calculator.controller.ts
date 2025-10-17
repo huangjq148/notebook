@@ -22,25 +22,35 @@ export class CalculatorController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Calculator | null> {
-    return this.calculatorService.findOne(+id);
+  async findOne(
+    @Param('id') id: string,
+  ): Promise<QueryResult<Calculator | null>> {
+    const result = await this.calculatorService.findOne(+id);
+    return ResponseResult.success<Calculator | null>(result);
   }
 
   @Post()
-  create(@Body() calculator: Partial<Calculator>): Promise<Calculator> {
-    return this.calculatorService.create(calculator);
+  async create(
+    @Body() calculator: Partial<Calculator>,
+  ): Promise<QueryResult<Calculator>> {
+    const result = await this.calculatorService.create(calculator);
+    return ResponseResult.success<Calculator>(result);
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() calculator: Partial<Calculator>,
-  ): Promise<Calculator | null> {
-    return this.calculatorService.update(+id, calculator);
+  ): Promise<QueryResult<Calculator | null>> {
+    const result = await this.calculatorService.update(+id, calculator);
+    return ResponseResult.success<Calculator | null>(result);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
-    return this.calculatorService.remove(+id);
+  async remove(@Param('id') id: string): Promise<QueryResult<string>> {
+    const affected = await this.calculatorService.remove(+id);
+    return affected > 0
+      ? ResponseResult.successMessage('删除成功')
+      : ResponseResult.error('删除失败');
   }
 }

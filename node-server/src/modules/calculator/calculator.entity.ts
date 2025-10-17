@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('t_calculator')
 export class Calculator {
@@ -23,9 +29,9 @@ export class Calculator {
   @Column({ nullable: true })
   updateUser: number;
 
-  @Column({ length: 50, nullable: true })
-  createTime: string;
+  @CreateDateColumn({ name: 'createTime', type: 'datetime' })
+  createTime: Date;
 
-  @Column({ length: 50, nullable: true })
-  updateTime: string;
+  @UpdateDateColumn({ name: 'updateTime', type: 'datetime' })
+  updateTime: Date;
 }

@@ -8,7 +8,7 @@ import styles from './index.module.less';
 import { useDict, DictKeys } from '@/hooks';
 
 export interface TableColumnType extends AntdTableColumnType<any> {
-  dataType?: 'date' | 'percent' | 'float' | 'code';
+  dataType?: 'date' | 'percent' | 'float' | 'code' | 'unix';
   code?: DictKeys;
   dataFormat?: string;
   title: string | React.ReactNode;
@@ -59,6 +59,8 @@ const Table = (props: Props) => {
         }
 
         if (item.dataType === 'date') {
+          formatFun = (value) => (value ? dayjs(value).format(item.dataFormat || 'YYYY-MM-DD HH:mm:ss') : '-');
+        } else if (item.dataType === 'unix') {
           formatFun = (value) => (value ? dayjs.unix(value).format(item.dataFormat || 'YYYY-MM-DD HH:mm') : '-');
         } else if (item.dataType === 'percent') {
           formatFun = toPercent;

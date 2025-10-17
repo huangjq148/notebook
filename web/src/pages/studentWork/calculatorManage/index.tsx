@@ -1,7 +1,8 @@
 import { SearchForm, TableColumnType, TextButton } from '@/components';
 import { useTable } from '@/hooks';
 import { getCalculatorList, deleteCalculator } from '@/services/calculator';
-import { Button, Card, Input, message, Space, Table } from 'antd';
+import { Button, Card, Input, message, Space } from 'antd';
+import { Table } from '@/components';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,7 +22,7 @@ const CalculatorManage = () => {
 
   const columns: TableColumnType[] = [
     { title: 'ID', dataIndex: 'id' },
-    { title: '创建日期', dataIndex: 'createTime' },
+    { title: '创建日期', dataIndex: 'createTime', dataType: 'date' },
     {
       title: '操作',
       dataIndex: 'id',

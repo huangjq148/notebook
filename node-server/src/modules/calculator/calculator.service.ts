@@ -32,7 +32,8 @@ export class CalculatorService {
     return this.calculatorRepository.findOne({ where: { id } });
   }
 
-  async remove(id: number): Promise<void> {
-    await this.calculatorRepository.delete(id);
+  async remove(id: number): Promise<number> {
+    const result = await this.calculatorRepository.delete(id);
+    return result.affected || 0;
   }
 }

@@ -13,7 +13,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
   password: process.env.DB_PASSWORD || 'fright2014',
   database: process.env.DB_DATABASE || 'notebook',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  synchronize: false, // 生产环境不自动同步数据库结构
+  synchronize: true, // 生产环境不自动同步数据库结构
   logging: false,
 };
 // export const databaseConfig: TypeOrmModuleOptions = isDevelopment

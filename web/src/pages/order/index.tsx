@@ -229,6 +229,7 @@ export default () => {
               onClick={() => {
                 handleRevokeOutStock(record);
               }}
+              danger
             >
               撤销出库
             </TextButton>

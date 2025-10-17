@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('t_order')
 export class Order {
@@ -38,11 +44,11 @@ export class Order {
   @Column({ nullable: true, default: 0 })
   updateUser: number;
 
-  @Column({ length: 20, nullable: true })
-  createTime: string;
+  @CreateDateColumn()
+  createTime: Date;
 
-  @Column({ length: 20, nullable: true })
-  updateTime: string;
+  @UpdateDateColumn()
+  updateTime: Date;
 
   @Column({ nullable: true })
   stockId: number;
