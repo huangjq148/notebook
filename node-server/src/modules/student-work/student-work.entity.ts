@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  UpdateDateColumn,
+  CreateDateColumn,
+} from 'typeorm';
 
 @Entity('t_student_work')
 export class StudentWork {
@@ -17,9 +23,9 @@ export class StudentWork {
   @Column({ nullable: true })
   updateUser: number;
 
-  @Column({ length: 50, nullable: true })
-  createTime: string;
+  @CreateDateColumn()
+  createTime: Date;
 
-  @Column({ length: 50, nullable: true })
-  updateTime: string;
+  @UpdateDateColumn()
+  updateTime: Date;
 }

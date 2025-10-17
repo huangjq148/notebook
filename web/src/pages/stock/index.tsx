@@ -115,7 +115,7 @@ export default () => {
         <Space size="middle">
           <TextButton onClick={() => handleStockSell(record)}>出货</TextButton>
           <TextButton onClick={() => handleEditClick(record.id ?? 0)}>编辑</TextButton>
-          <TextButton onClick={() => handleProductDelete(record.id ?? 0)}>删除</TextButton>
+          <TextButton danger onClick={() => handleProductDelete(record.id ?? 0)}>删除</TextButton>
           {/* <DeleteConfirmButton
             onConfirm={() => {
               handleProductDelete(record.id ?? 0);

@@ -2,6 +2,7 @@ import { Card, SearchForm, Table, TableColumnType, TextButton } from '@/componen
 import { useTable } from '@/hooks';
 import { createStudentWork, deleteStudentWork, getStudentWorkList } from '@/services/studentWork';
 import { Button, DatePicker, Form, Input, message, Modal, Space } from 'antd';
+import dayjs from 'dayjs';
 import moment from 'moment';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -27,6 +28,7 @@ const StudentWork = () => {
       title: '创建时间',
       dataIndex: 'createTime',
       width: 200,
+      dataType: 'date',
     },
     {
       title: '操作',
@@ -37,7 +39,8 @@ const StudentWork = () => {
           <Space size="large">
             <TextButton
               onClick={() => {
-                form.setFieldsValue({ ...record, time: moment(record.time, 'HH:mm'), date: record.date.split(',') });
+                form.setFieldsValue({ ...record, date: dayjs(record.date) });
+                setModalVisible(true);
               }}
             >
               编辑
@@ -119,6 +122,9 @@ const StudentWork = () => {
       {/* 创建作业弹框 */}
       <Modal title="创建作业" open={modalVisible} onOk={handleSubmit} onCancel={handleCancel} destroyOnClose>
         <Form form={form} layout="vertical">
+          <Form.Item hidden name="id">
+            <Input />
+          </Form.Item>
           <Form.Item name="date" label="日期" rules={[{ required: true, message: '请选择日期' }]}>
             <DatePicker style={{ width: '100%' }} />
           </Form.Item>

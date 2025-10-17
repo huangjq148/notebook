@@ -29,7 +29,8 @@ export class ContactService {
     return this.contactRepository.findOne({ where: { id } });
   }
 
-  async remove(id: number): Promise<void> {
-    await this.contactRepository.delete(id);
+  async remove(id: number): Promise<number> {
+    const result = await this.contactRepository.delete(id);
+    return result?.affected ?? 0;
   }
 }

@@ -1,4 +1,5 @@
 import { OrderProductInput } from '@/components';
+import { Product, Stock } from '@/global';
 import { createStock, queryStockById, updateStock } from '@/services/stock';
 import { Button, Form, Input, message } from 'antd';
 import { useEffect, useState } from 'react';
@@ -52,7 +53,9 @@ export default (props: Props) => {
         <Input placeholder="数量" />
       </Form.Item>
       <Form.Item>
-        <Button htmlType="submit">保存</Button>
+        <Button type="primary" htmlType="submit">
+          保存
+        </Button>
       </Form.Item>
     </Form>
   );

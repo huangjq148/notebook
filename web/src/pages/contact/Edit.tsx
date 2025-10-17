@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, message } from 'antd';
 import { createContact, queryContactById, updateContact } from '@/services/contact';
+import { Contact } from '@/global';
 
 type Props = {
   id?: string;
@@ -38,7 +39,7 @@ export default (props: Props) => {
 
   return (
     <Form onFinish={handleFormSubmit} form={formRef}>
-      <Form.Item label="姓名" name="name">
+      <Form.Item label="姓名" name="realname">
         <Input placeholder="联系人姓名" />
       </Form.Item>
       <Form.Item label="电话" name="phone">
@@ -48,7 +49,7 @@ export default (props: Props) => {
         <Input placeholder="联系人地址" />
       </Form.Item>
       <Form.Item>
-        <Button htmlType="submit">保存</Button>
+        <Button type='primary' htmlType="submit">保存</Button>
       </Form.Item>
     </Form>
   );

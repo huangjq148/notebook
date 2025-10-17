@@ -33,7 +33,8 @@ export class StudentWorkService {
     return this.studentWorkRepository.findOne({ where: { id } });
   }
 
-  async remove(id: number): Promise<void> {
-    await this.studentWorkRepository.delete(id);
+  async remove(id: number): Promise<number> {
+    const result = await this.studentWorkRepository.delete(id);
+    return result?.affected ?? 0;
   }
 }

@@ -37,6 +37,7 @@ const Alarm = () => {
     {
       title: '创建时间',
       dataIndex: 'createTime',
+      dataType: 'date',
     },
     {
       title: '操作',

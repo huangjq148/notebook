@@ -11,7 +11,7 @@ const PinyinMatchInput = (props: AutoCompleteProps) => {
         if (!inputVal.trim()) {
           return false;
         }
-        return !!match(option.label, inputVal)?.length;
+        return !!match(option?.label ?? '', inputVal)?.length;
       }}
       allowClear
       {...props}

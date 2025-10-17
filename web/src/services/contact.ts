@@ -1,3 +1,4 @@
+import { Contact } from '@/global';
 import request from '@/utils/request';
 
 export const createContact = async (data: Contact): Promise<Contact> => {
@@ -21,7 +22,7 @@ export const queryContactById = async (id: string): Promise<Contact> => {
 };
 
 export const updateContact = async (data: Contact): Promise<Contact[]> => {
-  return request(`/contact`, {
+  return request(`/contact/${data.id}`, {
     method: 'PATCH',
     data,
   });

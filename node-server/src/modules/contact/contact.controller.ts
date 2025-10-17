@@ -22,25 +22,42 @@ export class ContactController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Contact | null> {
-    return this.contactService.findOne(+id);
+  async findOne(
+    @Param('id') id: string,
+  ): Promise<QueryResult<Contact | string>> {
+    const result = await this.contactService.findOne(+id);
+    if (!result) {
+      return ResponseResult.error<Contact>('Contact not found');
+    }
+    return ResponseResult.success<Contact>(result);
   }
 
   @Post()
-  create(@Body() contact: Partial<Contact>): Promise<Contact> {
-    return this.contactService.create(contact);
+  async create(
+    @Body() contact: Partial<Contact>,
+  ): Promise<QueryResult<Contact>> {
+    const result = await this.contactService.create(contact);
+    return ResponseResult.success<Contact>(result);
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() contact: Partial<Contact>,
-  ): Promise<Contact | null> {
-    return this.contactService.update(+id, contact);
+  ): Promise<QueryResult<Contact | string>> {
+    const result = await this.contactService.update(+id, contact);
+    if (!result) {
+      return ResponseResult.error<Contact>('Contact not found');
+    }
+    return ResponseResult.success<Contact>(result);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
-    return this.contactService.remove(+id);
+  async remove(@Param('id') id: string): Promise<QueryResult<string>> {
+    const result = await this.contactService.remove(+id);
+    if (result === 0) {
+      return ResponseResult.error<void>('Contact not found');
+    }
+    return ResponseResult.successMessage<string>('success');
   }
 }

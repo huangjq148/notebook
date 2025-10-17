@@ -20,13 +20,14 @@ export class AuthController {
   @Post('login')
   async login(
     @Body() body: { username: string; password: string },
-  ): Promise<QueryResult<{ access_token: string }>> {
+  ): Promise<QueryResult<{ access_token: string } | string>> {
     const userAccount = await this.authService.validateUser(
       body.username,
       body.password,
     );
+
     if (!userAccount) {
-      throw new Error('用户名或密码错误');
+      return ResponseResult.error<string>('用户名或密码错误');
     }
 
     const token = this.authService.login(userAccount);

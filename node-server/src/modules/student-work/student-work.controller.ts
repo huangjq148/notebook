@@ -22,25 +22,36 @@ export class StudentWorkController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<StudentWork | null> {
-    return this.studentWorkService.findOne(+id);
+  async findOne(
+    @Param('id') id: string,
+  ): Promise<QueryResult<StudentWork | null>> {
+    const result = await this.studentWorkService.findOne(+id);
+    return ResponseResult.success<StudentWork | null>(result);
   }
 
   @Post()
-  create(@Body() studentWork: Partial<StudentWork>): Promise<StudentWork> {
-    return this.studentWorkService.create(studentWork);
+  async create(
+    @Body() studentWork: Partial<StudentWork>,
+  ): Promise<QueryResult<StudentWork>> {
+    const result = await this.studentWorkService.create(studentWork);
+    return ResponseResult.success<StudentWork>(result);
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() studentWork: Partial<StudentWork>,
-  ): Promise<StudentWork | null> {
-    return this.studentWorkService.update(+id, studentWork);
+  ): Promise<QueryResult<StudentWork | null>> {
+    const result = await this.studentWorkService.update(+id, studentWork);
+    return ResponseResult.success<StudentWork | null>(result);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
-    return this.studentWorkService.remove(+id);
+  async remove(@Param('id') id: string): Promise<QueryResult<string>> {
+    const affected = await this.studentWorkService.remove(+id);
+    if (affected > 0) {
+      return ResponseResult.successMessage<string>('删除成功');
+    }
+    return ResponseResult.error<string>('删除失败');
   }
 }

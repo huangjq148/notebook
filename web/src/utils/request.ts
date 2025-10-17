@@ -43,10 +43,20 @@ axios.interceptors.response.use(
   async (
     error: AxiosError<{
       code: number;
+      message: string;
     }>,
   ) => {
     if (error?.response?.data.code === 401 || error.status === 401) {
-      window.location.href = '/login';
+      if (error?.response?.data?.message) {
+        message.error(error?.response?.data?.message);
+      } else {
+        message.error('登录已过期，请重新登录');
+      }
+      if (location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    } else if (error?.response?.data?.message) {
+      message.error(error?.response?.data?.message);
     }
     return Promise.reject(error?.response?.data || error);
   },
