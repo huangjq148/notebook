@@ -26,8 +26,10 @@ export class AlarmController {
   }
 
   @Get()
-  async findAll(): Promise<QueryResult<Alarm>> {
-    const queryResult = await this.alarmService.queryPage();
+  async queryPage(
+    @Query() query: { title: string; current: number; pageSize: number },
+  ): Promise<QueryResult<Alarm>> {
+    const queryResult = await this.alarmService.queryPage(query);
 
     return ResponseResult.page<Alarm>(queryResult);
   }

@@ -15,6 +15,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   synchronize: true, // 生产环境不自动同步数据库结构
   logging: false,
+  // logging: true,
 };
 // export const databaseConfig: TypeOrmModuleOptions = isDevelopment
 //   ? {

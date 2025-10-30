@@ -1,7 +1,7 @@
-import { SearchForm, TextButton, DeleteConfirmButton } from '@/components';
+import { SearchForm, TextButton, DeleteConfirmButton, Table, TableColumnType } from '@/components';
 import { useTable } from '@/hooks';
 import { deleteContact, queryContact } from '@/services/contact';
-import { Button, Form, Input, message, Modal, Space, Table } from 'antd';
+import { Button, Form, Input, message, Modal, Space } from 'antd';
 import { useState } from 'react';
 import EditPage from './Edit';
 import styles from './index.module.less';
@@ -9,7 +9,7 @@ import { Contact } from '@/global';
 
 export default () => {
   const [conditions, setConditions] = useState({});
-  const { dataSource, loading, searchForm, pagination, handlePageChange } = useTable<Contact>({
+  const { tableOptions, searchForm } = useTable({
     request: queryContact,
     conditions,
   });
@@ -24,7 +24,7 @@ export default () => {
     searchForm();
   };
 
-  const columns = [
+  const columns: TableColumnType[] = [
     {
       title: '姓名',
       dataIndex: 'realname',
@@ -40,17 +40,20 @@ export default () => {
     {
       title: '创建时间',
       dataIndex: 'createTime',
+      dataType: 'date',
     },
     {
       title: '操作',
-      key: 'operation',
+      dataIndex: 'id',
       width: '140px',
-      render: (record: Contact) => (
+      render: (id: string) => (
         <Space size="middle">
-          <TextButton onClick={() => handleEditClick(record.id as string)}>编辑</TextButton>
-          <DeleteConfirmButton onConfirm={() => handleContactDelete(record.id as string)}>
-            <TextButton>删除</TextButton>
-          </DeleteConfirmButton>
+          <TextButton onClick={() => handleEditClick(id)}>编辑</TextButton>
+          {/* <DeleteConfirmButton onConfirm={() => handleContactDelete(record.id as string)}> */}
+          <TextButton danger onClick={() => handleContactDelete(id)}>
+            删除
+          </TextButton>
+          {/* </DeleteConfirmButton> */}
         </Space>
       ),
     },
@@ -108,14 +111,7 @@ export default () => {
         </Form>
       </SearchForm>
       <div className={styles.tableWrapper}>
-        <Table
-          rowKey="id"
-          pagination={pagination}
-          onChange={handlePageChange}
-          loading={loading}
-          dataSource={dataSource}
-          columns={columns}
-        />
+        <Table rowKey="id" {...tableOptions} columns={columns} />
       </div>
 
       <Modal

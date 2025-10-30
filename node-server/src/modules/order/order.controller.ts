@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { Order, OrderStats } from './order.entity';
@@ -16,8 +17,18 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Get()
-  async queryPage(): Promise<QueryResult<Order>> {
-    const queryResult = await this.orderService.queryPage();
+  async queryPage(
+    @Query()
+    query: {
+      name: string;
+      contact: string;
+      startCreateDate: string;
+      endCreateDate: string;
+      current: number;
+      pageSize: number;
+    },
+  ): Promise<QueryResult<Order>> {
+    const queryResult = await this.orderService.queryPage(query);
 
     return ResponseResult.page<Order>(queryResult);
   }
@@ -35,8 +46,18 @@ export class OrderController {
   }
 
   @Get('statistics')
-  async statistics(): Promise<QueryResult<OrderStats>> {
-    const orderStats = await this.orderService.statistics();
+  async statistics(
+    @Query()
+    query: {
+      name: string;
+      contact: string;
+      startCreateDate: string;
+      endCreateDate: string;
+      current: number;
+      pageSize: number;
+    },
+  ): Promise<QueryResult<OrderStats>> {
+    const orderStats = await this.orderService.statistics(query);
 
     return ResponseResult.success<OrderStats>(orderStats);
   }

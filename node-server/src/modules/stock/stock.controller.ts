@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { Stock, StockStatus } from './stock.entity';
@@ -16,14 +17,18 @@ export class StockController {
   constructor(private readonly stockService: StockService) {}
 
   @Get()
-  async queryPage(): Promise<QueryResult<Stock>> {
-    const queryResult = await this.stockService.queryPage();
+  async queryPage(
+    @Query() query: { name: string; current: number; pageSize: number },
+  ): Promise<QueryResult<Stock>> {
+    const queryResult = await this.stockService.queryPage(query);
     return ResponseResult.page<Stock>(queryResult);
   }
 
   @Get('statistics')
-  async statistics(): Promise<QueryResult<StockStatus>> {
-    const result = await this.stockService.statistics();
+  async statistics(
+    @Query() query: { name: string },
+  ): Promise<QueryResult<StockStatus>> {
+    const result = await this.stockService.statistics(query);
     return ResponseResult.success<StockStatus>(result);
   }
 

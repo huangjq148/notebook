@@ -8,6 +8,26 @@ import { useTable } from '@/hooks';
 import { createAlarm, deleteAlarm, queryAlarmList, sendMessageToWeChatWebhook, updateAlarm } from '@/services/alarm';
 import moment from 'moment';
 
+const WEEKS = [
+  { value: '1', label: '周一' },
+  { value: '2', label: '周二' },
+  { value: '3', label: '周三' },
+  { value: '4', label: '周四' },
+  { value: '5', label: '周五' },
+  { value: '6', label: '周六' },
+  { value: '7', label: '周日' },
+];
+
+const IS_ENABLE = [
+  { value: '1', label: '启用' },
+  { value: '0', label: '停用' },
+];
+
+const IS_REPEAT = [
+  { value: '1', label: '是' },
+  { value: '0', label: '否' },
+];
+
 const Alarm = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [form] = Form.useForm();
@@ -114,38 +134,16 @@ const Alarm = () => {
             <Input placeholder="请输入标题时间" />
           </Form.Item>
           <Form.Item label="提醒时间" rules={[{ required: true }]} name="date">
-            <Select
-              placeholder="请选择提醒时间"
-              mode="multiple"
-              options={[
-                { value: '1', label: '周一' },
-                { value: '2', label: '周二' },
-                { value: '3', label: '周三' },
-                { value: '4', label: '周四' },
-                { value: '5', label: '周五' },
-                { value: '6', label: '周六' },
-                { value: '7', label: '周日' },
-              ]}
-            />
+            <Select placeholder="请选择提醒时间" mode="multiple" options={WEEKS} />
           </Form.Item>
           <Form.Item label="提醒时间" name="time">
             <TimePicker placeholder="请选择提醒时间" style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item label="是否重复" rules={[{ required: true }]} name="isRepeat">
-            <Radio.Group
-              options={[
-                { value: '1', label: '是' },
-                { value: '0', label: '否' },
-              ]}
-            />
+            <Radio.Group options={IS_REPEAT} />
           </Form.Item>
           <Form.Item label="是否启用" rules={[{ required: true }]} name="isEnable">
-            <Radio.Group
-              options={[
-                { value: '1', label: '启用' },
-                { value: '0', label: '停用' },
-              ]}
-            />
+            <Radio.Group options={IS_ENABLE} />
           </Form.Item>
           <Form.Item label="备注" name="description">
             <Input.TextArea rows={4} autoSize placeholder="请输入备注" />
@@ -158,7 +156,7 @@ const Alarm = () => {
           <Input
             placeholder="请输入名称"
             onChange={(event) => {
-              setConditions({ name: event.target.value });
+              setConditions({ title: event.target.value });
             }}
           />
           <Button type="primary" onClick={() => searchForm()}>

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Product } from './product.entity';
 
 @Injectable()
@@ -10,8 +10,18 @@ export class ProductService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async queryPage(): Promise<[Product[], number]> {
-    const queryResult = await this.productRepository.findAndCount();
+  async queryPage(query: {
+    name: string;
+    current: number;
+    pageSize: number;
+  }): Promise<[Product[], number]> {
+    const queryResult = await this.productRepository.findAndCount({
+      where: {
+        name: Like(`%${query.name}%`),
+      },
+      skip: (query.current - 1) * query.pageSize,
+      take: query.pageSize,
+    });
     return queryResult;
   }
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between, Like } from 'typeorm';
 import { Contact } from '../contact/contact.entity';
 import { Product } from '../product/product.entity';
 import { Stock } from '../stock/stock.entity';
@@ -33,8 +33,55 @@ export class OrderService {
     return '订单已撤销';
   }
 
-  async queryPage(): Promise<[Order[], number]> {
+  getQueryParams = (queryParams) => {
+    const params: Record<string, any> = {};
+    if (queryParams.name) {
+      params.name = Like(`%${queryParams.name}%`);
+    }
+    if (queryParams.contact) {
+      params.contact = Like(`%${queryParams.contact}%`);
+    }
+    if (queryParams.startCreateDate && queryParams.endCreateDate) {
+      params.orderTime = Between(
+        queryParams.startCreateDate,
+        queryParams.endCreateDate,
+      );
+    }
+    return params;
+  };
+
+  async statistics(params): Promise<OrderStats> {
+    const result = (await this.orderRepository
+      .createQueryBuilder('t')
+      .select([
+        'IFNULL(SUM(t.buyPrice * t.number), 0) AS buyMoney',
+        'IFNULL(SUM(t.sellPrice * t.number), 0) AS sellMoney',
+        'IFNULL(SUM(t.number), 0) AS number',
+        'IFNULL(SUM(t.otherCost), 0) AS otherCost',
+      ])
+      .where(this.getQueryParams(params))
+      .getRawOne<OrderStats>()) || {
+      buyMoney: '0',
+      sellMoney: '0',
+      number: '0',
+      otherCost: '0',
+    };
+    return result;
+  }
+
+  async queryPage(params: {
+    name: string;
+    contact: string;
+    startCreateDate: string;
+    endCreateDate: string;
+    current: number;
+    pageSize: number;
+  }): Promise<[Order[], number]> {
+    const queryParams: Record<string, any> = this.getQueryParams(params);
     const queryResult = await this.orderRepository.findAndCount({
+      where: queryParams,
+      take: params.pageSize,
+      skip: (params.current - 1) * params.pageSize,
       order: { id: 'DESC' },
     });
     return queryResult;
@@ -89,23 +136,5 @@ export class OrderService {
   async contactNames(): Promise<string[]> {
     const queryResult = await this.contactRepository.find();
     return queryResult.map((item) => item.realname);
-  }
-
-  async statistics(): Promise<OrderStats> {
-    const result = (await this.orderRepository
-      .createQueryBuilder('t')
-      .select([
-        'IFNULL(SUM(t.buyPrice * t.number), 0) AS buyMoney',
-        'IFNULL(SUM(t.sellPrice * t.number), 0) AS sellMoney',
-        'IFNULL(SUM(t.number), 0) AS number',
-        'IFNULL(SUM(t.otherCost), 0) AS otherCost',
-      ])
-      .getRawOne<OrderStats>()) || {
-      buyMoney: '0',
-      sellMoney: '0',
-      number: '0',
-      otherCost: '0',
-    };
-    return result;
   }
 }

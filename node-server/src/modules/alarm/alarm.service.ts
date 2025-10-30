@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Alarm } from './alarm.entity';
 import axios from 'axios';
 
@@ -34,8 +34,16 @@ export class AlarmService {
     return 'success';
   }
 
-  async queryPage(): Promise<[Alarm[], number]> {
-    const queryResult = await this.alarmRepository.findAndCount();
+  async queryPage(query: {
+    title: string;
+    current: number;
+    pageSize: number;
+  }): Promise<[Alarm[], number]> {
+    const queryResult = await this.alarmRepository.findAndCount({
+      where: { title: Like(`%${query.title ?? ''}%`) },
+      skip: (query.current - 1) * query.pageSize,
+      take: query.pageSize,
+    });
     return queryResult;
   }
 

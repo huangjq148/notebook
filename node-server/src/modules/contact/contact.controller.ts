@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
 import { Contact } from './contact.entity';
@@ -16,8 +17,17 @@ export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Get()
-  async findAll(): Promise<QueryResult<Contact>> {
-    const queryResult = await this.contactService.findAll();
+  async findAll(
+    @Query()
+    query: {
+      realname: string;
+      phone: string;
+      address: string;
+      current: number;
+      pageSize: number;
+    },
+  ): Promise<QueryResult<Contact>> {
+    const queryResult = await this.contactService.queryPage(query);
     return ResponseResult.page<Contact>(queryResult);
   }
 

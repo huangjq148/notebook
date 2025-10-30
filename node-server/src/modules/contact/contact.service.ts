@@ -10,8 +10,34 @@ export class ContactService {
     private readonly contactRepository: Repository<Contact>,
   ) {}
 
-  async findAll(): Promise<[Contact[], number]> {
-    const queryResult = await this.contactRepository.findAndCount();
+  async queryPage(query: {
+    realname: string;
+    phone: string;
+    address: string;
+    current: number;
+    pageSize: number;
+  }): Promise<[Contact[], number]> {
+    const queryBuilder = this.contactRepository.createQueryBuilder('contact');
+    if (query.realname) {
+      queryBuilder.andWhere('contact.realname LIKE :realname', {
+        realname: `%${query.realname}%`,
+      });
+    }
+    if (query.phone) {
+      queryBuilder.andWhere('contact.phone LIKE :phone', {
+        phone: `%${query.phone}%`,
+      });
+    }
+    if (query.address) {
+      queryBuilder.andWhere('contact.address LIKE :address', {
+        address: `%${query.address}%`,
+      });
+    }
+    queryBuilder
+      .orderBy('contact.id', 'ASC')
+      .skip((query.current - 1) * query.pageSize)
+      .take(query.pageSize);
+    const queryResult = await queryBuilder.getManyAndCount();
     return queryResult;
   }
 

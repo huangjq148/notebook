@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Product } from './product.entity';
@@ -16,8 +17,10 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Get()
-  async queryPage(): Promise<QueryResult<Product>> {
-    const queryResult = await this.productService.queryPage();
+  async queryPage(
+    @Query() query: { name: string; current: number; pageSize: number },
+  ): Promise<QueryResult<Product>> {
+    const queryResult = await this.productService.queryPage(query);
     return ResponseResult.page<Product>(queryResult);
   }
 
@@ -34,8 +37,11 @@ export class ProductController {
   }
 
   @Post()
-  create(@Body() product: Partial<Product>): Promise<Product> {
-    return this.productService.create(product);
+  async create(
+    @Body() product: Partial<Product>,
+  ): Promise<QueryResult<Product>> {
+    const result = await this.productService.create(product);
+    return ResponseResult.success<Product>(result);
   }
 
   @Patch(':id')

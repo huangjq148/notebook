@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('t_contact')
 export class Contact {
@@ -20,9 +26,9 @@ export class Contact {
   @Column({ nullable: true })
   updateUser: number;
 
-  @Column({ length: 20, nullable: true })
-  createTime: string;
+  @CreateDateColumn()
+  createTime: Date;
 
-  @Column({ length: 20, nullable: true })
-  updateTime: string;
+  @UpdateDateColumn()
+  updateTime: Date;
 }

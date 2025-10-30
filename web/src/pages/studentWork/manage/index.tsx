@@ -3,7 +3,6 @@ import { useTable } from '@/hooks';
 import { createStudentWork, deleteStudentWork, getStudentWorkList } from '@/services/studentWork';
 import { Button, DatePicker, Form, Input, message, Modal, Space } from 'antd';
 import dayjs from 'dayjs';
-import moment from 'moment';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 

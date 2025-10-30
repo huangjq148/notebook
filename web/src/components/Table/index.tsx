@@ -1,11 +1,11 @@
+import { DictKeys, useDict } from '@/hooks';
 import { getNumToLocaleString } from '@/utils/utils';
 import { CaretDownOutlined, CaretUpOutlined, MinusOutlined } from '@ant-design/icons';
-import { Table as AntTable, TableColumnType as AntdTableColumnType, TablePaginationConfig, Tooltip } from 'antd';
+import { Table as AntTable, TableColumnType as AntdTableColumnType, TablePaginationConfig } from 'antd';
 import classnames from 'classnames';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
-import { useDict, DictKeys } from '@/hooks';
 
 export interface TableColumnType extends AntdTableColumnType<any> {
   dataType?: 'date' | 'percent' | 'float' | 'code' | 'unix';
