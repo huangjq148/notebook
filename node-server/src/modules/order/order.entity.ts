@@ -1,16 +1,8 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { AuditableEntity } from 'src/common/auditable/auditable.entity';
+import { Column, Entity } from 'typeorm';
 
 @Entity('t_order')
-export class Order {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class Order extends AuditableEntity {
   @Column({ length: 100, nullable: true })
   name: string;
 
@@ -37,18 +29,6 @@ export class Order {
 
   @Column({ length: 1, nullable: true })
   status: string;
-
-  @Column({ nullable: true })
-  createUser: number;
-
-  @Column({ nullable: true, default: 0 })
-  updateUser: number;
-
-  @CreateDateColumn()
-  createTime: Date;
-
-  @UpdateDateColumn()
-  updateTime: Date;
 
   @Column({ nullable: true })
   stockId: number;

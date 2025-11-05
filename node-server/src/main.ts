@@ -2,12 +2,15 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { logger } from './common/middleware/logger.middleware';
 
 // 加载环境变量
 dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(logger);
 
   // 配置全局路由前缀
   app.setGlobalPrefix('api');
