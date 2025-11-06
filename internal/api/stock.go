@@ -20,8 +20,7 @@ type StockQueryCondition struct {
 func CreateStock(c *fiber.Ctx) error {
 	db := database.DBConn
 	var stock model.Stock
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 
 	if err := c.BodyParser(&stock); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
@@ -47,8 +46,7 @@ func Statistics(c *fiber.Ctx) error {
 	}
 
 	var result StatisticsInfo
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 
 	tableName, whereSql, conditions := database.GenerateSql(c, StockQueryCondition{})
 
@@ -84,8 +82,7 @@ func QueryStockList(c *fiber.Ctx) error {
 func DeleteStock(c *fiber.Ctx) error {
 	db := database.DBConn
 	id := c.Params("id")
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 
 	result, e := db.Exec("delete from t_stock where 1=1 and createUser=? and id=?", userId, id)
 
@@ -100,8 +97,7 @@ func DeleteStock(c *fiber.Ctx) error {
 func GetStockById(c *fiber.Ctx) error {
 	db := database.DBConn
 	id := c.Params("id")
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 	var stock model.Stock
 
 	e := db.Get(&stock, "select * from t_stock where 1=1 and createUser=? and id=?", userId, id)

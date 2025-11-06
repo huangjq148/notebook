@@ -31,8 +31,7 @@ func Create(c *fiber.Ctx, tableName string, data interface{}) error {
 	typeOfData := reflect.TypeOf(data)
 	fieldLen := typeOfData.NumField()
 	db := DBConn
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 	if err := c.BodyParser(&data1); err != nil {
 		return err
 	}
@@ -85,8 +84,7 @@ func Create(c *fiber.Ctx, tableName string, data interface{}) error {
 }
 
 func UpdateEntity(c *fiber.Ctx, tableName string, data interface{}) (interface{}, error) {
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 	typeOfData := reflect.TypeOf(data)
 	fieldLen := typeOfData.NumField()
 	values := reflect.ValueOf(data)
@@ -124,8 +122,7 @@ func Update(c *fiber.Ctx, tableName string, data interface{}) (interface{}, erro
 	data1 := data
 	typeOfData := reflect.TypeOf(data)
 	fieldLen := typeOfData.NumField()
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 	var dataId interface{}
 
 	if err := c.BodyParser(&data1); err != nil {
@@ -238,8 +235,7 @@ func QueryPage(c *fiber.Ctx, queryResult interface{}, data interface{}) (interfa
 	var count int
 	pageSql := GeneratePageSql(c)
 	orderSql := " order by createTime desc"
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 
 	tableName, whereSql, conditions := GenerateSql(c, data)
 
@@ -264,8 +260,7 @@ func QueryList(c *fiber.Ctx) error {
 }
 
 func DeleteById(c *fiber.Ctx, tableName, id string) error {
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 	sql := "delete from " + tableName + " where 1=1 and createUser=? and id=?"
 
 	_, e := DBConn.Exec(sql, userId, id)
@@ -278,8 +273,7 @@ func DeleteById(c *fiber.Ctx, tableName, id string) error {
 }
 
 func GetById(c *fiber.Ctx, tableName string, id int, data interface{}) error {
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 	sql := "select * from " + tableName + " where id=? and createUser=?"
 
 	e := DBConn.Get(data, sql, id, userId)

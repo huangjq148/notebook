@@ -25,8 +25,7 @@ func queryUserInfoById(id string) (model.User, error) {
 
 // Hello hanlde api status
 func UserInfo(c *fiber.Ctx) error {
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 
 	user, err := queryUserInfoById(userId)
 

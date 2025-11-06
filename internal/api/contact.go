@@ -14,8 +14,7 @@ import (
 func SearchContact(c *fiber.Ctx) error {
 	db := database.DBConn
 	name := c.Query("name")
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 	queryResult := []model.Contact{}
 
 	e := db.Select(&queryResult, "select * from t_contact where createUser=? and realname like ?", userId, "%"+name+"%")
@@ -31,8 +30,7 @@ func SearchContact(c *fiber.Ctx) error {
 func CreateContact(c *fiber.Ctx) error {
 	db := database.DBConn
 	var contact model.Contact
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 
 	if err := c.BodyParser(&contact); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
@@ -82,8 +80,7 @@ func QueryContactList(c *fiber.Ctx) error {
 func DeleteContact(c *fiber.Ctx) error {
 	db := database.DBConn
 	id := c.Params("id")
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 
 	result, e := db.Exec("delete from t_contact where 1=1 and createUser=? and id=?", userId, id)
 
@@ -98,8 +95,7 @@ func DeleteContact(c *fiber.Ctx) error {
 func GetContactById(c *fiber.Ctx) error {
 	db := database.DBConn
 	id := c.Params("id")
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 	var contact model.Contact
 
 	e := db.Get(&contact, "select * from t_contact where 1=1 and createUser=? and id=?", userId, id)

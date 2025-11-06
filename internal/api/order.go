@@ -16,8 +16,7 @@ import (
 func handleSearchCondition(c *fiber.Ctx) (string, []interface{}) {
 	var paramKeys []string
 	var paramValues []interface{}
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 
 	paramKeys = append(paramKeys, "createUser=?")
 	paramValues = append(paramValues, userId)

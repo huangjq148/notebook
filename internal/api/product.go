@@ -14,8 +14,7 @@ import (
 func CreateProduct(c *fiber.Ctx) error {
 	db := database.DBConn
 	var product model.Product
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 
 	if err := c.BodyParser(&product); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
@@ -53,8 +52,7 @@ func QueryProductList(c *fiber.Ctx) error {
 func DeleteProduct(c *fiber.Ctx) error {
 	db := database.DBConn
 	id := c.Params("id")
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 
 	result, e := db.Exec("delete from t_product where 1=1 and createUser=? and id=?", userId, id)
 
@@ -69,8 +67,7 @@ func DeleteProduct(c *fiber.Ctx) error {
 func GetProductById(c *fiber.Ctx) error {
 	db := database.DBConn
 	id := c.Params("id")
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 	var product model.Product
 
 	e := db.Get(&product, "select * from t_product where 1=1 and createUser=? and id=?", userId, id)

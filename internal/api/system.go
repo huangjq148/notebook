@@ -16,8 +16,7 @@ type DataTransfer struct {
 func TransferData(c *fiber.Ctx) error {
 	db := database.DBConn
 	var dataTransfer DataTransfer
-	token := c.Get("Authorization")
-	userId := utils.GetFromToken(token, "user_id")
+	userId := utils.GetUserId(c)
 	var tableName string
 
 	if err := c.BodyParser(&dataTransfer); err != nil {
