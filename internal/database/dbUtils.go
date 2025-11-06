@@ -16,294 +16,301 @@ type GenerateWhereSql struct {
 	paramValues []interface{}
 }
 
-func (this *GenerateWhereSql) AddParam(key string, value string) {
-	this.paramKeys = append(this.paramKeys, key)
-	this.paramValues = append(this.paramValues, value)
+func (g *GenerateWhereSql) AddParam(key string, value interface{}) {
+	g.paramKeys = append(g.paramKeys, key)
+	g.paramValues = append(g.paramValues, value)
 }
 
-func (this *GenerateWhereSql) getData() (string, []interface{}) {
-	return strings.Join(this.paramKeys, " and "), this.paramValues
+func (g *GenerateWhereSql) getData() (string, []interface{}) {
+	if len(g.paramKeys) == 0 {
+		return "", nil
+	}
+	return strings.Join(g.paramKeys, " AND "), g.paramValues
 }
 
-/** 创建 */
+// -----------------------------------------------------------------------------
+// Create
+// -----------------------------------------------------------------------------
 func Create(c *fiber.Ctx, tableName string, data interface{}) error {
-	data1 := data
-	typeOfData := reflect.TypeOf(data)
-	fieldLen := typeOfData.NumField()
-	db := DBConn
+	if tableName == "" {
+		return errors.New("tableName 不能为空")
+	}
+
 	userId := utils.GetUserId(c)
-	if err := c.BodyParser(&data1); err != nil {
-		return err
+	now := utils.GetNow()
+
+	// 解析请求体为 map
+	dataMap := make(map[string]interface{})
+	if err := c.BodyParser(&dataMap); err != nil {
+		return fmt.Errorf("解析请求体失败: %w", err)
 	}
 
-	data2, ok := data1.(map[string]interface{})
-	if !ok {
-		return errors.New("转换错误")
-	}
+	t := reflect.TypeOf(data)
+	fieldLen := t.NumField()
 
-	conditions := make([]interface{}, 0)
-	conditionNames := make([]string, 0)
-	placeholders := make([]string, 0)
+	var cols []string
+	var placeholders []string
+	var values []interface{}
 
 	for i := 0; i < fieldLen; i++ {
-		tag := typeOfData.Field(i).Tag
-		dbFieldName := tag.Get("db")
-		jsonName := tag.Get("json")
+		field := t.Field(i)
+		dbTag := field.Tag.Get("db")
+		jsonTag := field.Tag.Get("json")
 
-		if dbFieldName != "id" && dbFieldName != "" {
-			value, ok := data2[jsonName]
-
-			placeholders = append(placeholders, "?")
-			conditionNames = append(conditionNames, dbFieldName)
-			if ok {
-				conditions = append(conditions, value)
-			} else {
-				conditions = append(conditions, "")
-			}
+		if dbTag == "" || dbTag == "id" {
+			continue
 		}
+
+		val, ok := dataMap[jsonTag]
+		if !ok {
+			val = nil
+		}
+
+		cols = append(cols, dbTag)
+		placeholders = append(placeholders, "?")
+		values = append(values, val)
 	}
 
-	conditionNames = append(conditionNames, "createTime", "createUser")
+	// 公共字段
+	cols = append(cols, "createTime", "createUser")
 	placeholders = append(placeholders, "?", "?")
-	conditions = append(conditions, utils.GetNow(), userId)
+	values = append(values, now, userId)
 
-	sql := "insert into " + tableName + "(" + strings.Join(conditionNames, ",") + ") values(" + strings.Join(placeholders, ",") + ") "
+	sql := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)",
+		tableName, strings.Join(cols, ","), strings.Join(placeholders, ","))
 
-	fmt.Println(sql, conditions)
-
-	result, e := db.Exec(sql, conditions...)
-
-	if e != nil {
-		fmt.Println(e)
-		return errors.New("插入失败")
+	if _, err := DBConn.Exec(sql, values...); err != nil {
+		return fmt.Errorf("插入失败: %w", err)
 	}
-
-	fmt.Println(result.LastInsertId())
 
 	return nil
 }
 
+// -----------------------------------------------------------------------------
+// UpdateEntity
+// -----------------------------------------------------------------------------
 func UpdateEntity(c *fiber.Ctx, tableName string, data interface{}) (interface{}, error) {
 	userId := utils.GetUserId(c)
-	typeOfData := reflect.TypeOf(data)
-	fieldLen := typeOfData.NumField()
-	values := reflect.ValueOf(data)
-	conditions := make([]interface{}, 0)
-	conditionNames := make([]string, 0)
+	now := utils.GetNow()
+	t := reflect.TypeOf(data)
+	v := reflect.ValueOf(data)
+	fieldLen := t.NumField()
+
 	var id string
+	var sets []string
+	var values []interface{}
 
 	for i := 0; i < fieldLen; i++ {
-		tag := typeOfData.Field(i).Tag
-		dbName := tag.Get("db")
-		if dbName == "id" {
-			id = values.Field(i).String()
-		} else {
-			conditionNames = append(conditionNames, dbName+"=?")
-			conditions = append(conditions, values.Field(i).String())
+		field := t.Field(i)
+		dbTag := field.Tag.Get("db")
+		if dbTag == "" {
+			continue
+		}
+
+		val := v.Field(i).Interface()
+		if dbTag == "id" {
+			id = fmt.Sprintf("%v", val)
+			continue
+		}
+		sets = append(sets, dbTag+"=?")
+		values = append(values, val)
+	}
+
+	sets = append(sets, "updateUser=?", "updateTime=?")
+	values = append(values, userId, now, id, userId)
+
+	sql := fmt.Sprintf("UPDATE %s SET %s WHERE id=? AND createUser=?", tableName, strings.Join(sets, ","))
+
+	if _, err := DBConn.Exec(sql, values...); err != nil {
+		return nil, fmt.Errorf("更新失败: %w", err)
+	}
+	return nil, nil
+}
+
+// -----------------------------------------------------------------------------
+// Update
+// -----------------------------------------------------------------------------
+func Update(c *fiber.Ctx, tableName string, data interface{}) (interface{}, error) {
+	userId := utils.GetUserId(c)
+	now := utils.GetNow()
+
+	dataMap := make(map[string]interface{})
+	if err := c.BodyParser(&dataMap); err != nil {
+		return nil, fmt.Errorf("解析请求体失败: %w", err)
+	}
+
+	t := reflect.TypeOf(data)
+	fieldLen := t.NumField()
+
+	var id interface{}
+	var sets []string
+	var values []interface{}
+
+	for i := 0; i < fieldLen; i++ {
+		field := t.Field(i)
+		dbTag := field.Tag.Get("db")
+		jsonTag := field.Tag.Get("json")
+
+		if dbTag == "" {
+			continue
+		}
+
+		if dbTag == "id" {
+			id = dataMap["id"]
+			continue
+		}
+
+		if val, ok := dataMap[jsonTag]; ok {
+			sets = append(sets, dbTag+"=?")
+			values = append(values, val)
 		}
 	}
-	conditionNames = append(conditionNames, "updateUser=?", "updateTime=?")
-	conditions = append(conditions, userId, utils.GetNow())
 
-	sql := "update " + tableName + " set " + strings.Join(conditionNames, ",") + " where id=? and createUser=?"
-	conditions = append(conditions, id, userId)
+	if id == nil {
+		return nil, errors.New("缺少 id 参数")
+	}
 
-	_, e := DBConn.Exec(sql, conditions...)
+	sets = append(sets, "updateTime=?", "updateUser=?")
+	values = append(values, now, userId, id)
 
-	if e != nil {
-		fmt.Println(e.Error())
-		return nil, e
+	sql := fmt.Sprintf("UPDATE %s SET %s WHERE id=?", tableName, strings.Join(sets, ","))
+
+	if _, err := DBConn.Exec(sql, values...); err != nil {
+		return nil, fmt.Errorf("更新失败: %w", err)
 	}
 
 	return nil, nil
 }
 
-func Update(c *fiber.Ctx, tableName string, data interface{}) (interface{}, error) {
-	data1 := data
-	typeOfData := reflect.TypeOf(data)
-	fieldLen := typeOfData.NumField()
-	userId := utils.GetUserId(c)
-	var dataId interface{}
-
-	if err := c.BodyParser(&data1); err != nil {
-		return nil, err
-	}
-
-	data2, _ := data1.(map[string]interface{})
-
-	conditions := make([]interface{}, 0)
-	conditionNames := make([]string, 0)
-
-	for i := 0; i < fieldLen; i++ {
-		tag := typeOfData.Field(i).Tag
-		dbFieldName := tag.Get("db")
-		jsonName := tag.Get("json")
-
-		if dbFieldName != "id" && dbFieldName != "" {
-			value, ok := data2[jsonName]
-
-			if ok {
-				conditionNames = append(conditionNames, dbFieldName+"=?")
-				conditions = append(conditions, value)
-			}
-		} else if dbFieldName == "id" {
-			value, ok := data2["id"]
-
-			if ok {
-				dataId = value
-			}
-		}
-	}
-
-	conditionNames = append(conditionNames, "updateTime=?", "updateUser=?")
-	conditions = append(conditions, utils.GetNow(), userId)
-
-	sql := "update " + tableName + " set " + strings.Join(conditionNames, ",") + " where id=?"
-	conditions = append(conditions, dataId)
-
-	result, e := DBConn.Exec(sql, conditions...)
-	if e != nil {
-		fmt.Println(e)
-		return nil, errors.New("更新失败")
-	}
-	fmt.Println(result.LastInsertId())
-
-	return result, nil
-}
-
+// -----------------------------------------------------------------------------
+// GenerateSql
+// -----------------------------------------------------------------------------
 func GenerateSql(c *fiber.Ctx, data interface{}) (string, string, []interface{}) {
-	typeOfData := reflect.TypeOf(data)
-	fieldLen := typeOfData.NumField()
-	conditions := make([]interface{}, 0)
-	conditionNames := make([]string, 0)
+	t := reflect.TypeOf(data)
+	fieldLen := t.NumField()
+
 	var tableName string
-	var whereSql string
+	var whereParts []string
+	var values []interface{}
 
 	for i := 0; i < fieldLen; i++ {
-		tag := typeOfData.Field(i).Tag
+		field := t.Field(i)
+		tableTag := field.Tag.Get("table")
+		if tableTag != "" {
+			tableName = tableTag
+			continue
+		}
 
-		if tag.Get("table") != "" {
-			tableName = tag.Get("table")
-		} else if c.Query(tag.Get("json")) != "" {
-			switch tag.Get("op") {
-			case "like":
-				conditionNames = append(conditionNames, " and "+tag.Get("db")+" like ? ")
-				conditions = append(conditions, "%"+c.Query(tag.Get("json"))+"%")
-			case "=":
-				conditions = append(conditions, c.Query(tag.Get("json")))
-				conditionNames = append(conditionNames, " and "+tag.Get("db")+" "+tag.Get("op")+"?")
-			case "<=":
-				conditions = append(conditions, c.Query(tag.Get("json")))
-				conditionNames = append(conditionNames, " and "+tag.Get("db")+" "+tag.Get("op")+"?")
-			case ">=":
-				conditions = append(conditions, c.Query(tag.Get("json")))
-				conditionNames = append(conditionNames, " and "+tag.Get("db")+" "+tag.Get("op")+"?")
-			}
+		dbTag := field.Tag.Get("db")
+		jsonTag := field.Tag.Get("json")
+		op := field.Tag.Get("op")
+
+		val := c.Query(jsonTag)
+		if val == "" {
+			continue
+		}
+
+		switch op {
+		case "like":
+			whereParts = append(whereParts, fmt.Sprintf("%s LIKE ?", dbTag))
+			values = append(values, "%"+val+"%")
+		case "=", "<=", ">=":
+			whereParts = append(whereParts, fmt.Sprintf("%s %s ?", dbTag, op))
+			values = append(values, val)
 		}
 	}
 
-	whereSql = strings.Join(conditionNames, " ")
+	whereSql := ""
+	if len(whereParts) > 0 {
+		whereSql = " AND " + strings.Join(whereParts, " AND ")
+	}
 
-	return tableName, whereSql, conditions
+	return tableName, whereSql, values
 }
 
+// -----------------------------------------------------------------------------
+// GeneratePageSql
+// -----------------------------------------------------------------------------
 func GeneratePageSql(c *fiber.Ctx) string {
-	pageSize, err := strconv.Atoi(c.Query("pageSize"))
+	pageSize, _ := strconv.Atoi(c.Query("pageSize", "10"))
+	current, _ := strconv.Atoi(c.Query("current", "1"))
 
-	if err != nil {
-		fmt.Println(err.Error())
-		return " limit 0,10"
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	if current <= 0 {
+		current = 1
 	}
 
-	current, err := strconv.Atoi(c.Query("current"))
-
-	if err != nil {
-		fmt.Println(err.Error())
-		return " limit 0,10"
-	}
-
-	startIndex := ((current - 1) * pageSize)
-
-	return " limit " + strconv.Itoa(startIndex) + "," + strconv.Itoa(pageSize)
+	offset := (current - 1) * pageSize
+	return fmt.Sprintf(" LIMIT %d,%d", offset, pageSize)
 }
 
-// Example
-// var queryResult []model.Contact
-// database.QueryPage(c, &queryResult, model.Contact{})
+// -----------------------------------------------------------------------------
+// QueryPage
+// -----------------------------------------------------------------------------
 func QueryPage(c *fiber.Ctx, queryResult interface{}, data interface{}) (interface{}, error) {
-	db := DBConn
-	var count int
-	pageSql := GeneratePageSql(c)
-	orderSql := " order by createTime desc"
 	userId := utils.GetUserId(c)
+	db := DBConn
 
-	tableName, whereSql, conditions := GenerateSql(c, data)
+	tableName, whereSql, args := GenerateSql(c, data)
+	pageSql := GeneratePageSql(c)
+	orderSql := " ORDER BY createTime DESC"
 
-	sql := "select * from " + tableName + " where 1=1 and createUser=" + userId + " " + whereSql + orderSql + pageSql
+	sql := fmt.Sprintf("SELECT * FROM %s WHERE createUser=? %s%s%s", tableName, whereSql, orderSql, pageSql)
+	args = append([]interface{}{userId}, args...)
 
-	e := db.Select(queryResult, sql, conditions...)
-
-	if e != nil {
-		fmt.Println("err=", e)
-		return nil, e
+	if err := db.Select(queryResult, sql, args...); err != nil {
+		return nil, fmt.Errorf("查询失败: %w", err)
 	}
 
-	countSql := "select count(1) from " + tableName + " where 1=1 and createUser=" + userId + " " + whereSql
+	var total int
+	countSql := fmt.Sprintf("SELECT COUNT(1) FROM %s WHERE createUser=? %s", tableName, whereSql)
+	if err := db.Get(&total, countSql, args...); err != nil {
+		return nil, fmt.Errorf("统计失败: %w", err)
+	}
 
-	db.Get(&count, countSql, conditions...)
-
-	return fiber.Map{"content": queryResult, "total": count}, nil
+	return fiber.Map{"content": queryResult, "total": total}, nil
 }
 
-func QueryList(c *fiber.Ctx) error {
-	return nil
-}
-
+// -----------------------------------------------------------------------------
+// DeleteById
+// -----------------------------------------------------------------------------
 func DeleteById(c *fiber.Ctx, tableName, id string) error {
 	userId := utils.GetUserId(c)
-	sql := "delete from " + tableName + " where 1=1 and createUser=? and id=?"
-
-	_, e := DBConn.Exec(sql, userId, id)
-
-	if e != nil {
-		fmt.Println(e.Error())
-		return e
+	sql := fmt.Sprintf("DELETE FROM %s WHERE createUser=? AND id=?", tableName)
+	if _, err := DBConn.Exec(sql, userId, id); err != nil {
+		return fmt.Errorf("删除失败: %w", err)
 	}
 	return nil
 }
 
+// -----------------------------------------------------------------------------
+// GetById
+// -----------------------------------------------------------------------------
 func GetById(c *fiber.Ctx, tableName string, id int, data interface{}) error {
 	userId := utils.GetUserId(c)
-	sql := "select * from " + tableName + " where id=? and createUser=?"
-
-	e := DBConn.Get(data, sql, id, userId)
-
-	if e != nil {
+	sql := fmt.Sprintf("SELECT * FROM %s WHERE id=? AND createUser=?", tableName)
+	if err := DBConn.Get(data, sql, id, userId); err != nil {
 		return errors.New("查找不到数据")
 	}
-
 	return nil
 }
 
-// 传入sql语句将结果设置到传入的结构体中
+// -----------------------------------------------------------------------------
+// QueryObjectBySql / QueryListBySql
+// -----------------------------------------------------------------------------
 func QueryObjectBySql(sql string, data interface{}, conditions ...interface{}) error {
-	e := DBConn.Get(data, sql, conditions...)
-
-	if e != nil {
+	if err := DBConn.Get(data, sql, conditions...); err != nil {
 		return errors.New("查找不到数据")
 	}
-
 	return nil
 }
 
-// 传入sql语句将结果设置到传入的结构体中
 func QueryListBySql(sql string, data interface{}, conditions ...interface{}) error {
-	e := DBConn.Select(data, sql, conditions...)
-
-	if e != nil {
+	if err := DBConn.Select(data, sql, conditions...); err != nil {
 		return errors.New("查找不到数据")
 	}
-
 	return nil
 }
 
