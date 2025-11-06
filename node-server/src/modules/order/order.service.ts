@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, Like } from 'typeorm';
 import { Contact } from '../contact/contact.entity';
 import { Product } from '../product/product.entity';
 import { Stock } from '../stock/stock.entity';
 import { Order, OrderStats } from './order.entity';
+import { REQUEST } from '@nestjs/core';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST }) // 👈 注意这里
 export class OrderService {
   constructor(
     @InjectRepository(Order)
@@ -17,6 +18,8 @@ export class OrderService {
     private readonly contactRepository: Repository<Contact>,
     @InjectRepository(Stock)
     private readonly stockRepository: Repository<Stock>,
+    @Inject(REQUEST)
+    private readonly request: Request,
   ) {}
 
   async revokeStock(id: number): Promise<string> {
@@ -77,6 +80,7 @@ export class OrderService {
     current: number;
     pageSize: number;
   }): Promise<[Order[], number]> {
+    console.log('user', (this.request as any).user);
     const queryParams: Record<string, any> = this.getQueryParams(params);
     const queryResult = await this.orderRepository.findAndCount({
       where: queryParams,

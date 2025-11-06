@@ -7,11 +7,14 @@ import {
   Patch,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { Order, OrderStats } from './order.entity';
 import { QueryResult, ResponseResult } from 'src/utils';
+import { JwtAuthGuard } from 'src/authorization/jwt/jwt.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
