@@ -1,4 +1,4 @@
-package calculator
+package api
 
 import (
 	"hjq-notebook/internal/database"

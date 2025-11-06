@@ -1,8 +1,7 @@
-package order
+package api
 
 import (
 	"fmt"
-	"hjq-notebook/internal/api/stock"
 	"hjq-notebook/internal/database"
 	"hjq-notebook/internal/model"
 	"hjq-notebook/internal/model/response"
@@ -54,7 +53,7 @@ func handleSearchCondition(c *fiber.Ctx) (string, []interface{}) {
 }
 
 // Statistics 统计订单信息
-func Statistics(c *fiber.Ctx) error {
+func OrderStatistics(c *fiber.Ctx) error {
 	type StatisticsInfo struct {
 		BuyMoney  string `db:"buyMoney" json:"buyMoney"`
 		SellMoney string `db:"sellMoney" json:"sellMoney"`
@@ -83,7 +82,7 @@ func CreateOrder(c *fiber.Ctx) error {
 
 	database.Create(c, "t_order", order)
 
-	if err := stock.OutStock(order.StockId, order.Number); err != nil {
+	if err := OutStock(order.StockId, order.Number); err != nil {
 		return c.JSON(response.Error(err.Error()))
 	}
 
@@ -103,7 +102,7 @@ func RevokeStockOrder(c *fiber.Ctx) error {
 		oldOrder, _ = services.GetOrderById(c, intId)
 	}
 
-	err := stock.OutStock(oldOrder.StockId, "-"+oldOrder.Number)
+	err := OutStock(oldOrder.StockId, "-"+oldOrder.Number)
 
 	if err != nil {
 		return c.JSON(response.Error("更新库存失败"))

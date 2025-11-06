@@ -1,17 +1,7 @@
 package router
 
 import (
-	"hjq-notebook/internal/api/alarm"
-	"hjq-notebook/internal/api/auth"
-	"hjq-notebook/internal/api/calculator"
-	"hjq-notebook/internal/api/contact"
-	"hjq-notebook/internal/api/order"
-	"hjq-notebook/internal/api/overview"
-	"hjq-notebook/internal/api/product"
-	"hjq-notebook/internal/api/stock"
-	"hjq-notebook/internal/api/studentWork"
-	"hjq-notebook/internal/api/system"
-	"hjq-notebook/internal/api/user"
+	api "hjq-notebook/internal/api"
 	"hjq-notebook/internal/middleware"
 
 	"github.com/gofiber/fiber/v2"
@@ -25,77 +15,77 @@ func SetupRoutes(app *fiber.App) {
 
 	// Auth
 	authRouter := app.Group("/auth")
-	authRouter.Post("/login", auth.Login)
+	authRouter.Post("/login", api.Login)
 
 	authVerifyRouter := app.Use(middleware.Protected()).Use(middleware.User())
 
 	overviewRouter := authVerifyRouter.Group("/overview")
-	overviewRouter.Get("", overview.OverviewData)
-	overviewRouter.Get("/profit/statistics", overview.ProfitStatic)
+	overviewRouter.Get("", api.OverviewData)
+	overviewRouter.Get("/profit/statistics", api.ProfitStatic)
 
 	orderRouter := authVerifyRouter.Group("/order")
-	orderRouter.Delete("/revoke/stock/:id", order.RevokeStockOrder)
-	orderRouter.Get("/statistics", order.Statistics)
-	orderRouter.Post("", order.CreateOrder)
-	orderRouter.Get("", order.QueryOrderList)
-	orderRouter.Get("/contacts", order.QueryContactsByOrders)
-	orderRouter.Get("/products", order.QueryProductsByOrders)
-	orderRouter.Get("/:id", order.GetOrderById)
-	orderRouter.Delete("/:id", order.DeleteOrder)
-	orderRouter.Patch("", order.UpdateOrder)
-	orderRouter.Patch("/:id/status/:status", order.ChangeStatus)
+	orderRouter.Delete("/revoke/stock/:id", api.RevokeStockOrder)
+	orderRouter.Get("/statistics", api.OrderStatistics)
+	orderRouter.Post("", api.CreateOrder)
+	orderRouter.Get("", api.QueryOrderList)
+	orderRouter.Get("/contacts", api.QueryContactsByOrders)
+	orderRouter.Get("/products", api.QueryProductsByOrders)
+	orderRouter.Get("/:id", api.GetOrderById)
+	orderRouter.Delete("/:id", api.DeleteOrder)
+	orderRouter.Patch("", api.UpdateOrder)
+	orderRouter.Patch("/:id/status/:status", api.ChangeStatus)
 
 	productRouter := authVerifyRouter.Group("/product")
-	productRouter.Post("", product.CreateProduct)
-	productRouter.Get("", product.QueryProductList)
-	productRouter.Get("/:id", product.GetProductById)
-	productRouter.Delete("/:id", product.DeleteProduct)
-	productRouter.Patch("", product.UpdateProduct)
+	productRouter.Post("", api.CreateProduct)
+	productRouter.Get("", api.QueryProductList)
+	productRouter.Get("/:id", api.GetProductById)
+	productRouter.Delete("/:id", api.DeleteProduct)
+	productRouter.Patch("", api.UpdateProduct)
 
 	contactRouter := authVerifyRouter.Group("/contact")
-	contactRouter.Get("/search", contact.SearchContact)
-	contactRouter.Post("", contact.CreateContact)
-	contactRouter.Get("", contact.QueryContactList)
-	contactRouter.Get("/:id", contact.GetContactById)
-	contactRouter.Delete("/:id", contact.DeleteContact)
-	contactRouter.Patch("", contact.UpdateContact)
+	contactRouter.Get("/search", api.SearchContact)
+	contactRouter.Post("", api.CreateContact)
+	contactRouter.Get("", api.QueryContactList)
+	contactRouter.Get("/:id", api.GetContactById)
+	contactRouter.Delete("/:id", api.DeleteContact)
+	contactRouter.Patch("", api.UpdateContact)
 
 	stockRouter := authVerifyRouter.Group("/stock")
-	stockRouter.Get("/statistics", stock.Statistics)
-	stockRouter.Post("", stock.CreateStock)
-	stockRouter.Get("", stock.QueryStockList)
-	stockRouter.Get("/:id", stock.GetStockById)
-	stockRouter.Delete("/:id", stock.DeleteStock)
-	stockRouter.Patch("", stock.UpdateStock)
+	stockRouter.Get("/statistics", api.Statistics)
+	stockRouter.Post("", api.CreateStock)
+	stockRouter.Get("", api.QueryStockList)
+	stockRouter.Get("/:id", api.GetStockById)
+	stockRouter.Delete("/:id", api.DeleteStock)
+	stockRouter.Patch("", api.UpdateStock)
 
 	alarmRouter := authVerifyRouter.Group("/alarm")
-	alarmRouter.Get("/sendMessageToWeChatWebhook", alarm.SendMessageToWeChatWebhook)
-	alarmRouter.Get("", alarm.QueryAlarmList)
-	alarmRouter.Post("", alarm.CreateAlarm)
-	alarmRouter.Patch("/:id", alarm.UpdateAlarm)
-	alarmRouter.Delete("/:id", alarm.DeleteAlarm)
-	alarmRouter.Get("/:id", alarm.CreateAlarm)
+	alarmRouter.Get("/sendMessageToWeChatWebhook", api.SendMessageToWeChatWebhook)
+	alarmRouter.Get("", api.QueryAlarmList)
+	alarmRouter.Post("", api.CreateAlarm)
+	alarmRouter.Patch("/:id", api.UpdateAlarm)
+	alarmRouter.Delete("/:id", api.DeleteAlarm)
+	alarmRouter.Get("/:id", api.CreateAlarm)
 
 	// Auth
 	userRouter := authVerifyRouter.Group("/user")
-	userRouter.Get("/info", user.UserInfo)
-	userRouter.Get("/", user.UserList)
+	userRouter.Get("/info", api.UserInfo)
+	userRouter.Get("/", api.UserList)
 
 	// Auth
 	systemRouter := authVerifyRouter.Group("/system")
-	systemRouter.Post("/data/transfer", system.TransferData)
+	systemRouter.Post("/data/transfer", api.TransferData)
 
 	studentWorkRouter := authVerifyRouter.Group("/student-work")
-	studentWorkRouter.Get("", studentWork.QueryStudentWorkList)
-	studentWorkRouter.Post("", studentWork.CreateStudentWork)
-	studentWorkRouter.Get("/:id", studentWork.GetStudentWorkById)
-	studentWorkRouter.Delete("/:id", studentWork.DeleteStudentWork)
-	studentWorkRouter.Patch("/:id", studentWork.UpdateStudentWork)
+	studentWorkRouter.Get("", api.QueryStudentWorkList)
+	studentWorkRouter.Post("", api.CreateStudentWork)
+	studentWorkRouter.Get("/:id", api.GetStudentWorkById)
+	studentWorkRouter.Delete("/:id", api.DeleteStudentWork)
+	studentWorkRouter.Patch("/:id", api.UpdateStudentWork)
 
 	calculatorRouter := authVerifyRouter.Group("/calculator")
-	calculatorRouter.Get("", calculator.QueryCalculatorList)
-	calculatorRouter.Get("/:id", calculator.GetCalculatorById)
-	calculatorRouter.Post("", calculator.CreateCalculator)
-	calculatorRouter.Delete("/:id", calculator.DeleteCalculator)
-	calculatorRouter.Patch("", calculator.UpdateCalculator)
+	calculatorRouter.Get("", api.QueryCalculatorList)
+	calculatorRouter.Get("/:id", api.GetCalculatorById)
+	calculatorRouter.Post("", api.CreateCalculator)
+	calculatorRouter.Delete("/:id", api.DeleteCalculator)
+	calculatorRouter.Patch("", api.UpdateCalculator)
 }

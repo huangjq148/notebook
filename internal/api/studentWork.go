@@ -1,4 +1,4 @@
-package studentWork
+package api
 
 import (
 	"hjq-notebook/internal/database"

@@ -1,4 +1,4 @@
-package system
+package api
 
 import (
 	"hjq-notebook/internal/database"

@@ -1,4 +1,4 @@
-package contact
+package api
 
 import (
 	"fmt"

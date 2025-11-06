@@ -26,7 +26,7 @@ type Order struct {
 
 type Contact struct {
 	Id      string `db:"id" json:"id"`
-	Name    string `db:"realname" json:"name" form:"name;required"`
+	Name    string `db:"realname" json:"realname" form:"realname;required"`
 	Phone   string `db:"phone" json:"phone" `
 	Address string `db:"address" json:"address" form:"address"`
 	*CreateInfo

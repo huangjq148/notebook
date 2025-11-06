@@ -1,4 +1,4 @@
-package stock
+package api
 
 import (
 	"errors"
