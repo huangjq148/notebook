@@ -58,11 +58,7 @@ const BarChart = (props: BarChartProps) => {
     }
   }, [width]);
 
-  return (
-    <div ref={chartRef} style={{ height, width: '100%' }}>
-      PieChart
-    </div>
-  );
+  return <div ref={chartRef} style={{ height, width: '100%' }} />;
 };
 
 export default BarChart;
