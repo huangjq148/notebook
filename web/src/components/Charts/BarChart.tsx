@@ -20,8 +20,8 @@ const BarChart = (props: BarChartProps) => {
       grid: {
         left: 20, // 🔹 左侧内边距，默认 60
         right: 20, // 🔹 右侧内边距，默认 60
-        top: 50,
-        bottom: 50,
+        top: 20,
+        bottom: 20,
         containLabel: true, // 确保标签不会被裁剪
       },
       xAxis: {
