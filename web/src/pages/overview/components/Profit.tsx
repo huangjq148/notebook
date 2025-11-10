@@ -3,16 +3,19 @@ import { getProfitStatistics } from '@/services/overview';
 import { LineChart } from '@/components';
 
 export default function Charts() {
-  const [dataSource, setDataSource] = useState([]);
+  const [options, setOptions] = useState<{ xAxis: string[]; yAxis: string[] | number[] }>({ xAxis: [], yAxis: [] });
 
   const lodData = async () => {
-    const result = await getProfitStatistics();
-    setDataSource(result as any);
+    const result: any = await getProfitStatistics();
+    setOptions({
+      xAxis: result.map((item: any) => item.orderTime),
+      yAxis: result.map((item: any) => item.profit),
+    });
   };
 
   useEffect(() => {
     lodData();
   }, []);
 
-  return <LineChart data={dataSource} xAxis="orderTime" yAxis="profit" />;
+  return <LineChart xAxis={options.xAxis} yAxis={options.yAxis} />;
 }

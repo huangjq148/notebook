@@ -2,13 +2,13 @@ import * as echarts from 'echarts';
 import { useEffect, useRef } from 'react';
 import { useWindowSize } from 'react-use';
 
-type LineChartProps = {
+type BarChartProps = {
   xAxis: string[];
   yAxis: string[] | number[];
   height?: number;
 };
 
-const LineChart1 = (props: LineChartProps) => {
+const BarChart = (props: BarChartProps) => {
   const chartRef = useRef<any>(null);
   const { xAxis = [], yAxis = [], height = '300px' } = props;
   const { width } = useWindowSize();
@@ -16,7 +16,6 @@ const LineChart1 = (props: LineChartProps) => {
 
   const render = () => {
     chartInstanceRef.current = echarts.init(chartRef.current);
-
     const option = {
       grid: {
         left: 20, // 🔹 左侧内边距，默认 60
@@ -35,8 +34,7 @@ const LineChart1 = (props: LineChartProps) => {
       series: [
         {
           data: yAxis,
-          type: 'line',
-          smooth: true,
+          type: 'bar',
         },
       ],
       tooltip: {
@@ -60,7 +58,11 @@ const LineChart1 = (props: LineChartProps) => {
     }
   }, [width]);
 
-  return <div ref={chartRef} id="main" style={{ width: '100%', height: height }} />;
+  return (
+    <div ref={chartRef} style={{ height, width: '100%' }}>
+      PieChart
+    </div>
+  );
 };
 
-export default LineChart1;
+export default BarChart;

@@ -1,78 +1,81 @@
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
-import { Empty } from 'antd';
-
-const COLORS = [
-  '#0088FE',
-  '#00C49F',
-  '#FFBB28',
-  '#FF8042',
-  '#80de1d',
-  '#ff4242',
-  '#4542ff',
-  '#ff42d0',
-  '#42cdff',
-  '#20f90c',
-  '#22b658',
-];
+import React, { useEffect, useRef } from 'react';
+import * as echarts from 'echarts';
 
 type PieChartProps = {
-  data: any[];
-  dataKey: string;
-  tooltip?: boolean;
-  legend?: boolean;
-  label?: any;
-  showInnerLabel?: boolean;
-  showOuterLabel?: boolean;
+  data: any;
+  dataKey?: string;
 };
 
-const PieChartComponent = (props: PieChartProps) => {
-  const label = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, ...restProps }: any) => {
-    const RADIAN = Math.PI / 180;
-    const radius = outerRadius + 25; // 向外移动
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+const PieChart = (props: PieChartProps) => {
+  const chartRef = useRef<any>(null);
+  const { dataKey = 'value', data = [] } = props;
 
-    const radius1 = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x1 = cx + radius1 * Math.cos(-midAngle * RADIAN);
-    const y1 = cy + radius1 * Math.sin(-midAngle * RADIAN);
+  useEffect(() => {
+    if (chartRef.current) {
+      const total = data.reduce((sum: number, d: any) => sum + d[dataKey], 0);
+      const percent = ((data[0][dataKey] / total) * 100).toFixed(1) + '%';
 
-    return (
-      <>
-        {props.showOuterLabel && (
-          <text x={x} y={y} fill="#666" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
-            {restProps.name}
-          </text>
-        )}
-        {props.showInnerLabel && (
-          <text x={x1} y={y1 + 10} fill="white" textAnchor={x1 > cx ? 'start' : 'end'} dominantBaseline="central">
-            {`${(percent * 100).toFixed(0)}%`}
-          </text>
-        )}
-      </>
-    );
-  };
+      const myChart = echarts.init(chartRef.current);
+      const options = {
+        tooltip: {
+          trigger: 'item',
+        },
+        legend: {
+          bottom: 0,
+          left: 'center',
+          type: 'scroll',
+        },
+        series: [
+          {
+            name: '销售数据',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderRadius: 6,
+              borderColor: '#fff',
+              borderWidth: 2,
+            },
+            label: {
+              show: false,
+              position: 'center',
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: 20,
+                fontWeight: 'bold',
+              },
+            },
+            labelLine: {
+              show: false,
+            },
+            graphic: {
+              type: 'text',
+              left: 'center',
+              top: 'center',
+              style: {
+                text: percent, // ✅ 自动计算百分比
+                textAlign: 'center',
+                fill: '#333',
+                fontSize: 20,
+                fontWeight: 'bold',
+              },
+            },
+            data: data.map((item: any) => ({ ...item, value: item[dataKey] })),
+          },
+        ],
+      };
 
-  return props?.data?.length ? (
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-        <Pie
-          dataKey={props.dataKey}
-          isAnimationActive={false}
-          data={props.data}
-          cx="50%"
-          cy="50%"
-          outerRadius={100}
-          labelLine={props.showOuterLabel ?? false}
-          label={label}
-        >
-          {props.data?.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-        </Pie>
-        <Tooltip />
-      </PieChart>
-    </ResponsiveContainer>
-  ) : (
-    <Empty />
+      myChart.setOption(options);
+    }
+  }, []);
+
+  return (
+    <div ref={chartRef} style={{ height: '300px', width: '100%' }}>
+      PieChart
+    </div>
   );
 };
 
-export default PieChartComponent;
+export default PieChart;

@@ -1,7 +1,7 @@
-import { PieChart } from '@/components';
+import { BarChart } from '@/components';
 import { List, Radio } from 'antd';
-import styles from '../index.module.less';
 import { useState } from 'react';
+import styles from '../index.module.less';
 
 type TopData = {
   name: string;
@@ -41,7 +41,10 @@ export default function Charts(props: { data: any }) {
         }}
       >
         {type === 'chart' ? (
-          <PieChart data={props?.data?.data} dataKey={'money'} showInnerLabel showOuterLabel />
+          <BarChart
+            xAxis={data?.data?.map((item: any) => item.name)}
+            yAxis={data?.data?.map((item: any) => parseFloat(item.money))}
+          />
         ) : (
           <List
             className={styles.listDataContainer}
