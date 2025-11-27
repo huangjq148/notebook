@@ -3,7 +3,7 @@ package model
 type CreateInfo struct {
 	CreateUser int     `db:"createUser" json:"createUser"`
 	UpdateUser *int    `db:"updateUser" json:"updateUser"`
-	CreateTime string  `db:"createTime" json:"createTime"`
+	CreateTime *string `db:"createTime" json:"createTime"`
 	UpdateTime *string `db:"updateTime" json:"updateTime"`
 }
 
@@ -62,7 +62,7 @@ type User struct {
 	// 对应 id 表字段
 	Id int `db:"id" json:"id"`
 	// 对应 name 表字段
-	Name string `db:"realname" json:"name"`
+	Name string `db:"realname" json:"realname"`
 	// 对应 sex 表字段
 	Sex      *string `db:"sex" json:"sex"`
 	Username string  `json:"username"`

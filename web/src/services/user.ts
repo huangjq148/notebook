@@ -2,7 +2,7 @@ import { UserInfo } from '@/global';
 import request from '@/utils/request';
 
 export const fetchUserInfo = async (): Promise<UserInfo> => {
-  return request(`/auth/profile`, {
+  return request(`/user/info`, {
     method: 'GET',
   });
 };

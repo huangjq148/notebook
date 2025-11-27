@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getProfitStatistics } from '@/services/overview';
 import { LineChart } from '@/components';
+import { Empty } from 'antd';
 
 export default function Charts() {
   const [options, setOptions] = useState<{ xAxis: string[]; yAxis: string[] | number[] }>({ xAxis: [], yAxis: [] });
@@ -17,5 +18,5 @@ export default function Charts() {
     lodData();
   }, []);
 
-  return <LineChart xAxis={options.xAxis} yAxis={options.yAxis} />;
+  return options?.yAxis?.length ? <LineChart xAxis={options.xAxis} yAxis={options.yAxis} /> : <Empty description="暂无数据" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />;
 }
