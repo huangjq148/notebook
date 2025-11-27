@@ -1,35 +1,37 @@
 import { DictKeys, useDict } from '@/hooks';
 import { getNumToLocaleString } from '@/utils/utils';
 import { CaretDownOutlined, CaretUpOutlined, MinusOutlined } from '@ant-design/icons';
-import { Table as AntTable, TableColumnType as AntdTableColumnType, TablePaginationConfig } from 'antd';
+import { Table as AntTable, TableColumnType as AntdTableColumnType, TablePaginationConfig, TableProps } from 'antd';
 import classnames from 'classnames';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
-export interface TableColumnType extends AntdTableColumnType<any> {
+export interface TableColumnType<T extends Record<string, any> = any> extends Omit<AntdTableColumnType<T>, 'fixed'> {
   dataType?: 'date' | 'percent' | 'float' | 'code' | 'unix';
   code?: DictKeys;
   dataFormat?: string;
   title: string | React.ReactNode;
   dataIndex: string;
-  render?: (val: any, record: any) => React.ReactNode;
+  render?: (val: any, record: T) => React.ReactNode;
   unit?: string;
   desc?: string;
   haCompare?: boolean;
   decimal?: number;
   dragSupport?: any;
   width?: number | string;
+  fixed?: any;
 }
 
-type Props = {
-  columns: TableColumnType[];
-  dataSource: any[];
-  rowSelection?: any;
-  rowKey?: string;
+type Props<T extends Record<string, any> = any> = {
+  columns: TableColumnType<T>[];
+  dataSource: T[];
+  rowSelection?: TableProps<T>['rowSelection'] | any;
+  rowKey?: TableProps<T>['rowKey'] | string;
+  loading?: boolean;
   pagination?: boolean | TablePaginationConfig;
-  onSortChange?: (newList: any) => void;
-};
+  onSortChange?: (newList: T[]) => void;
+} & Omit<TableProps<T>, 'columns' | 'dataSource'>;
 
 const toPercent = (val: number, decimal?: number) => {
   return `${getNumToLocaleString((val * 100).toFixed(decimal ?? 2), { dw: '%' })}`;
@@ -39,10 +41,10 @@ const toFloat = (val: number, decimal?: number) => {
   return val.toFixed(decimal ?? 2);
 };
 
-const Table = (props: Props) => {
+const Table = <T extends Record<string, any> = any>(props: Props<T>) => {
   const { columns, dataSource, rowKey = 'id', pagination, ...restProps } = props;
   const { getDict } = useDict();
-  const [innerDataSource, setInnerDataSource] = useState<any>([]);
+  const [innerDataSource, setInnerDataSource] = useState<T[]>([]);
 
   useEffect(() => {
     if (props?.dataSource) {
@@ -51,7 +53,7 @@ const Table = (props: Props) => {
   }, [props.dataSource]);
   const displayColumns = columns.map((item) => {
     return {
-      render: (val: any, record: any) => {
+      render: (val: any, record: T) => {
         let formatFun = (v: any, _?: number) => v;
 
         if (item.code) {
@@ -70,15 +72,13 @@ const Table = (props: Props) => {
 
         if (item.haCompare) {
           const value = val;
-          const compareValue = record[item.dataIndex + 'Compare'];
+          const compareValue = (record as Record<string, any>)[item.dataIndex + 'Compare'];
 
           return (
             <div className={styles.compare}>
               <div>
                 <div>{getNumToLocaleString(formatFun(value, item.decimal))}</div>
-                <div className={styles.compareValue}>
-                  {getNumToLocaleString(formatFun(record[item.dataIndex + 'Compare'], item.decimal))}
-                </div>
+                <div className={styles.compareValue}>{getNumToLocaleString(formatFun(compareValue, item.decimal))}</div>
               </div>
               <div
                 className={classnames(styles.changeStatus, {
@@ -87,7 +87,7 @@ const Table = (props: Props) => {
                   [styles.noChange]: value === compareValue,
                 })}
               >
-                {record[item.dataIndex + 'Compare'] ? toPercent(Math.abs(value - compareValue) / compareValue) : '-'}
+                {compareValue ? toPercent(Math.abs(value - compareValue) / compareValue) : '-'}
                 {value > compareValue && <CaretUpOutlined />}
                 {value === compareValue && <MinusOutlined />}
                 {value < compareValue && <CaretDownOutlined />}
@@ -106,12 +106,12 @@ const Table = (props: Props) => {
   });
 
   return (
-    <AntTable
+    <AntTable<T>
       bordered
       rowKey={rowKey}
       columns={displayColumns}
       dataSource={innerDataSource}
-      // scroll={{ x: 'max-content' }}
+      scroll={{ x: 'max-content' }}
       pagination={
         typeof pagination == 'object'
           ? {

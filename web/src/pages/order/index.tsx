@@ -1,19 +1,11 @@
-import {
-  DateRangePicker,
-  DeleteConfirmButton,
-  OrderContactInput,
-  OrderProductInput,
-  SearchForm,
-  TextButton,
-} from '@/components';
+import { DateRangePicker, OrderContactInput, OrderProductInput, SearchForm, TextButton, Table } from '@/components';
 import { useTable } from '@/hooks';
 import { deleteOrder, queryOrder, revokeStockOrder, statistics } from '@/services/order';
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Descriptions, FloatButton, Form, message, Modal, Space, Table } from 'antd';
+import { Button, Descriptions, FloatButton, Form, message, Modal, Space } from 'antd';
 import { useEffect, useState } from 'react';
 import BatchCreate from './BatchCreate';
 import EditPage from './Edit';
-// import { STATUS, translateToArray } from "@/data";
 import { copy } from '@/utils';
 import dayjs from 'dayjs';
 import Decimal from 'decimal.js';
@@ -130,7 +122,7 @@ export default () => {
     {
       title: '产品名',
       dataIndex: 'name',
-      width: 100,
+      fixed: 'left',
     },
     {
       title: '姓名',
@@ -204,26 +196,11 @@ export default () => {
     {
       title: '操作',
       key: 'operation',
+      dataIndex: 'id',
       width: 180,
       render: (record: Order) => (
         <Space size="middle">
           <TextButton onClick={() => handleEditClick(record.id)}>编辑</TextButton>
-          {/* {record.status == "1" ? (
-            <TextButton onClick={() => handleOrderStatusChange(record.id, "2")}>已完成</TextButton>
-          ) : (
-            <TextButton onClick={() => handleOrderStatusChange(record.id, "1")}>未完成</TextButton>
-          )} */}
-          {/* <DeleteConfirmButton
-            onConfirm={() => {
-              if (record.stockId) {
-                handleRevokeOutStock(record);
-              } else {
-                handleOrderDelete(record.id);
-              }
-            }}
-          >
-            {record.stockId ? <TextButton>撤销出库</TextButton> : <TextButton>删除</TextButton>}
-          </DeleteConfirmButton> */}
           {record.stockId ? (
             <TextButton
               onClick={() => {
@@ -341,7 +318,7 @@ export default () => {
             });
           }}
         />
-        <Table
+        <Table<Order>
           rowSelection={{
             type: 'checkbox',
             ...rowSelection,
