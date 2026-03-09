@@ -1,8 +1,20 @@
 .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  background: var(--color-bg-elevated) !important;
+  border-bottom: 1px solid var(--color-border-light);
+
   .action {
-    color: black;
+    color: var(--color-text);
     cursor: pointer;
-    float: right;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
   }
 }
 
@@ -10,16 +22,66 @@
   font-size: 18px;
   line-height: 64px;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: all var(--duration-normal) var(--ease-out);
+  color: var(--color-text-secondary);
+  padding: 0 var(--space-sm);
+  border-radius: var(--radius-md);
+
+  &:hover {
+    color: var(--color-primary);
+    background-color: var(--color-bg-subtle);
+  }
 }
 
-.trigger:hover {
-  color: #1890ff;
+.userInfo {
+  font-weight: 600;
+  color: var(--color-text);
+  transition: color var(--duration-normal) var(--ease-out);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+
+  &:hover {
+    color: var(--color-primary);
+    background-color: var(--color-bg-subtle);
+  }
 }
 
 .deleteButton {
-  color: #e46156;
+  color: var(--color-error);
+  font-weight: 500;
+  transition: all var(--duration-normal) var(--ease-out);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+
   &:hover {
     cursor: pointer;
+    background-color: var(--color-error-light);
+  }
+}
+
+// 下拉菜单样式覆盖
+:global {
+  .ant-dropdown-menu {
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--color-border);
+    padding: var(--space-xs);
+
+    .ant-dropdown-menu-item {
+      border-radius: var(--radius-md);
+      transition: all var(--duration-fast) var(--ease-out);
+      color: var(--color-text);
+      font-weight: 500;
+
+      &:hover {
+        background-color: var(--color-bg-subtle);
+        color: var(--color-primary);
+      }
+    }
+
+    .ant-dropdown-menu-item-divider {
+      background-color: var(--color-border);
+      margin: var(--space-xs) 0;
+    }
   }
 }

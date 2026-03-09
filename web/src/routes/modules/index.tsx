@@ -41,65 +41,65 @@ const menuRoutes: Router[] = [
     icon: <ContactsOutlined />,
     element: lazyLoad('@/pages/contact'),
   },
-  {
-    path: 'speak',
-    label: '说',
-    icon: <ContactsOutlined />,
-    element: lazyLoad('@/pages/speak'),
-  },
-  {
-    path: 'alarm',
-    label: '定时提醒',
-    icon: <ContactsOutlined />,
-    element: lazyLoad('@/pages/alarm'),
-  },
-  {
-    path: 'student-work',
-    label: '作业管理',
-    icon: <ContactsOutlined />,
-    children: [
-      {
-        path: 'manage',
-        flatMenu: true,
-        children: [
-          {
-            path: '',
-            label: '作业列表',
-            element: lazyLoad('@/pages/studentWork/manage'),
-          },
-          {
-            path: ':id',
-            label: '科目作业',
-            hideInMenu: true,
-            element: lazyLoad('@/pages/studentWork/manage/subjectWork'),
-          },
-        ],
-      },
-      {
-        path: 'calculator-manage',
-        flatMenu: true,
-        children: [
-          {
-            path: 'list',
-            label: '计算题',
-            element: lazyLoad('@/pages/studentWork/calculatorManage'),
-          },
-          {
-            path: 'create',
-            label: '生成计算题',
-            hideInMenu: true,
-            element: lazyLoad('@/pages/studentWork/generateCalculator'),
-          },
-          {
-            path: ':id',
-            label: '计算题编辑',
-            hideInMenu: true,
-            element: lazyLoad('@/pages/studentWork/generateCalculator'),
-          },
-        ],
-      },
-    ],
-  },
+  // {
+  //   path: 'speak',
+  //   label: '说',
+  //   icon: <ContactsOutlined />,
+  //   element: lazyLoad('@/pages/speak'),
+  // },
+  // {
+  //   path: 'alarm',
+  //   label: '定时提醒',
+  //   icon: <ContactsOutlined />,
+  //   element: lazyLoad('@/pages/alarm'),
+  // },
+  // {
+  //   path: 'student-work',
+  //   label: '作业管理',
+  //   icon: <ContactsOutlined />,
+  //   children: [
+  //     {
+  //       path: 'manage',
+  //       flatMenu: true,
+  //       children: [
+  //         {
+  //           path: '',
+  //           label: '作业列表',
+  //           element: lazyLoad('@/pages/studentWork/manage'),
+  //         },
+  //         {
+  //           path: ':id',
+  //           label: '科目作业',
+  //           hideInMenu: true,
+  //           element: lazyLoad('@/pages/studentWork/manage/subjectWork'),
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       path: 'calculator-manage',
+  //       flatMenu: true,
+  //       children: [
+  //         {
+  //           path: 'list',
+  //           label: '计算题',
+  //           element: lazyLoad('@/pages/studentWork/calculatorManage'),
+  //         },
+  //         {
+  //           path: 'create',
+  //           label: '生成计算题',
+  //           hideInMenu: true,
+  //           element: lazyLoad('@/pages/studentWork/generateCalculator'),
+  //         },
+  //         {
+  //           path: ':id',
+  //           label: '计算题编辑',
+  //           hideInMenu: true,
+  //           element: lazyLoad('@/pages/studentWork/generateCalculator'),
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
   {
     path: '/',
     hideInMenu: true,

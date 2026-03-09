@@ -2,29 +2,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--space-sm);
 
   .compareValue {
-    color: #999;
+    color: var(--color-text-muted);
+    font-weight: 500;
   }
 
   .increase {
-    color: #589707;
+    color: var(--color-success);
+    font-weight: 600;
   }
 
   .decrease {
-    color: #d4001a;
+    color: var(--color-error);
+    font-weight: 600;
   }
 
   .noChange {
-    color: #a0a0a0;
+    color: var(--color-text-muted);
   }
 
   .changeStatus {
-    font-size: 12px;
+    font-size: var(--text-sm);
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 2px;
   }
 }
 
@@ -32,5 +36,39 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  display: block; // 或者 inline-block
+  display: block;
+}
+
+// 表格工具栏样式
+.tableToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) 0;
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+
+  .toolbarLeft {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .toolbarRight {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+}
+
+// 表格统计信息
+.tableStats {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+
+  .highlight {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
 }

@@ -1,3 +1,26 @@
 .pinyinMatchInput {
   width: 200px;
+
+  :global {
+    .ant-select {
+      width: 100%;
+    }
+
+    // 下拉选项高亮匹配文字
+    .ant-select-item-option-content {
+      mark {
+        background: linear-gradient(120deg, #DBEAFE 0%, #EFF6FF 100%);
+        color: #2563EB;
+        font-weight: 600;
+        padding: 0 2px;
+        border-radius: 2px;
+      }
+    }
+
+    // 选中项样式
+    .ant-select-selection-item {
+      font-weight: 500;
+      color: var(--color-text);
+    }
+  }
 }

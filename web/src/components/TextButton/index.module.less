@@ -1,16 +1,71 @@
 .textButton {
-  color: #1677ff;
+  color: var(--color-primary);
   cursor: pointer;
+  font-weight: 500;
+  transition: all var(--duration-fast) var(--ease-out);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 
   &:hover {
-    color: #0566ee;
+    color: var(--color-primary-light);
+    background-color: var(--color-bg-subtle);
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 }
 
-.danger{
-  color: #ff4446;
+.danger {
+  color: var(--color-error);
   cursor: pointer;
+  font-weight: 500;
+  transition: all var(--duration-fast) var(--ease-out);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
   &:hover {
-    color: #ff6d6a;
+    color: var(--color-error);
+    background-color: var(--color-error-light);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// 成功样式
+.success {
+  color: var(--color-success);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all var(--duration-fast) var(--ease-out);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+
+  &:hover {
+    color: var(--color-success);
+    background-color: var(--color-success-light);
+  }
+}
+
+// 警告样式
+.warning {
+  color: var(--color-warning);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all var(--duration-fast) var(--ease-out);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+
+  &:hover {
+    color: var(--color-warning);
+    background-color: var(--color-warning-light);
   }
 }
