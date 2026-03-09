@@ -321,6 +321,7 @@ export default (props: Props) => {
       <Modal
         destroyOnClose
         footer={null}
+        title="选择客户"
         width={1000}
         open={contactModal.open}
         onCancel={() =>
@@ -335,6 +336,7 @@ export default (props: Props) => {
       <Modal
         destroyOnClose
         footer={null}
+        title="选择产品"
         width={1000}
         open={productModal.open}
         onCancel={() =>

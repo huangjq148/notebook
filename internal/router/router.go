@@ -32,7 +32,7 @@ func SetupRoutes(app *fiber.App) {
 	orderRouter.Get("/products", api.QueryProductsByOrders)
 	orderRouter.Get("/:id", api.GetOrderById)
 	orderRouter.Delete("/:id", api.DeleteOrder)
-	orderRouter.Patch("", api.UpdateOrder)
+	orderRouter.Patch("/:id", api.UpdateOrder)
 	orderRouter.Patch("/:id/status/:status", api.ChangeStatus)
 
 	productRouter := authVerifyRouter.Group("/product")

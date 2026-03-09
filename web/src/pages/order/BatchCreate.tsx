@@ -73,7 +73,17 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
   };
 
   const handleDataAdd = () => {
-    setDataSource((val: any) => {
+    setDataSource((val: OrderProductInfo[]) => {
+      // 检查之前的数据是否填写完整
+      const hasEmptyRow = val.some((item) => {
+        return !item.name || !item.buyPrice || !item.sellPrice || !item.number;
+      });
+
+      if (hasEmptyRow) {
+        message.warning('请先完成当前行的产品名、进价、售价、数量填写');
+        return val;
+      }
+
       const newDataSource = [
         ...val,
         {
@@ -265,6 +275,7 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       <Modal
         destroyOnClose
         footer={null}
+        title="选择产品"
         width={1000}
         open={productModalOpen}
         onCancel={() => setProductModalOpen(false)}
@@ -547,6 +558,7 @@ export default (props: Props) => {
       <Modal
         destroyOnClose
         footer={null}
+        title="选择客户"
         width={1000}
         open={contactModal.open}
         onCancel={() =>
