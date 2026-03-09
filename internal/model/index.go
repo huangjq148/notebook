@@ -8,19 +8,19 @@ type CreateInfo struct {
 }
 
 type Order struct {
-	Id        int    `db:"id" json:"id"`
-	Name      string `db:"name" json:"name"`
-	Contact   string `db:"contact" json:"contact"`
-	Phone     string `db:"phone" json:"phone"`
-	Address   string `db:"address" json:"address"`
-	BuyPrice  string `db:"buyPrice" json:"buyPrice"`
-	SellPrice string `db:"sellPrice" json:"sellPrice"`
-	Number    string `db:"number" json:"number"`
-	OtherCost string `db:"otherCost" json:"otherCost"`
-	Remark    string `db:"remark" json:"remark"`
-	Status    string `db:"status" json:"status"`
-	StockId   int    `db:"stockId" json:"stockId"`
-	OrderTime string `db:"orderTime" json:"orderTime"`
+	Id        int     `db:"id" json:"id"`
+	Name      string  `db:"name" json:"name"`
+	Contact   string  `db:"contact" json:"contact"`
+	Phone     *string `db:"phone" json:"phone"`
+	Address   *string `db:"address" json:"address"`
+	BuyPrice  string  `db:"buyPrice" json:"buyPrice"`
+	SellPrice string  `db:"sellPrice" json:"sellPrice"`
+	Number    string  `db:"number" json:"number"`
+	OtherCost string  `db:"otherCost" json:"otherCost"`
+	Remark    *string `db:"remark" json:"remark"`
+	Status    string  `db:"status" json:"status"`
+	StockId   int     `db:"stockId" json:"stockId"`
+	OrderTime string  `db:"orderTime" json:"orderTime"`
 	*CreateInfo
 }
 

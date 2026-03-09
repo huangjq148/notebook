@@ -196,9 +196,8 @@ export default () => {
     {
       title: '操作',
       key: 'operation',
-      dataIndex: 'id',
       width: 180,
-      render: (record: Order) => (
+      render: (_: any, record: Order) => (
         <Space size="middle">
           <TextButton onClick={() => handleEditClick(record.id)}>编辑</TextButton>
           {record.stockId ? (

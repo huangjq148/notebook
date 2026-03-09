@@ -3,11 +3,13 @@ import { createOrder, queryOrderById, updateOrder } from '@/services/order';
 import { DownOutlined, MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { Button, DatePicker, Form, Input, message, Modal, Space, Table } from 'antd';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ContactList from './ContactList';
 import styles from './index.module.less';
 import ProductList from './ProductList';
 import { Contact, Order, Product } from '@/global';
+
+const STORAGE_KEY = 'batch_order_form_draft';
 
 type Props = {
   id?: number;
@@ -28,6 +30,25 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [dataSource, setDataSource] = useState<OrderProductInfo[]>([]);
   const [currentEditIndex, setCurrentEditIndex] = useState(-1);
+
+  // 同步外部 value 到内部 dataSource（用于数据回填）
+  useEffect(() => {
+    if (props.value && props.value.length > 0) {
+      // 只有当外部 value 与当前 dataSource 不同时才同步
+      const isDifferent = props.value.length !== dataSource.length ||
+        props.value.some((item, index) => {
+          const current = dataSource[index];
+          return !current || item.name !== current.name || item.number !== current.number;
+        });
+
+      if (isDifferent) {
+        setDataSource(props.value.map((item) => ({
+          ...item,
+          tmpId: item.tmpId || Date.now() + Math.random(),
+        })));
+      }
+    }
+  }, [props.value]);
 
   const handleRecordRemove = (recordIndex: number) => {
     setDataSource((val) => {
@@ -92,7 +113,7 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       title: '产品名',
       dataIndex: 'name',
       key: 'name',
-      width: 240,
+      width: 180,
       render: (val: any, record: any, index: number) => {
         return index == currentEditIndex ? (
           <div
@@ -251,6 +272,11 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
         <ProductList onRowSelect={handleProductSelect} />
       </Modal>
       <Table<OrderProductInfo> rowKey="tmpId" pagination={false} columns={columns} dataSource={dataSource}></Table>
+      <div style={{ marginTop: 16, textAlign: 'center' }}>
+        <Button type="dashed" onClick={handleDataAdd} icon={<PlusCircleOutlined />}>
+          新增
+        </Button>
+      </div>
     </>
   );
 };
@@ -262,10 +288,13 @@ export default (props: Props) => {
     open: false,
   });
   const [showMoreInfoSetting, setShowMoreInfoSetting] = useState(false);
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const [cachedData, setCachedData] = useState<any>(null);
+  const hasRestoredRef = useRef(false);
 
   const handleContactSelect = (val: Contact) => {
     formRef.setFieldsValue({
-      contact: val.name,
+      contact: val.realname,
       phone: val.phone,
       address: val.address,
     });
@@ -306,8 +335,52 @@ export default (props: Props) => {
         await createOrder(order);
       }
     }
+    // 提交成功后清除缓存
+    clearDraft();
     message.success('保存成功');
     props?.onSubmit?.();
+  };
+
+  // 保存草稿到 localStorage
+  const saveDraft = (values: any) => {
+    if (props.id) return; // 编辑模式不缓存
+    if (!hasRestoredRef.current) return; // 数据回填完成前不保存
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
+    } catch (e) {
+      console.error('保存草稿失败:', e);
+    }
+  };
+
+  // 从 localStorage 恢复草稿
+  const restoreDraft = () => {
+    if (cachedData) {
+      // 将日期字符串转换回 dayjs 对象
+      const restoredData = {
+        ...cachedData,
+        orderTime: cachedData.orderTime ? dayjs(cachedData.orderTime) : dayjs(),
+      };
+      formRef.setFieldsValue(restoredData);
+      message.success('数据已回填');
+    }
+    hasRestoredRef.current = true;
+    setIsRestoreModalOpen(false);
+  };
+
+  // 清除草稿
+  const clearDraft = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.error('清除草稿失败:', e);
+    }
+  };
+
+  // 忽略草稿
+  const ignoreDraft = () => {
+    hasRestoredRef.current = true;
+    clearDraft();
+    setIsRestoreModalOpen(false);
   };
 
   const loadData = async () => {
@@ -327,11 +400,34 @@ export default (props: Props) => {
 
   useEffect(() => {
     loadData();
+
+    // 检查是否有缓存的草稿数据（仅在新增模式下）
+    if (!props.id) {
+      try {
+        const savedDraft = localStorage.getItem(STORAGE_KEY);
+        if (savedDraft) {
+          const parsed = JSON.parse(savedDraft);
+          setCachedData(parsed);
+          setIsRestoreModalOpen(true);
+        } else {
+          // 没有缓存数据，直接允许保存草稿
+          hasRestoredRef.current = true;
+        }
+      } catch (e) {
+        console.error('读取草稿失败:', e);
+        hasRestoredRef.current = true;
+      }
+    }
   }, [props.id]);
+
+  // 监听表单值变化，自动保存草稿
+  const handleValuesChange = (_: any, allValues: any) => {
+    saveDraft(allValues);
+  };
 
   return (
     <>
-      <Form onFinish={handleFormSubmit} form={formRef}>
+      <Form onFinish={handleFormSubmit} form={formRef} onValuesChange={handleValuesChange}>
         <Form.Item
           name="orderTime"
           label="日期"
@@ -460,6 +556,19 @@ export default (props: Props) => {
         }
       >
         <ContactList onRowSelect={handleContactSelect} />
+      </Modal>
+
+      {/* 恢复草稿确认弹框 */}
+      <Modal
+        title="恢复草稿"
+        open={isRestoreModalOpen}
+        onOk={restoreDraft}
+        onCancel={ignoreDraft}
+        okText="恢复"
+        cancelText="忽略"
+        centered
+      >
+        <p>检测到上次有未提交的批量订单数据，是否恢复？</p>
       </Modal>
     </>
   );

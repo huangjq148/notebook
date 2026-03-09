@@ -3,9 +3,11 @@ import { Contact, Order, Product, Stock } from '@/global';
 import { createOrder, queryOrderById, updateOrder } from '@/services/order';
 import { Button, DatePicker, Form, Input, message, Modal } from 'antd';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ContactList from './ContactList';
 import ProductList from './ProductList';
+
+const STORAGE_KEY = 'order_form_draft';
 
 type Props = {
   id?: number;
@@ -22,12 +24,15 @@ export default (props: Props) => {
   const [contactModal, setContactModal] = useState({
     open: false,
   });
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const [cachedData, setCachedData] = useState<any>(null);
+  const hasRestoredRef = useRef(false);
 
   const handleContactSelect = (val: Contact) => {
     formRef.setFieldsValue({
       contact: val.name,
-      phone: val.phone,
-      address: val.address,
+      phone: val.phone || '',
+      address: val.address || '',
     });
 
     setContactModal({
@@ -61,8 +66,52 @@ export default (props: Props) => {
         stockId: props.stockInfo?.id ? props.stockInfo.id : 0,
       });
     }
+    // 提交成功后清除缓存
+    clearDraft();
     message.success('保存成功');
     props?.onSubmit?.();
+  };
+
+  // 保存草稿到 localStorage
+  const saveDraft = (values: any) => {
+    if (props.id) return; // 编辑模式不缓存
+    if (!hasRestoredRef.current) return; // 数据回填完成前不保存
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
+    } catch (e) {
+      console.error('保存草稿失败:', e);
+    }
+  };
+
+  // 从 localStorage 恢复草稿
+  const restoreDraft = () => {
+    if (cachedData) {
+      // 将日期字符串转换回 dayjs 对象
+      const restoredData = {
+        ...cachedData,
+        orderTime: cachedData.orderTime ? dayjs(cachedData.orderTime) : dayjs(),
+      };
+      formRef.setFieldsValue(restoredData);
+      message.success('数据已回填');
+    }
+    hasRestoredRef.current = true;
+    setIsRestoreModalOpen(false);
+  };
+
+  // 清除草稿
+  const clearDraft = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.error('清除草稿失败:', e);
+    }
+  };
+
+  // 忽略草稿
+  const ignoreDraft = () => {
+    hasRestoredRef.current = true;
+    clearDraft();
+    setIsRestoreModalOpen(false);
   };
 
   const loadData = async () => {
@@ -72,6 +121,9 @@ export default (props: Props) => {
       formRef.setFieldsValue({
         ...data,
         orderTime: showDate,
+        phone: data.phone || '',
+        address: data.address || '',
+        remark: data.remark || '',
       });
       setOldData({
         ...data,
@@ -82,6 +134,24 @@ export default (props: Props) => {
 
   useEffect(() => {
     loadData();
+
+    // 检查是否有缓存的草稿数据（仅在新增模式下）
+    if (!props.id) {
+      try {
+        const savedDraft = localStorage.getItem(STORAGE_KEY);
+        if (savedDraft) {
+          const parsed = JSON.parse(savedDraft);
+          setCachedData(parsed);
+          setIsRestoreModalOpen(true);
+        } else {
+          // 没有缓存数据，直接允许保存草稿
+          hasRestoredRef.current = true;
+        }
+      } catch (e) {
+        console.error('读取草稿失败:', e);
+        hasRestoredRef.current = true;
+      }
+    }
   }, [props.id]);
 
   useEffect(() => {
@@ -95,9 +165,14 @@ export default (props: Props) => {
     }
   }, []);
 
+  // 监听表单值变化，自动保存草稿
+  const handleValuesChange = (_: any, allValues: any) => {
+    saveDraft(allValues);
+  };
+
   return (
     <>
-      <Form onFinish={handleFormSubmit} form={formRef} initialValues={{}}>
+      <Form onFinish={handleFormSubmit} form={formRef} initialValues={{}} onValuesChange={handleValuesChange}>
         <Form.Item name="orderTime" label="日期">
           <DatePicker
             allowClear={false}
@@ -269,6 +344,18 @@ export default (props: Props) => {
         }
       >
         <ProductList onRowSelect={handleProductSelect} />
+      </Modal>
+
+      {/* 恢复草稿确认弹框 */}
+      <Modal
+        title="恢复草稿"
+        open={isRestoreModalOpen}
+        onOk={restoreDraft}
+        onCancel={ignoreDraft}
+        okText="恢复"
+        cancelText="忽略"
+      >
+        <p>检测到上次有未提交的订单数据，是否恢复？</p>
       </Modal>
     </>
   );

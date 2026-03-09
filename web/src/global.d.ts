@@ -34,13 +34,13 @@ declare interface Product extends CreateInfo {
 declare interface Order extends CreateInfo {
   id?: number;
   name: string;
-  contace: string;
-  address: string;
-  phone: string;
+  contact: string;
+  address?: string | null;
+  phone?: string | null;
   buyPrice: string;
   sellPrice: string;
   number: string;
-  remark: string;
+  remark?: string | null;
   status: string;
   stockId: number;
   orderTime: string;
@@ -48,9 +48,9 @@ declare interface Order extends CreateInfo {
 
 declare interface Contact extends CreateInfo {
   id?: string;
-  name: string;
-  phone: string;
-  address: string;
+  realname: string;
+  phone?: string | null;
+  address?: string | null;
 }
 declare interface Stock extends CreateInfo {
   id?: number;
