@@ -111,6 +111,13 @@ export default (props: Props) => {
   const ignoreDraft = () => {
     hasRestoredRef.current = true;
     clearDraft();
+    // 延迟重置表单确保 Form 已挂载
+    setTimeout(() => {
+      formRef.resetFields();
+      formRef.setFieldsValue({
+        orderTime: dayjs(),
+      });
+    }, 0);
     setIsRestoreModalOpen(false);
   };
 
@@ -129,10 +136,28 @@ export default (props: Props) => {
         ...data,
         orderTime: showDate as any,
       });
+    } else {
+      // 新增模式：延迟重置表单，确保 Form 实例已准备好
+      setTimeout(() => {
+        formRef.resetFields();
+        const initialValues: any = {
+          orderTime: dayjs(),
+        };
+        if (props.stockInfo) {
+          initialValues.name = props.stockInfo.name;
+          initialValues.sellPrice = props.stockInfo.sellPrice;
+          initialValues.buyPrice = props.stockInfo.buyPrice;
+          initialValues.number = props.stockInfo.number;
+        }
+        formRef.setFieldsValue(initialValues);
+        hasRestoredRef.current = true;
+      }, 0);
     }
   };
 
   useEffect(() => {
+    // 重置恢复标记
+    hasRestoredRef.current = false;
     loadData();
 
     // 检查是否有缓存的草稿数据（仅在新增模式下）
@@ -143,27 +168,12 @@ export default (props: Props) => {
           const parsed = JSON.parse(savedDraft);
           setCachedData(parsed);
           setIsRestoreModalOpen(true);
-        } else {
-          // 没有缓存数据，直接允许保存草稿
-          hasRestoredRef.current = true;
         }
       } catch (e) {
         console.error('读取草稿失败:', e);
-        hasRestoredRef.current = true;
       }
     }
-  }, [props.id]);
-
-  useEffect(() => {
-    if (props.stockInfo) {
-      formRef.setFieldsValue({
-        name: props.stockInfo.name,
-        sellPrice: props.stockInfo.sellPrice,
-        buyPrice: props.stockInfo.buyPrice,
-        number: props.stockInfo.number,
-      });
-    }
-  }, []);
+  }, [props.id, props.stockInfo]);
 
   // 监听表单值变化，自动保存草稿
   const handleValuesChange = (_: any, allValues: any) => {

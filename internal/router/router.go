@@ -22,6 +22,9 @@ func SetupRoutes(app *fiber.App) {
 	overviewRouter := authVerifyRouter.Group("/overview")
 	overviewRouter.Get("", api.OverviewData)
 	overviewRouter.Get("/profit/statistics", api.ProfitStatic)
+	overviewRouter.Get("/core-metrics", api.CoreMetricsData)
+	overviewRouter.Get("/sales-distribution", api.SalesDistribution)
+	overviewRouter.Get("/profit/trend", api.ProfitTrendWithCompare)
 
 	orderRouter := authVerifyRouter.Group("/order")
 	orderRouter.Delete("/revoke/stock/:id", api.RevokeStockOrder)

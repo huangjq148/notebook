@@ -93,11 +93,14 @@ export default () => {
   };
 
   const handleAfterCreate = () => {
-    setModalOptions({
-      id: 0,
-      open: false,
-    });
     handleSearchForm();
+    // 延迟关闭弹框，让表单有时间重置
+    setTimeout(() => {
+      setModalOptions({
+        id: 0,
+        open: false,
+      });
+    }, 100);
   };
 
   const handleAfterBatchCreate = () => {

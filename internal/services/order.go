@@ -31,7 +31,7 @@ func handleTopDataCondition(c *fiber.Ctx) (string, []interface{}) {
 	}
 	if endOrderTime != "" {
 		conditionNames = append(conditionNames, " and orderTime<=?")
-		conditions = append(conditions, startOrderTime)
+		conditions = append(conditions, endOrderTime)
 	}
 
 	conditionNames = append(conditionNames, " and createUser=?")

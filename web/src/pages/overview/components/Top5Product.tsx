@@ -1,5 +1,5 @@
 import { BarChart } from '@/components';
-import { List, Radio } from 'antd';
+import { List, Radio, Empty } from 'antd';
 import { useState } from 'react';
 import styles from '../index.module.less';
 
@@ -40,26 +40,39 @@ export default function Charts(props: { data: any }) {
           width: '100%',
         }}
       >
-        {type === 'chart' ? (
-          <BarChart
-            xAxis={data?.data?.map((item: any) => item.name)}
-            yAxis={data?.data?.map((item: any) => parseFloat(item.money))}
-          />
+        {data?.data?.length > 0 ? (
+          type === 'chart' ? (
+            <BarChart
+              xAxis={data?.data?.map((item: any) => item.name)}
+              yAxis={data?.data?.map((item: any) => parseFloat(item.money))}
+            />
+          ) : (
+            <List
+              className={styles.listDataContainer}
+              key={data?.label}
+              header={<div>{data?.label}</div>}
+              bordered
+              dataSource={data?.data}
+              renderItem={(item: TopData) => (
+                <List.Item>
+                  <>
+                    <span>{item.name}</span>
+                    <span>{parseFloat(item.money).toFixed(2)}</span>
+                  </>
+                </List.Item>
+              )}
+            />
+          )
         ) : (
-          <List
-            className={styles.listDataContainer}
-            key={data?.label}
-            header={<div>{data?.label}</div>}
-            bordered
-            dataSource={data?.data ?? []}
-            renderItem={(item: TopData) => (
-              <List.Item>
-                <>
-                  <span>{item.name}</span>
-                  <span>{parseFloat(item.money).toFixed(2)}</span>
-                </>
-              </List.Item>
-            )}
+          <Empty
+            description="暂无数据"
+            style={{
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           />
         )}
       </div>
