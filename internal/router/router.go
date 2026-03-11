@@ -43,7 +43,7 @@ func SetupRoutes(app *fiber.App) {
 	productRouter.Get("", api.QueryProductList)
 	productRouter.Get("/:id", api.GetProductById)
 	productRouter.Delete("/:id", api.DeleteProduct)
-	productRouter.Patch("", api.UpdateProduct)
+	productRouter.Patch("/:id", api.UpdateProduct)
 
 	contactRouter := authVerifyRouter.Group("/contact")
 	contactRouter.Get("/search", api.SearchContact)
@@ -51,7 +51,7 @@ func SetupRoutes(app *fiber.App) {
 	contactRouter.Get("", api.QueryContactList)
 	contactRouter.Get("/:id", api.GetContactById)
 	contactRouter.Delete("/:id", api.DeleteContact)
-	contactRouter.Patch("", api.UpdateContact)
+	contactRouter.Patch("/:id", api.UpdateContact)
 
 	stockRouter := authVerifyRouter.Group("/stock")
 	stockRouter.Get("/statistics", api.Statistics)
@@ -59,7 +59,7 @@ func SetupRoutes(app *fiber.App) {
 	stockRouter.Get("", api.QueryStockList)
 	stockRouter.Get("/:id", api.GetStockById)
 	stockRouter.Delete("/:id", api.DeleteStock)
-	stockRouter.Patch("", api.UpdateStock)
+	stockRouter.Patch("/:id", api.UpdateStock)
 
 	alarmRouter := authVerifyRouter.Group("/alarm")
 	alarmRouter.Get("/sendMessageToWeChatWebhook", api.SendMessageToWeChatWebhook)
@@ -90,5 +90,5 @@ func SetupRoutes(app *fiber.App) {
 	calculatorRouter.Get("/:id", api.GetCalculatorById)
 	calculatorRouter.Post("", api.CreateCalculator)
 	calculatorRouter.Delete("/:id", api.DeleteCalculator)
-	calculatorRouter.Patch("", api.UpdateCalculator)
+	calculatorRouter.Patch("/:id", api.UpdateCalculator)
 }
