@@ -30,7 +30,7 @@ const TargetUserSelectModal = (props: Props) => {
       setUsers(
         res.map((item) => ({
           value: item.id,
-          label: item.name,
+          label: item.realname || item.username || '',
         })),
       );
     });

@@ -5,12 +5,13 @@ import { Button, Form, Input, message, Space, Table } from 'antd';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import TargetUserSelectModal from './TargetUserSelectModal';
+import type { Order as OrderType } from '@/global';
 
 const Order = () => {
   const [conditions, setConditions] = useState({});
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [open, setOpen] = useState(false);
-  const { dataSource, loading, searchForm, pagination, handlePageChange } = useTable<Order>({
+  const { dataSource, loading, searchForm, pagination, handlePageChange } = useTable<OrderType>({
     request: queryOrder,
     conditions,
   });
@@ -58,7 +59,7 @@ const Order = () => {
       title: '日期',
       dataIndex: 'orderTime',
       width: 140,
-      render: (text: string, record: Order) => dayjs(text || record.createTime).format('YYYY-MM-DD'),
+      render: (text: string, record: OrderType) => dayjs(text || record.createTime).format('YYYY-MM-DD'),
     },
   ];
 
@@ -78,7 +79,7 @@ const Order = () => {
   };
 
   const rowSelection = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: Order[]) => {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: OrderType[]) => {
       setSelectedKeys(selectedRowKeys);
     },
   };

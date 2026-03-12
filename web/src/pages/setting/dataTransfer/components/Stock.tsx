@@ -4,12 +4,13 @@ import { queryStock } from '@/services/stock';
 import { Button, Form, Input, message, Space, Table } from 'antd';
 import { useState } from 'react';
 import TargetUserSelectModal from './TargetUserSelectModal';
+import type { Stock as StockType } from '@/global';
 
 const Stock = () => {
   const [conditions, setConditions] = useState({});
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [open, setOpen] = useState(false);
-  const { dataSource, loading, pagination, searchForm, handlePageChange } = useTable<Product>({
+  const { dataSource, loading, pagination, searchForm, handlePageChange } = useTable<StockType>({
     request: queryStock,
     conditions,
   });

@@ -30,7 +30,7 @@ export default (props: Props) => {
 
   const handleContactSelect = (val: Contact) => {
     formRef.setFieldsValue({
-      contact: val.name,
+      contact: val.realname,
       phone: val.phone || '',
       address: val.address || '',
     });

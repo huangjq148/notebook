@@ -4,7 +4,7 @@ import { pickBy } from 'lodash-es';
 
 type Pagination = TablePaginationConfig;
 
-export default <T>(props: { request: any; conditions: Record<string, any> }) => {
+export default <T extends Record<string, any> = Record<string, any>>(props: { request: any; conditions: Record<string, any> }) => {
   const { request, conditions } = props;
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState<Pagination>({
@@ -13,7 +13,7 @@ export default <T>(props: { request: any; conditions: Record<string, any> }) => 
     total: 30,
     showSizeChanger: true,
   });
-  const [dataSource, setDataSource] = useState<T[]>([] as any);
+  const [dataSource, setDataSource] = useState<T[]>([] as T[]);
 
   const loadData = async (params?: any) => {
     const { current, pageSize } = pagination;

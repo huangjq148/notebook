@@ -12,7 +12,7 @@ export interface TableColumnType<T extends Record<string, any> = any> extends Om
   code?: DictKeys;
   dataFormat?: string;
   title: string | React.ReactNode;
-  dataIndex: string;
+  dataIndex?: string;
   render?: (val: any, record: T) => React.ReactNode;
   unit?: string;
   desc?: string;

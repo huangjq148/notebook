@@ -130,12 +130,16 @@ export default () => {
     {
       title: '姓名',
       dataIndex: 'contact',
-      render: (text: string, record: ContactInfo) => (
+      render: (text: string, record: Order) => (
         <TextButton
           onClick={() =>
             setContactOptions({
               open: true,
-              data: record,
+              data: {
+                contact: record.contact,
+                phone: record.phone || '',
+                address: record.address || '',
+              },
             })
           }
         >
@@ -322,7 +326,7 @@ export default () => {
         />
         <Table<Order>
           rowSelection={{
-            type: 'checkbox',
+            type: 'checkbox' as const,
             ...rowSelection,
           }}
           rowKey="id"

@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { TextButton } from '@/components';
 import EditPage from '@/pages/product/Edit';
 import styles from './index.module.less';
+import { Product } from '@/global';
 
 type Props = {
   onRowSelect: (val: Product) => void;
