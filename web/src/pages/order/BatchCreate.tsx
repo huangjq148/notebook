@@ -34,18 +34,24 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
   // 同步外部 value 到内部 dataSource（用于数据回填）
   useEffect(() => {
     if (props.value && props.value.length > 0) {
+      // 过滤掉空行后再比较，避免将用户正在编辑的空行误判为差异
+      const filteredDataSource = dataSource.filter((item) => item.name && item.number);
+
       // 只有当外部 value 与当前 dataSource 不同时才同步
-      const isDifferent = props.value.length !== dataSource.length ||
+      const isDifferent =
+        props.value.length !== filteredDataSource.length ||
         props.value.some((item, index) => {
-          const current = dataSource[index];
+          const current = filteredDataSource[index];
           return !current || item.name !== current.name || item.number !== current.number;
         });
 
       if (isDifferent) {
-        setDataSource(props.value.map((item) => ({
-          ...item,
-          tmpId: item.tmpId || Date.now() + Math.random(),
-        })));
+        setDataSource(
+          props.value.map((item) => ({
+            ...item,
+            tmpId: item.tmpId || Date.now() + Math.random(),
+          })),
+        );
       }
     }
   }, [props.value]);
@@ -244,6 +250,13 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
               <>
                 <TextButton
                   onClick={() => {
+                    // 检查之前的数据是否填写完整
+                    const hasEmptyRow = !record.name || !record.buyPrice || !record.sellPrice || !record.number;
+
+                    if (hasEmptyRow) {
+                      message.warning('请先完成当前行的产品名、进价、售价、数量填写');
+                      return val;
+                    }
                     setCurrentEditIndex(-1);
                   }}
                 >
