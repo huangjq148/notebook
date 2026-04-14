@@ -1,23 +1,34 @@
-import { FormOutlined, QrcodeOutlined } from '@ant-design/icons';
-import React, { useState } from 'react';
+import { LockOutlined } from '@ant-design/icons';
+import React from 'react';
 import styles from './index.module.less';
 import Password from './Password';
-import QrCode from './QrCode';
 
 const App: React.FC = () => {
-  const [type, setType] = useState<'password' | 'qrCode'>('password');
-
   return (
     <div className={styles.loginContainer}>
-      <div className={styles.formWrapper}>
-        {/* <div
-          className={styles.switchType}
-          onClick={() => setType((val) => (val === 'password' ? 'qrCode' : 'password'))}
-        >
-          {type === 'password' ? <QrcodeOutlined /> : <FormOutlined />}
-        </div> */}
-        <div className={styles.loginFormTitle}>登录</div>
-        {type === 'password' ? <Password /> : <QrCode />}
+      <div className={styles.bgOrbs} aria-hidden="true">
+        <span className={styles.orbOne} />
+        <span className={styles.orbTwo} />
+        <span className={styles.orbThree} />
+      </div>
+
+      <div className={styles.shell}>
+        <section className={styles.authPanel}>
+          <div className={styles.formWrapper}>
+            <div className={styles.panelHeader}>
+              <div className={styles.brandMark}>
+                <LockOutlined />
+              </div>
+              <div>
+                <div className={styles.loginFormTitle}>登录系统</div>
+                <div className={styles.loginFormSubtitle}>请输入账号信息以继续访问</div>
+              </div>
+            </div>
+            <div className={styles.formArea}>
+              <Password />
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );

@@ -1,57 +1,79 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Form, Input, message } from 'antd';
+import { useState } from 'react';
 import { login } from '@/services/auth';
 import { setToken } from '@/utils/auth';
 import { useNavigate } from 'react-router-dom';
+import styles from '../index.module.less';
 
 const Password = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const onFinish = async (values: { username: string; password: string }) => {
-    const result = await login(values);
-    setToken(
-      {
-        access_token: result.access_token,
-      },
-      values.username,
-    );
-    message.success('登陆成功');
-    navigate('/overview');
+    setLoading(true);
+    try {
+      const result = await login(values);
+      setToken(
+        {
+          access_token: result.access_token,
+        },
+        values.username,
+      );
+      message.success('登录成功');
+      navigate('/overview');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Form
       name="normal_login"
-      className="login-form"
+      className={styles.loginForm}
       initialValues={{
         remember: true,
       }}
       onFinish={onFinish}
+      layout="vertical"
+      requiredMark={false}
     >
       <Form.Item
         name="username"
+        label="用户名"
         rules={[
           {
             required: true,
-            message: '请输入用户名!',
+            message: '请输入用户名',
           },
         ]}
       >
-        <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="用户名" />
+        <Input
+          size="large"
+          prefix={<UserOutlined className="site-form-item-icon" />}
+          placeholder="请输入用户名"
+          autoComplete="username"
+        />
       </Form.Item>
       <Form.Item
         name="password"
+        label="密码"
         rules={[
           {
             required: true,
-            message: '请输入密码!',
+            message: '请输入密码',
           },
         ]}
       >
-        <Input prefix={<LockOutlined className="site-form-item-icon" />} type="password" placeholder="密码" />
+        <Input.Password
+          size="large"
+          prefix={<LockOutlined className="site-form-item-icon" />}
+          placeholder="请输入密码"
+          autoComplete="current-password"
+        />
       </Form.Item>
-      <Form.Item>
+      <Form.Item className={styles.formMetaRow}>
         <Form.Item name="remember" valuePropName="checked" noStyle>
-          <Checkbox>记住我</Checkbox>
+          <Checkbox className={styles.rememberCheckbox}>记住我</Checkbox>
         </Form.Item>
 
         {/* <a className="login-form-forgot" href="">
@@ -60,8 +82,8 @@ const Password = () => {
       </Form.Item>
 
       <Form.Item>
-        <Button type="primary" block htmlType="submit" className="login-form-button">
-          登陆
+        <Button type="primary" block htmlType="submit" size="large" loading={loading} className={styles.submitButton}>
+          登录
         </Button>
         {/* Or <a href="">register now!</a> */}
       </Form.Item>
