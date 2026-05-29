@@ -24,6 +24,11 @@ export const routes: Router[] = [
     ],
   },
   {
+    path: '/mobile/orders',
+    element: lazyLoad('@/pages/mobile/orders'),
+    hideInMenu: true,
+  },
+  {
     path: '/',
     element: <BasicLayout />,
     children: modules,
