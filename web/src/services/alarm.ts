@@ -1,4 +1,14 @@
 import { request } from '@/utils';
+import type { PagedResult } from '@/hooks/useTable';
+
+export type AlarmRecord = {
+  id?: number;
+  title: string;
+  description: string;
+  isRepeat?: string;
+  isEnable?: string;
+  createTime?: string;
+};
 
 export const createAlarm = (data: {
   title: string;
@@ -10,7 +20,7 @@ export const createAlarm = (data: {
   });
 };
 
-export const queryAlarmList = (params: { name?: string }): Promise<{ status: string; access_token: string }> => {
+export const queryAlarmList = (params: Record<string, unknown>): Promise<PagedResult<AlarmRecord>> => {
   return request('/alarm', {
     method: 'GET',
     params,

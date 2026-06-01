@@ -18,7 +18,6 @@ import {
 import type { Key } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 
 const { Dragger } = Upload;
 
@@ -232,7 +231,7 @@ const SubjectWork = () => {
             const newDataSource = { ...dataSource };
             newDataSource[modalOption.subject] = [
               ...(newDataSource[modalOption.subject] || []),
-              { id: uuidv4(), ...values },
+              { id: crypto.randomUUID(), ...values },
             ];
             setDataSource(newDataSource);
             setModalOption({ ...modalOption, open: false });

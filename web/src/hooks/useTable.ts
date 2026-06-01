@@ -1,34 +1,64 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TablePaginationConfig } from 'antd/es/table';
 import { pickBy } from 'lodash-es';
 
 type Pagination = TablePaginationConfig;
+type QueryParams = Record<string, unknown> & {
+  current?: number;
+  pageSize?: number;
+};
 
-export default <T extends Record<string, any> = Record<string, any>>(props: { request: any; conditions: Record<string, any> }) => {
+export type PagedResult<T> = {
+  content?: T[];
+  total?: number;
+};
+
+export type UseTableRequest<T> = (params: QueryParams) => Promise<PagedResult<T>>;
+
+export default <T extends Record<string, any> = Record<string, any>>(props: {
+  request: UseTableRequest<T>;
+  conditions: Record<string, unknown>;
+}) => {
   const { request, conditions } = props;
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState<Pagination>({
     pageSize: 10,
     current: 1,
-    total: 30,
+    total: 0,
     showSizeChanger: true,
   });
   const [dataSource, setDataSource] = useState<T[]>([] as T[]);
+  const requestSeqRef = useRef(0);
 
-  const loadData = async (params?: any) => {
+  const loadData = async (params?: Record<string, unknown>) => {
     const { current, pageSize } = pagination;
+    const requestSeq = requestSeqRef.current + 1;
+    requestSeqRef.current = requestSeq;
     setLoading(true);
-    const result = await request({
-      ...pickBy({ ...conditions, ...(params ?? {}) }),
-      current,
-      pageSize,
-    });
-    setLoading(false);
-    setDataSource(result.content || []);
-    setPagination((val) => ({
-      ...val,
-      total: result.total,
-    }));
+
+    try {
+      const result = (await request({
+        ...pickBy({ ...conditions, ...(params ?? {}) }),
+        current,
+        pageSize,
+      })) ?? {};
+
+      if (requestSeq !== requestSeqRef.current) {
+        return;
+      }
+
+      setDataSource(Array.isArray(result.content) ? result.content : []);
+      setPagination((val) => ({
+        ...val,
+        total: typeof result.total === 'number' ? result.total : (val.total ?? 0),
+      }));
+    } catch {
+      // Errors are surfaced by the global request interceptor. Keep the last table data intact.
+    } finally {
+      if (requestSeq === requestSeqRef.current) {
+        setLoading(false);
+      }
+    }
   };
 
   const searchForm = () => {

@@ -1,4 +1,4 @@
-import { BarChart } from '@/components';
+import BarChart from '@/components/Charts/BarChart';
 import { List, Radio, Empty } from 'antd';
 import { useState } from 'react';
 import styles from '../index.module.less';

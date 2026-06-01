@@ -1,6 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import * as echarts from 'echarts';
-import { useWindowSize } from 'react-use';
+import { PieChart as EChartsPieChart } from 'echarts/charts';
+import { GraphicComponent, LegendComponent, TooltipComponent } from 'echarts/components';
+import { init, use, type EChartsType } from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
+import useElementResize from '@/hooks/useElementResize';
+
+use([EChartsPieChart, GraphicComponent, LegendComponent, TooltipComponent, CanvasRenderer]);
 
 type PieChartProps = {
   data: any;
@@ -8,16 +13,17 @@ type PieChartProps = {
 };
 
 const PieChart = (props: PieChartProps) => {
-  const chartRef = useRef<any>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
   const { dataKey = 'value', data = [] } = props;
-  const { width } = useWindowSize();
-  const chartInstanceRef = useRef<any>(null);
+  const { width, height } = useElementResize(chartRef);
+  const chartInstanceRef = useRef<EChartsType | null>(null);
 
   const render = () => {
+    if (!chartRef.current || data.length === 0) return;
     const total = data.reduce((sum: number, d: any) => sum + d[dataKey], 0);
     const percent = ((data[0][dataKey] / total) * 100).toFixed(1) + '%';
 
-    const myChart = echarts.init(chartRef.current);
+    chartInstanceRef.current ??= init(chartRef.current);
     const options = {
       tooltip: {
         trigger: 'item',
@@ -69,20 +75,22 @@ const PieChart = (props: PieChartProps) => {
       ],
     };
 
-    myChart.setOption(options);
+    chartInstanceRef.current?.setOption(options);
   };
 
   useEffect(() => {
     if (chartRef.current) {
-      render()
+      render();
     }
-  }, [data]);
+    return () => {
+      chartInstanceRef.current?.dispose();
+      chartInstanceRef.current = null;
+    };
+  }, [data, dataKey]);
 
   useEffect(() => {
-    if (chartRef.current) {
-      chartInstanceRef.current.resize();
-    }
-  }, [width]);
+    chartInstanceRef.current?.resize();
+  }, [width, height]);
 
   return <div ref={chartRef} style={{ height: '300px', width: '100%' }} />;
 };

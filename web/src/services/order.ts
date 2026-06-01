@@ -1,4 +1,5 @@
 import { Order } from '@/global';
+import type { PagedResult } from '@/hooks/useTable';
 import request from '@/utils/request';
 
 export const createOrder = async (data: Order): Promise<void> => {
@@ -15,7 +16,7 @@ export const statistics = async (conditions: Record<string, unknown>): Promise<a
   });
 };
 
-export const queryOrder = async (conditions: Record<string, unknown>): Promise<Order[]> => {
+export const queryOrder = async (conditions: Record<string, unknown>): Promise<PagedResult<Order>> => {
   return request(`/order`, {
     method: 'GET',
     params: conditions,

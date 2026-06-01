@@ -2,7 +2,16 @@ import { Spin } from 'antd';
 import React from 'react';
 import { Suspense } from 'react';
 
-const modules: any = import.meta.glob('@/pages/**/index.tsx', { eager: false });
+const modules: any = import.meta.glob(
+  [
+    '@/pages/**/index.tsx',
+    '!@/pages/login/**/index.tsx',
+    '!@/pages/alarm/index.tsx',
+    '!@/pages/speak/index.tsx',
+    '!@/pages/studentWork/**/index.tsx',
+  ],
+  { eager: false },
+);
 
 const componentsMap: Record<string, any> = {};
 

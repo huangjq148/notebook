@@ -1,4 +1,5 @@
 import { Contact } from '@/global';
+import type { PagedResult } from '@/hooks/useTable';
 import request from '@/utils/request';
 
 export const createContact = async (data: Contact): Promise<Contact> => {
@@ -8,7 +9,7 @@ export const createContact = async (data: Contact): Promise<Contact> => {
   });
 };
 
-export const queryContact = async (conditions: Record<string, unknown>): Promise<Contact[]> => {
+export const queryContact = async (conditions: Record<string, unknown>): Promise<PagedResult<Contact>> => {
   return request(`/contact`, {
     method: 'GET',
     params: conditions,

@@ -1,4 +1,5 @@
 import request from '@/utils/request';
+import type { PagedResult } from '@/hooks/useTable';
 
 // 定义StudentWork接口
 export interface StudentWork {
@@ -7,9 +8,10 @@ export interface StudentWork {
   content: string;
 }
 
-export const getStudentWorkList = async (): Promise<void> => {
+export const getStudentWorkList = async (params: Record<string, unknown>): Promise<PagedResult<StudentWork>> => {
   return request(`/student-work`, {
     method: 'GET',
+    params,
   });
 };
 

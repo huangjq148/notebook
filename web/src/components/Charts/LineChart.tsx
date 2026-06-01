@@ -1,6 +1,11 @@
-import * as echarts from 'echarts';
+import { LineChart as EChartsLineChart } from 'echarts/charts';
+import { GridComponent, TooltipComponent } from 'echarts/components';
+import { init, use, type EChartsType } from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
 import { useEffect, useRef } from 'react';
-import { useWindowSize } from 'react-use';
+import useElementResize from '@/hooks/useElementResize';
+
+use([EChartsLineChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
 type LineChartProps = {
   xAxis: string[];
@@ -9,13 +14,14 @@ type LineChartProps = {
 };
 
 const LineChart1 = (props: LineChartProps) => {
-  const chartRef = useRef<any>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
   const { xAxis = [], yAxis = [], height = '300px' } = props;
-  const { width } = useWindowSize();
-  const chartInstanceRef = useRef<any>(null);
+  const { width, height: chartHeight } = useElementResize(chartRef);
+  const chartInstanceRef = useRef<EChartsType | null>(null);
 
   const render = () => {
-    chartInstanceRef.current = echarts.init(chartRef.current);
+    if (!chartRef.current) return;
+    chartInstanceRef.current ??= init(chartRef.current);
 
     const option = {
       grid: {
@@ -45,20 +51,22 @@ const LineChart1 = (props: LineChartProps) => {
       },
     };
 
-    chartInstanceRef.current.setOption(option);
+    chartInstanceRef.current?.setOption(option);
   };
 
   useEffect(() => {
     if (chartRef.current) {
       render();
     }
+    return () => {
+      chartInstanceRef.current?.dispose();
+      chartInstanceRef.current = null;
+    };
   }, [xAxis, yAxis]);
 
   useEffect(() => {
-    if (chartRef.current) {
-      chartInstanceRef.current.resize();
-    }
-  }, [width]);
+    chartInstanceRef.current?.resize();
+  }, [width, chartHeight]);
 
   return <div ref={chartRef} id="main" style={{ width: '100%', height: height }} />;
 };

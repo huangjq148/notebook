@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { SearchForm, TextButton, Table, TableColumnType } from '@/components';
 import { useTable } from '@/hooks';
 import { createAlarm, deleteAlarm, queryAlarmList, sendMessageToWeChatWebhook, updateAlarm } from '@/services/alarm';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const WEEKS = [
   { value: '1', label: '周一' },
@@ -77,7 +77,7 @@ const Alarm = () => {
               onClick={() => {
                 setEditingRecord(record);
                 setModalOpen(true);
-                form.setFieldsValue({ ...record, time: moment(record.time, 'HH:mm'), date: record.date.split(',') });
+                form.setFieldsValue({ ...record, time: dayjs(record.time, 'HH:mm'), date: record.date.split(',') });
               }}
             >
               编辑

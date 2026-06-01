@@ -1,4 +1,5 @@
 import { Stock } from '@/global';
+import type { PagedResult } from '@/hooks/useTable';
 import request from '@/utils/request';
 
 export const createStock = async (data: Stock): Promise<void> => {
@@ -8,7 +9,7 @@ export const createStock = async (data: Stock): Promise<void> => {
   });
 };
 
-export const queryStock = async (conditions: Record<string, unknown>): Promise<Stock[]> => {
+export const queryStock = async (conditions: Record<string, unknown>): Promise<PagedResult<Stock>> => {
   return request(`/stock`, {
     method: 'GET',
     params: conditions,

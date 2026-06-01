@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getProfitStatistics } from '@/services/overview';
-import { LineChart } from '@/components';
+import LineChart from '@/components/Charts/LineChart';
 import { Empty } from 'antd';
 
 export default function Charts() {

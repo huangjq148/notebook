@@ -1,6 +1,11 @@
-import * as echarts from 'echarts';
+import { BarChart as EChartsBarChart } from 'echarts/charts';
+import { GridComponent, TooltipComponent } from 'echarts/components';
+import { init, use, type EChartsType } from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
 import { useEffect, useRef } from 'react';
-import { useWindowSize } from 'react-use';
+import useElementResize from '@/hooks/useElementResize';
+
+use([EChartsBarChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
 type BarChartProps = {
   xAxis: string[];
@@ -9,13 +14,14 @@ type BarChartProps = {
 };
 
 const BarChart = (props: BarChartProps) => {
-  const chartRef = useRef<any>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
   const { xAxis = [], yAxis = [], height = '300px' } = props;
-  const { width } = useWindowSize();
-  const chartInstanceRef = useRef<any>(null);
+  const { width, height: chartHeight } = useElementResize(chartRef);
+  const chartInstanceRef = useRef<EChartsType | null>(null);
 
   const render = () => {
-    chartInstanceRef.current = echarts.init(chartRef.current);
+    if (!chartRef.current) return;
+    chartInstanceRef.current ??= init(chartRef.current);
     const option = {
       grid: {
         left: 20, // 🔹 左侧内边距，默认 60
@@ -43,20 +49,22 @@ const BarChart = (props: BarChartProps) => {
       },
     };
 
-    chartInstanceRef.current.setOption(option);
+    chartInstanceRef.current?.setOption(option);
   };
 
   useEffect(() => {
     if (chartRef.current) {
       render();
     }
+    return () => {
+      chartInstanceRef.current?.dispose();
+      chartInstanceRef.current = null;
+    };
   }, [xAxis, yAxis]);
 
   useEffect(() => {
-    if (chartRef.current) {
-      chartInstanceRef.current.resize();
-    }
-  }, [width]);
+    chartInstanceRef.current?.resize();
+  }, [width, chartHeight]);
 
   return <div ref={chartRef} style={{ height, width: '100%' }} />;
 };
