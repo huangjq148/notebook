@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import BatchCreate from './BatchCreate';
 import EditPage from './Edit';
 import { copy } from '@/utils';
+import * as XLSX from 'xlsx';
 import dayjs from 'dayjs';
 import Decimal from 'decimal.js';
 import styles from './index.module.less';
@@ -37,6 +38,7 @@ export default () => {
   });
   const [batchModalOpen, setBatchModalOpen] = useState(false);
   const [selectedDataStr, setSelectDataStr] = useState('');
+  const [selectedRows, setSelectedRows] = useState<Order[]>([]);
   const [contactOptions, setContactOptions] = useState<{
     data: ContactInfo;
     open: boolean;
@@ -232,10 +234,11 @@ export default () => {
   ];
 
   const rowSelection = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: Order[]) => {
+    onChange: (selectedRowKeys: React.Key[], rows: Order[]) => {
+      setSelectedRows(rows);
       const result: string[] = [];
       let total = 0;
-      selectedRows.map((item) => {
+      rows.map((item) => {
         let sum = 0;
         sum += Math.round(Decimal.mul(parseFloat(item.sellPrice), parseFloat(item.number + '')).toNumber());
         total += sum;
@@ -248,6 +251,39 @@ export default () => {
       result.push(`总计：${total.toFixed(0)}`);
       setSelectDataStr(result.join('\n'));
     },
+  };
+
+  const handleExportExcel = () => {
+    if (!selectedRows.length) {
+      message.warning('请先选择要导出的数据');
+      return;
+    }
+
+    // Build sheet data: [品名, 日期, 单价, 数量, 总金额]
+    const sheetData: any[][] = [['品名', '日期', '单价', '数量', '总金额']];
+    let totalSum = 0;
+
+    selectedRows.forEach((item) => {
+      const price = parseFloat(item.sellPrice);
+      const qty = parseFloat(item.number);
+      const amount = price * qty;
+      totalSum += amount;
+      sheetData.push([
+        item.name,
+        dayjs(item.orderTime || item.createTime).format('YYYY-MM-DD'),
+        price,
+        qty,
+        amount,
+      ]);
+    });
+
+    // Summary row
+    sheetData.push(['汇总', '', '', '', totalSum]);
+
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '订单');
+    XLSX.writeFile(wb, `订单_${dayjs().format('YYYYMMDD_HHmmss')}.xlsx`);
   };
 
   useEffect(() => {
