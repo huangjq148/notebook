@@ -314,6 +314,9 @@ export default () => {
               <Button type="primary" onClick={handleCopyClick}>
                 复制
               </Button>
+              <Button type="primary" onClick={handleExportExcel}>
+                导出 Excel
+              </Button>
             </Space>
           </Form.Item>
         </Form>
