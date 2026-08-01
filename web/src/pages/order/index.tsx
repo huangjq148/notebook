@@ -43,8 +43,8 @@ const drawTableImage = (rows: any[][]): HTMLCanvasElement | null => {
   if (!ctx) return null;
 
   const cellPadding = 16;
-  const rowHeight = 44;
-  const headerHeight = 48;
+  const rowHeight = 34;
+  const headerHeight = 38;
   const fontSize = 16;
   const fontFamily = '"PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif';
 
@@ -402,17 +402,29 @@ export default () => {
       return;
     }
 
-    canvas.toBlob((blob) => {
+    canvas.toBlob(async (blob) => {
       if (!blob) {
         message.error('生成图片失败');
         return;
       }
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `订单_${dayjs().format('YYYYMMDD_HHmmss')}.png`;
-      link.click();
-      URL.revokeObjectURL(url);
+
+      // 优先复制到剪贴板，浏览器不支持或未授权时降级为下载
+      try {
+        if (typeof ClipboardItem === 'undefined' || !navigator.clipboard?.write) {
+          throw new Error('clipboard not supported');
+        }
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        message.success('图片已复制到剪贴板');
+        return;
+      } catch (error) {
+        message.info('当前浏览器无法复制到剪贴板，已改为下载图片');
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `订单_${dayjs().format('YYYYMMDD_HHmmss')}.png`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
     }, 'image/png');
   };
 
