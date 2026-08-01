@@ -3,11 +3,10 @@ import { useTable } from '@/hooks';
 import { deleteOrder, queryOrder, revokeStockOrder, statistics } from '@/services/order';
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, FloatButton, Form, message, Modal, Space } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import BatchCreate from './BatchCreate';
 import EditPage from './Edit';
 import { copy } from '@/utils';
-import * as XLSX from 'xlsx';
 import dayjs from 'dayjs';
 import Decimal from 'decimal.js';
 import styles from './index.module.less';
@@ -210,6 +209,12 @@ export default () => {
     handleFormSearch(form.getFieldsValue());
   };
 
+  const handleQuickDate = (offsetDays: number) => {
+    const date = dayjs().add(offsetDays, 'day');
+    form.setFieldsValue({ createTime: [date, date] });
+    handleFormSearch(form.getFieldsValue());
+  };
+
   const handleFormSearch = (values: any) => {
     const { createTime, ...restValues } = values;
     let newConditions = restValues;
@@ -224,6 +229,17 @@ export default () => {
 
     setConditions(newConditions);
     queryStatistics(newConditions);
+  };
+
+  // 查询条件变化时自动发起查询（防抖 300ms）
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const handleFormValuesChange = (_: any, allValues: any) => {
+    if (searchTimer.current) {
+      clearTimeout(searchTimer.current);
+    }
+    searchTimer.current = setTimeout(() => {
+      handleFormSearch(allValues);
+    }, 300);
   };
 
   const handleAfterCreate = () => {
@@ -376,20 +392,6 @@ export default () => {
     },
   };
 
-  const handleExportExcel = () => {
-    if (!selectedRows.length) {
-      message.warning('请先选择要导出的数据');
-      return;
-    }
-
-    const sheetData = buildSheetData(selectedRows);
-
-    const ws = XLSX.utils.aoa_to_sheet(sheetData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, '订单');
-    XLSX.writeFile(wb, `订单_${dayjs().format('YYYYMMDD_HHmmss')}.xlsx`);
-  };
-
   const handleGenerateImage = () => {
     if (!selectedRows.length) {
       message.warning('请先选择要导出的数据');
@@ -435,29 +437,29 @@ export default () => {
   return (
     <div>
       <SearchForm>
-        <Form form={form} onFinish={handleFormSearch} layout="inline">
+        <Form form={form} onFinish={handleFormSearch} onValuesChange={handleFormValuesChange} layout="inline">
           <Form.Item label="品名" name="name" className={styles.searchInput}>
             <OrderProductInput placeholder="商品名称" />
           </Form.Item>
           <Form.Item label="姓名" name="contact" className={styles.searchInput}>
             <OrderContactInput placeholder="客户姓名" />
           </Form.Item>
-          <Form.Item label="日期" name="createTime">
-            <DateRangePicker />
+          <Form.Item label="日期">
+            <Space.Compact>
+              <Button onClick={() => handleQuickDate(-1)}>昨天</Button>
+              <Button onClick={() => handleQuickDate(0)}>今天</Button>
+              <Form.Item name="createTime" noStyle>
+                <DateRangePicker />
+              </Form.Item>
+            </Space.Compact>
           </Form.Item>
           <Form.Item>
             <Space>
-              <Button htmlType="submit" type="primary">
-                查询
-              </Button>
               <Button type="primary" onClick={() => setBatchModalOpen(true)}>
                 批量新增
               </Button>
               <Button type="primary" onClick={handleCopyClick}>
                 复制
-              </Button>
-              <Button type="primary" onClick={handleExportExcel}>
-                导出 Excel
               </Button>
               <Button type="primary" onClick={handleGenerateImage}>
                 生成图片
