@@ -2,7 +2,7 @@ import { DateRangePicker, OrderContactInput, OrderProductInput, SearchForm, Text
 import { useTable } from '@/hooks';
 import { deleteOrder, queryOrder, revokeStockOrder, statistics } from '@/services/order';
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Descriptions, FloatButton, Form, message, Modal, Space } from 'antd';
+import { Button, FloatButton, Form, message, Modal, Space } from 'antd';
 import { useEffect, useState } from 'react';
 import BatchCreate from './BatchCreate';
 import EditPage from './Edit';
@@ -13,12 +13,6 @@ import Decimal from 'decimal.js';
 import styles from './index.module.less';
 import { Order } from '@/global';
 
-interface ContactInfo {
-  contact?: string;
-  phone?: string;
-  address?: string;
-}
-
 interface Statistics {
   buyMoney: number;
   sellMoney: number;
@@ -27,7 +21,8 @@ interface Statistics {
 }
 
 export default () => {
-  const [conditions, setConditions] = useState({});
+  const [form] = Form.useForm();
+  const [conditions, setConditions] = useState<Record<string, any>>({});
   const { dataSource, loading, searchForm, pagination, handlePageChange } = useTable<Order>({
     request: queryOrder,
     conditions,
@@ -39,13 +34,6 @@ export default () => {
   const [batchModalOpen, setBatchModalOpen] = useState(false);
   const [selectedDataStr, setSelectDataStr] = useState('');
   const [selectedRows, setSelectedRows] = useState<Order[]>([]);
-  const [contactOptions, setContactOptions] = useState<{
-    data: ContactInfo;
-    open: boolean;
-  }>({
-    data: {},
-    open: false,
-  });
   const [statisticsInfo, setStatisticsInfo] = useState<Statistics>({
     sellMoney: 0,
     buyMoney: 0,
@@ -76,6 +64,24 @@ export default () => {
     }
     copy(selectedDataStr);
     message.success('复制成功');
+  };
+
+  const handleContactClick = (contact: string) => {
+    const isCurrentFilter = conditions.contact === contact;
+    form.setFieldsValue({ contact: isCurrentFilter ? undefined : contact });
+    handleFormSearch(form.getFieldsValue());
+  };
+
+  const handleProductClick = (name: string) => {
+    const isCurrentFilter = conditions.name === name;
+    form.setFieldsValue({ name: isCurrentFilter ? undefined : name });
+    handleFormSearch(form.getFieldsValue());
+  };
+
+  const handleDateClick = (date: string) => {
+    const isCurrentFilter = conditions.startCreateDate === date && conditions.endCreateDate === date;
+    form.setFieldsValue({ createTime: isCurrentFilter ? undefined : [dayjs(date), dayjs(date)] });
+    handleFormSearch(form.getFieldsValue());
   };
 
   const handleFormSearch = (values: any) => {
@@ -128,25 +134,13 @@ export default () => {
       title: '产品名',
       dataIndex: 'name',
       fixed: 'left',
+      render: (text: string) => <TextButton onClick={() => handleProductClick(text)}>{text}</TextButton>,
     },
     {
       title: '姓名',
       dataIndex: 'contact',
       render: (text: string, record: Order) => (
-        <TextButton
-          onClick={() =>
-            setContactOptions({
-              open: true,
-              data: {
-                contact: record.contact,
-                phone: record.phone || '',
-                address: record.address || '',
-              },
-            })
-          }
-        >
-          {text}
-        </TextButton>
+        <TextButton onClick={() => handleContactClick(record.contact)}>{text}</TextButton>
       ),
     },
     {
@@ -188,7 +182,10 @@ export default () => {
       title: '日期',
       dataIndex: 'orderTime',
       width: 140,
-      render: (text: string, record: Order) => dayjs(text || record.createTime).format('YYYY-MM-DD'),
+      render: (text: string, record: Order) => {
+        const date = dayjs(text || record.createTime).format('YYYY-MM-DD');
+        return <TextButton onClick={() => handleDateClick(date)}>{date}</TextButton>;
+      },
     },
     // {
     //   title: "状态",
@@ -293,7 +290,7 @@ export default () => {
   return (
     <div>
       <SearchForm>
-        <Form onFinish={handleFormSearch} layout="inline">
+        <Form form={form} onFinish={handleFormSearch} layout="inline">
           <Form.Item label="品名" name="name" className={styles.searchInput}>
             <OrderProductInput placeholder="商品名称" />
           </Form.Item>
@@ -403,36 +400,6 @@ export default () => {
         <BatchCreate onSubmit={handleAfterBatchCreate} />
       </Modal>
 
-      <Modal
-        open={contactOptions.open}
-        cancelText="asd"
-        onCancel={() =>
-          setContactOptions({
-            open: false,
-            data: {},
-          })
-        }
-        destroyOnClose
-        title="客户信息"
-        footer={
-          <Button
-            onClick={() =>
-              setContactOptions({
-                open: false,
-                data: {},
-              })
-            }
-          >
-            确定
-          </Button>
-        }
-      >
-        <Descriptions column={1}>
-          <Descriptions.Item label="姓名">{contactOptions.data.contact}</Descriptions.Item>
-          <Descriptions.Item label="电话">{contactOptions.data.phone}</Descriptions.Item>
-          <Descriptions.Item label="地址">{contactOptions.data.address}</Descriptions.Item>
-        </Descriptions>
-      </Modal>
     </div>
   );
 };
