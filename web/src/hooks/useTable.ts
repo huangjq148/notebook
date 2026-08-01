@@ -18,11 +18,12 @@ export type UseTableRequest<T> = (params: QueryParams) => Promise<PagedResult<T>
 export default <T extends Record<string, any> = Record<string, any>>(props: {
   request: UseTableRequest<T>;
   conditions: Record<string, unknown>;
+  defaultPageSize?: number;
 }) => {
-  const { request, conditions } = props;
+  const { request, conditions, defaultPageSize = 10 } = props;
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState<Pagination>({
-    pageSize: 10,
+    pageSize: defaultPageSize,
     current: 1,
     total: 0,
     showSizeChanger: true,

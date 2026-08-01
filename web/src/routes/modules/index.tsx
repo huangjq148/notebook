@@ -19,7 +19,7 @@ const menuRoutes: Router[] = [
   },
   {
     path: 'orders',
-    label: '订单',
+    label: '订单汇总',
     icon: <OrderedListOutlined />,
     element: lazyLoad('@/pages/order'),
   },

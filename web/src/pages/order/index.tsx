@@ -151,12 +151,16 @@ export default () => {
   const { dataSource, loading, searchForm, pagination, handlePageChange } = useTable<Order>({
     request: queryOrder,
     conditions,
+    defaultPageSize: 15,
   });
   const [modalOptions, setModalOptions] = useState({
     id: 0,
     open: false,
   });
   const [batchModalOpen, setBatchModalOpen] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState('');
+  const generatedImageUrlRef = useRef('');
   const [selectedDataStr, setSelectDataStr] = useState('');
   const [selectedRows, setSelectedRows] = useState<Order[]>([]);
   const [statisticsInfo, setStatisticsInfo] = useState<Statistics>({
@@ -404,30 +408,37 @@ export default () => {
       return;
     }
 
-    canvas.toBlob(async (blob) => {
+    canvas.toBlob((blob) => {
       if (!blob) {
         message.error('生成图片失败');
         return;
       }
-
-      // 优先复制到剪贴板，浏览器不支持或未授权时降级为下载
-      try {
-        if (typeof ClipboardItem === 'undefined' || !navigator.clipboard?.write) {
-          throw new Error('clipboard not supported');
-        }
-        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-        message.success('图片已复制到剪贴板');
-        return;
-      } catch (error) {
-        message.info('当前浏览器无法复制到剪贴板，已改为下载图片');
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `订单_${dayjs().format('YYYYMMDD_HHmmss')}.png`;
-        link.click();
-        URL.revokeObjectURL(url);
+      // 释放上一次生成的图片资源
+      if (generatedImageUrlRef.current) {
+        URL.revokeObjectURL(generatedImageUrlRef.current);
       }
+      const url = URL.createObjectURL(blob);
+      generatedImageUrlRef.current = url;
+      setGeneratedImageUrl(url);
+      setImageModalOpen(true);
     }, 'image/png');
+  };
+
+  const handleCloseImageModal = () => {
+    setImageModalOpen(false);
+    if (generatedImageUrlRef.current) {
+      URL.revokeObjectURL(generatedImageUrlRef.current);
+      generatedImageUrlRef.current = '';
+    }
+    setGeneratedImageUrl('');
+  };
+
+  const handleDownloadImage = () => {
+    if (!generatedImageUrl) return;
+    const link = document.createElement('a');
+    link.href = generatedImageUrl;
+    link.download = `订单_${dayjs().format('YYYYMMDD_HHmmss')}.png`;
+    link.click();
   };
 
   useEffect(() => {
@@ -548,6 +559,22 @@ export default () => {
         onCancel={() => setBatchModalOpen(false)}
       >
         <BatchCreate onSubmit={handleAfterBatchCreate} />
+      </Modal>
+
+      <Modal
+        title="生成图片"
+        open={imageModalOpen}
+        width={800}
+        onCancel={handleCloseImageModal}
+        footer={[
+          <Button key="download" type="primary" onClick={handleDownloadImage}>
+            下载图片
+          </Button>,
+        ]}
+      >
+        <div style={{ maxHeight: 560, overflow: 'auto', textAlign: 'center' }}>
+          <img src={generatedImageUrl} alt="生成的订单图片" style={{ maxWidth: '100%' }} />
+        </div>
       </Modal>
 
     </div>
