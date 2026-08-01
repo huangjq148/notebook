@@ -13,6 +13,132 @@ import Decimal from 'decimal.js';
 import styles from './index.module.less';
 import { Order } from '@/global';
 
+const EXCEL_HEADERS = ['品名', '日期', '单价', '数量', '总金额'];
+
+const buildSheetData = (orders: Order[]) => {
+  const sheetData: any[][] = [EXCEL_HEADERS];
+  let totalSum = 0;
+
+  orders.forEach((item) => {
+    const price = parseFloat(item.sellPrice);
+    const qty = parseFloat(item.number);
+    const amount = parseFloat(Decimal.mul(price, qty).toFixed(2));
+    totalSum += amount;
+    sheetData.push([
+      item.name,
+      dayjs(item.orderTime || item.createTime).format('YYYY-MM-DD'),
+      price,
+      qty,
+      amount,
+    ]);
+  });
+
+  sheetData.push(['汇总', '', '', '', parseFloat(totalSum.toFixed(2))]);
+  return sheetData;
+};
+
+const drawTableImage = (rows: any[][]): HTMLCanvasElement | null => {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  const cellPadding = 16;
+  const rowHeight = 44;
+  const headerHeight = 48;
+  const fontSize = 16;
+  const fontFamily = '"PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif';
+
+  const colCount = rows[0].length;
+  ctx.font = `${fontSize}px ${fontFamily}`;
+
+  // 按内容计算列宽
+  const colWidths: number[] = [];
+  for (let c = 0; c < colCount; c++) {
+    let maxWidth = 0;
+    rows.forEach((row) => {
+      maxWidth = Math.max(maxWidth, ctx.measureText(String(row[c] ?? '')).width);
+    });
+    colWidths.push(Math.ceil(maxWidth) + cellPadding * 2);
+  }
+  colWidths[0] = Math.max(colWidths[0], 140);
+  for (let c = 1; c < colCount; c++) {
+    colWidths[c] = Math.max(colWidths[c], 96);
+  }
+
+  const tableWidth = colWidths.reduce((sum, width) => sum + width, 0);
+  const tableHeight = headerHeight + (rows.length - 1) * rowHeight;
+
+  // 高分屏下 2x 绘制保证清晰，数据量过大时降级为 1x 避免超出画布上限
+  const scale = tableHeight * 2 > 15000 || tableWidth * 2 > 15000 ? 1 : 2;
+  canvas.width = Math.ceil(tableWidth * scale);
+  canvas.height = Math.ceil(tableHeight * scale);
+  ctx.scale(scale, scale);
+
+  // 背景
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, tableWidth, tableHeight);
+
+  const drawRow = (rowY: number, rowH: number, row: any[], isHeader = false, isSummary = false) => {
+    // 汇总行底色
+    if (isSummary) {
+      ctx.fillStyle = '#f5f5f5';
+      ctx.fillRect(0, rowY, tableWidth, rowH);
+    }
+
+    ctx.textBaseline = 'middle';
+    ctx.font = isHeader || isSummary ? `bold ${fontSize}px ${fontFamily}` : `${fontSize}px ${fontFamily}`;
+
+    let x = 0;
+    for (let c = 0; c < colCount; c++) {
+      const text = String(row[c] ?? '');
+      ctx.fillStyle = isHeader ? '#1f1f1f' : '#333333';
+      if (c >= 2) {
+        // 数值列右对齐
+        ctx.textAlign = 'right';
+        ctx.fillText(text, x + colWidths[c] - cellPadding, rowY + rowH / 2);
+      } else {
+        ctx.textAlign = 'left';
+        ctx.fillText(text, x + cellPadding, rowY + rowH / 2);
+      }
+      x += colWidths[c];
+    }
+
+    // 边框：上边框 + 竖边框
+    ctx.strokeStyle = '#d9d9d9';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, rowY);
+    ctx.lineTo(tableWidth, rowY);
+    x = 0;
+    for (let c = 0; c <= colCount; c++) {
+      ctx.moveTo(x, rowY);
+      ctx.lineTo(x, rowY + rowH);
+      if (c < colCount) x += colWidths[c];
+    }
+    ctx.stroke();
+  };
+
+  // 表头行
+  drawRow(0, headerHeight, rows[0], true);
+
+  // 数据行 + 汇总行
+  let y = headerHeight;
+  for (let r = 1; r < rows.length; r++) {
+    drawRow(y, rowHeight, rows[r], false, r === rows.length - 1);
+    y += rowHeight;
+  }
+
+  // 最底部边框
+  ctx.strokeStyle = '#d9d9d9';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, tableHeight);
+  ctx.lineTo(tableWidth, tableHeight);
+  ctx.stroke();
+
+  return canvas;
+};
+
 interface Statistics {
   buyMoney: number;
   sellMoney: number;
@@ -256,31 +382,38 @@ export default () => {
       return;
     }
 
-    // Build sheet data: [品名, 日期, 单价, 数量, 总金额]
-    const sheetData: any[][] = [['品名', '日期', '单价', '数量', '总金额']];
-    let totalSum = 0;
-
-    selectedRows.forEach((item) => {
-      const price = parseFloat(item.sellPrice);
-      const qty = parseFloat(item.number);
-      const amount = price * qty;
-      totalSum += amount;
-      sheetData.push([
-        item.name,
-        dayjs(item.orderTime || item.createTime).format('YYYY-MM-DD'),
-        price,
-        qty,
-        amount,
-      ]);
-    });
-
-    // Summary row
-    sheetData.push(['汇总', '', '', '', totalSum]);
+    const sheetData = buildSheetData(selectedRows);
 
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, '订单');
     XLSX.writeFile(wb, `订单_${dayjs().format('YYYYMMDD_HHmmss')}.xlsx`);
+  };
+
+  const handleGenerateImage = () => {
+    if (!selectedRows.length) {
+      message.warning('请先选择要导出的数据');
+      return;
+    }
+
+    const canvas = drawTableImage(buildSheetData(selectedRows));
+    if (!canvas) {
+      message.error('生成图片失败');
+      return;
+    }
+
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        message.error('生成图片失败');
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `订单_${dayjs().format('YYYYMMDD_HHmmss')}.png`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
   };
 
   useEffect(() => {
@@ -313,6 +446,9 @@ export default () => {
               </Button>
               <Button type="primary" onClick={handleExportExcel}>
                 导出 Excel
+              </Button>
+              <Button type="primary" onClick={handleGenerateImage}>
+                生成图片
               </Button>
             </Space>
           </Form.Item>
