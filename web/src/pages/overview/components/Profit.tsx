@@ -18,5 +18,12 @@ export default function Charts() {
     lodData();
   }, []);
 
-  return options?.yAxis?.length ? <LineChart xAxis={options.xAxis} yAxis={options.yAxis} /> : <Empty description="暂无数据" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />;
+  return options?.yAxis?.length ? (
+    <LineChart xAxis={options.xAxis} yAxis={options.yAxis} showLabel />
+  ) : (
+    <Empty
+      description="暂无数据"
+      style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+    />
+  );
 }

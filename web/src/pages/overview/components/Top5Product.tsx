@@ -43,6 +43,7 @@ export default function Charts(props: { data: any }) {
         {data?.data?.length > 0 ? (
           type === 'chart' ? (
             <BarChart
+              showLabel
               xAxis={data?.data?.map((item: any) => item.name)}
               yAxis={data?.data?.map((item: any) => parseFloat(item.money))}
             />

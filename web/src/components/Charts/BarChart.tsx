@@ -11,11 +11,13 @@ type BarChartProps = {
   xAxis: string[];
   yAxis: string[] | number[];
   height?: number;
+  // 是否在柱子上方显示数值
+  showLabel?: boolean;
 };
 
 const BarChart = (props: BarChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
-  const { xAxis = [], yAxis = [], height = '300px' } = props;
+  const { xAxis = [], yAxis = [], height = '300px', showLabel = false } = props;
   const { width, height: chartHeight } = useElementResize(chartRef);
   const chartInstanceRef = useRef<EChartsType | null>(null);
 
@@ -26,7 +28,7 @@ const BarChart = (props: BarChartProps) => {
       grid: {
         left: 20, // 🔹 左侧内边距，默认 60
         right: 20, // 🔹 右侧内边距，默认 60
-        top: 20,
+        top: showLabel ? 36 : 20,
         bottom: 20,
         containLabel: true, // 确保标签不会被裁剪
       },
@@ -41,6 +43,17 @@ const BarChart = (props: BarChartProps) => {
         {
           data: yAxis,
           type: 'bar',
+          label: {
+            show: showLabel,
+            position: 'top',
+            color: '#1E293B',
+            fontSize: 12,
+            fontWeight: 500,
+            formatter: (params: any) => {
+              const value = Number(params.value);
+              return Number.isNaN(value) ? params.value : `${Number(value.toFixed(2))}`;
+            },
+          },
         },
       ],
       tooltip: {
@@ -60,7 +73,7 @@ const BarChart = (props: BarChartProps) => {
       chartInstanceRef.current?.dispose();
       chartInstanceRef.current = null;
     };
-  }, [xAxis, yAxis]);
+  }, [xAxis, yAxis, showLabel]);
 
   useEffect(() => {
     chartInstanceRef.current?.resize();

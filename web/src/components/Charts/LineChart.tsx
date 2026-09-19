@@ -11,11 +11,13 @@ type LineChartProps = {
   xAxis: string[];
   yAxis: string[] | number[];
   height?: number;
+  // 是否在数据点上显示数值
+  showLabel?: boolean;
 };
 
 const LineChart1 = (props: LineChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
-  const { xAxis = [], yAxis = [], height = '300px' } = props;
+  const { xAxis = [], yAxis = [], height = '300px', showLabel = false } = props;
   const { width, height: chartHeight } = useElementResize(chartRef);
   const chartInstanceRef = useRef<EChartsType | null>(null);
 
@@ -27,7 +29,7 @@ const LineChart1 = (props: LineChartProps) => {
       grid: {
         left: 20, // 🔹 左侧内边距，默认 60
         right: 20, // 🔹 右侧内边距，默认 60
-        top: 20,
+        top: showLabel ? 36 : 20,
         bottom: 20,
         containLabel: true, // 确保标签不会被裁剪
       },
@@ -43,6 +45,17 @@ const LineChart1 = (props: LineChartProps) => {
           data: yAxis,
           type: 'line',
           smooth: true,
+          label: {
+            show: showLabel,
+            position: 'top',
+            color: '#1E293B',
+            fontSize: 12,
+            fontWeight: 500,
+            formatter: (params: any) => {
+              const value = Number(params.value);
+              return Number.isNaN(value) ? params.value : `${Number(value.toFixed(2))}`;
+            },
+          },
         },
       ],
       tooltip: {
@@ -62,7 +75,7 @@ const LineChart1 = (props: LineChartProps) => {
       chartInstanceRef.current?.dispose();
       chartInstanceRef.current = null;
     };
-  }, [xAxis, yAxis]);
+  }, [xAxis, yAxis, showLabel]);
 
   useEffect(() => {
     chartInstanceRef.current?.resize();
