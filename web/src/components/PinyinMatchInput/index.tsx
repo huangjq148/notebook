@@ -1,10 +1,12 @@
 import { AutoComplete, AutoCompleteProps } from 'antd';
+import { forwardRef } from 'react';
 import { match } from 'pinyin-pro';
 import styles from './index.module.less';
 
-const PinyinMatchInput = (props: AutoCompleteProps) => {
+const PinyinMatchInput = forwardRef<any, AutoCompleteProps>((props, ref) => {
   return (
     <AutoComplete
+      ref={ref}
       className={styles.pinyinMatchInput}
       options={props.options}
       filterOption={(inputVal, option: any) => {
@@ -17,6 +19,8 @@ const PinyinMatchInput = (props: AutoCompleteProps) => {
       {...props}
     />
   );
-};
+});
+
+PinyinMatchInput.displayName = 'PinyinMatchInput';
 
 export default PinyinMatchInput;

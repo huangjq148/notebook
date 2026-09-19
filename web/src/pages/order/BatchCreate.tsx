@@ -26,10 +26,20 @@ type OrderProductInfo = {
 };
 type OrderProductInfoKey = keyof OrderProductInfo;
 
+const createEmptyProduct = (): OrderProductInfo => ({
+  name: '',
+  buyPrice: '',
+  sellPrice: '',
+  number: '',
+  otherCost: '',
+  tmpId: Date.now() + Math.random(),
+});
+
 const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderProductInfo[]) => void }) => {
   const [productModalOpen, setProductModalOpen] = useState(false);
-  const [dataSource, setDataSource] = useState<OrderProductInfo[]>([]);
-  const [currentEditIndex, setCurrentEditIndex] = useState(-1);
+  // 默认提供一行，方便直接录入
+  const [dataSource, setDataSource] = useState<OrderProductInfo[]>([createEmptyProduct()]);
+  const [currentEditIndex, setCurrentEditIndex] = useState(0);
 
   // 同步外部 value 到内部 dataSource（用于数据回填）
   useEffect(() => {
@@ -52,6 +62,8 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
             tmpId: item.tmpId || Date.now() + Math.random(),
           })),
         );
+        // 回填的数据默认处于展示态，点击编辑后再修改
+        setCurrentEditIndex(-1);
       }
     }
   }, [props.value]);
@@ -90,17 +102,7 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
         return val;
       }
 
-      const newDataSource = [
-        ...val,
-        {
-          name: '',
-          buyPrice: '',
-          sellPrice: '',
-          number: '',
-          otherCost: '',
-          tmpId: Date.now(),
-        },
-      ];
+      const newDataSource = [...val, createEmptyProduct()];
       setCurrentEditIndex(newDataSource.length - 1);
       return newDataSource;
     });
@@ -315,6 +317,7 @@ export default (props: Props) => {
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [cachedData, setCachedData] = useState<any>(null);
   const hasRestoredRef = useRef(false);
+  const contactInputRef = useRef<any>(null);
 
   const handleContactSelect = (val: Contact) => {
     formRef.setFieldsValue({
@@ -444,6 +447,18 @@ export default (props: Props) => {
     }
   }, [props.id]);
 
+  // 打开弹框后默认聚焦姓名输入框，便于直接录入
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isRestoreModalOpen) return;
+      contactInputRef.current?.focus?.();
+      const activeElement = document.activeElement as HTMLInputElement | null;
+      activeElement?.select?.();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [isRestoreModalOpen]);
+
   // 监听表单值变化，自动保存草稿
   const handleValuesChange = (_: any, allValues: any) => {
     saveDraft(allValues);
@@ -500,7 +515,7 @@ export default (props: Props) => {
                 },
               ]}
             >
-              <OrderContactInput placeholder="请输入姓名" />
+              <OrderContactInput ref={contactInputRef} placeholder="请输入姓名" />
             </Form.Item>
             <Button
               type="primary"
