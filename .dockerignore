@@ -1,5 +1,10 @@
+.git
+.gitignore
 .vscode
+.idea
+**/node_modules
 dist
-node_modules
+web/dist
 .DS_Store
-**/*/node_modules
+__debug_bin*
+.env

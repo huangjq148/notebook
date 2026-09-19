@@ -9,15 +9,16 @@ import (
 )
 
 // SetupRoutes setup router api
+//
+// 所有接口统一挂载在 /api 前缀下，便于与前端静态资源共用一个服务。
 func SetupRoutes(app *fiber.App) {
-	// Middleware
-	// api := app.Group("/api", logger.New())
+	apiRoot := app.Group("/api")
 
 	// Auth
-	authRouter := app.Group("/auth")
+	authRouter := apiRoot.Group("/auth")
 	authRouter.Post("/login", api.Login)
 
-	authVerifyRouter := app.Use(middleware.Protected()).Use(middleware.User())
+	authVerifyRouter := apiRoot.Use(middleware.Protected()).Use(middleware.User())
 
 	overviewRouter := authVerifyRouter.Group("/overview")
 	overviewRouter.Get("", api.OverviewData)

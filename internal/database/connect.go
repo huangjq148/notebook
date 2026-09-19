@@ -1,12 +1,13 @@
 package database
 
 import (
-	// "api-fiber-gorm/config"
 	"fmt"
+	"strconv"
+
+	"hjq-notebook/internal/config"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	// "strconv"
 )
 
 var (
@@ -16,13 +17,22 @@ var (
 // ConnectDB connect to db
 func ConnectDB() (string, bool) {
 	var err error
-	// p := config.Config("DB_PORT")
-	// port, err := strconv.ParseUint(p, 10, 32)
-	// dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.Config("DB_HOST"), port, config.Config("DB_USER"), config.Config("DB_PASSWORD"), config.Config("DB_NAME"))
-	// DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	connectInfo := "root:fright2014@tcp(10.30.40.197:3306)/notebook"
-	db, _ := sqlx.Open("mysql", connectInfo)
 
+	host := config.Config("DB_HOST")
+	portStr := config.Config("DB_PORT")
+	user := config.Config("DB_USER")
+	password := config.Config("DB_PASSWORD")
+	dbName := config.Config("DB_NAME")
+
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		port = 3306
+	}
+
+	connectInfo := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		user, password, host, port, dbName)
+
+	db, err := sqlx.Open("mysql", connectInfo)
 	if err != nil {
 		panic("failed to connect database")
 	}

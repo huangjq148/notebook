@@ -4,7 +4,6 @@ services:
   mysql:
     image: mysql:8
     container_name: mysql_container
-    # network_mode: host  # 设置网络模式为 host
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: notebook
@@ -15,18 +14,21 @@ services:
     # volumes:
     #   - /path/to/mysql/data:/var/lib/mysql
 
-  web: 
-    build: 
+  # 前后端一体化服务：构建同一个镜像，Go 服务同时托管前端与 API
+  app:
+    build:
+      context: .
       dockerfile: Dockerfile
-    # network_mode: host  # 设置网络模式为 host
-    ports:
-      - "8000:80"
-
-  server: 
-    build: 
-      dockerfile: Dockerfile.server
+    container_name: notebook_app
     depends_on:
       - mysql
-    # network_mode: host  # 设置网络模式为 host
+    # 从 .env 读取默认配置（DB、SMTP 等）
+    env_file:
+      - .env
+    environment:
+      # 容器内通过服务名访问 mysql，覆盖 .env 中的 DB_HOST
+      DB_HOST: mysql
+      DB_PORT: "3306"
     ports:
       - "3000:3000"
+    restart: unless-stopped

@@ -2,7 +2,7 @@ import request from '@/utils/request';
 import { getAccessToken } from '@/utils';
 import axios from 'axios';
 
-const baseURL = process.env.NODE_ENV === 'development' ? '/api' : '/server';
+const baseURL = '/api';
 
 // 导入导出涉及文件流和 FormData，统一 request 会把 Content-Type 固定为 json，
 // 这里单独创建一个实例，只复用 token。

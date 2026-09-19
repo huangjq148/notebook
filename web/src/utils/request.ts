@@ -6,9 +6,8 @@ import { getAccessToken } from './auth';
 // axios 配置及拦截器
 axios.defaults.timeout = 30000;
 
-// 指定请求地址
-
-axios.defaults.baseURL = process.env.NODE_ENV === 'development' ? '/api' : '/server';
+// 指定请求地址（前后端同域，统一走 /api）
+axios.defaults.baseURL = '/api';
 
 // 添加请求拦截器
 axios.interceptors.request.use(

@@ -10,7 +10,8 @@ function pathResolve(dir: string) {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './',
+  // 与后端同域部署在根路径，使用绝对路径避免深层路由刷新时资源 404
+  base: '/',
   build: {
     rollupOptions: {
       output: {
