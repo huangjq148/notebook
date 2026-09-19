@@ -77,6 +77,11 @@ func SetupRoutes(app *fiber.App) {
 	// Auth
 	systemRouter := authVerifyRouter.Group("/system")
 	systemRouter.Post("/data/transfer", api.TransferData)
+	systemRouter.Get("/data/export", api.ExportData)
+	systemRouter.Post("/data/import", api.ImportData)
+	systemRouter.Post("/data/mail", api.SendDataSyncMail)
+	systemRouter.Get("/data/mail/config", api.GetDataSyncMailConfig)
+	systemRouter.Put("/data/mail/config", api.SaveDataSyncMailConfig)
 
 	studentWorkRouter := authVerifyRouter.Group("/student-work")
 	studentWorkRouter.Get("", api.QueryStudentWorkList)

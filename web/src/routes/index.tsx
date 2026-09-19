@@ -21,6 +21,10 @@ export const routes: Router[] = [
         path: 'data-transfer',
         element: lazyLoad('@/pages/setting/dataTransfer'),
       },
+      {
+        path: 'data-sync',
+        element: lazyLoad('@/pages/setting/dataSync'),
+      },
     ],
   },
   {

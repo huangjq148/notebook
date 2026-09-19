@@ -67,6 +67,18 @@ const LayoutHeader = (props: { collapsed: boolean; setCollapsed: (val: boolean) 
         label: (
           <span
             onClick={() => {
+              navigate('/setting/data-sync');
+            }}
+          >
+            数据同步
+          </span>
+        ),
+        key: 'dataSync',
+      },
+      {
+        label: (
+          <span
+            onClick={() => {
               navigate('/setting/data-transfer');
             }}
           >

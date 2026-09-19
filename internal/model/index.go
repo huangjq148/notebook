@@ -115,3 +115,21 @@ type Calculator struct {
 	Content     string `db:"content" json:"content"`
 	*CreateInfo
 }
+
+// DataSyncConfig 数据同步邮件配置（全局单条记录，id=1）
+type DataSyncConfig struct {
+	Id int `db:"id" json:"id"`
+	// 是否开启每日定时发送，"1" 开启 / "0" 关闭
+	IsEnable string `db:"isEnable" json:"isEnable"`
+	// 发件邮箱完整地址
+	MailUsername string `db:"mailUsername" json:"mailUsername"`
+	// QQ 邮箱 SMTP 授权码
+	MailAuthCode string `db:"mailAuthCode" json:"mailAuthCode"`
+	MailFrom     string `db:"mailFrom" json:"mailFrom"`
+	MailTo       string `db:"mailTo" json:"mailTo"`
+	MailHost     string `db:"mailHost" json:"mailHost"`
+	MailPort     string `db:"mailPort" json:"mailPort"`
+	// 每天发送的小时（0-23）
+	SendHour   int    `db:"sendHour" json:"sendHour"`
+	UpdateTime string `db:"updateTime" json:"updateTime"`
+}
