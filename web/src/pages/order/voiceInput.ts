@@ -1,6 +1,7 @@
 import { pinyin } from 'pinyin-pro';
 
 export const voiceFields = {
+  姓名: 'contact',
   产品名称: 'name',
   产品名: 'name',
   品名: 'name',
@@ -11,14 +12,16 @@ export const voiceFields = {
   其它费用: 'otherCost',
 } as const;
 export type VoiceField = (typeof voiceFields)[keyof typeof voiceFields];
-export type VoiceAction = { type: 'field'; field: VoiceField } | { type: 'add' } | { type: 'value'; value: string };
+export type VoiceAction =
+  { type: 'field'; field: VoiceField } | { type: 'add' } | { type: 'previous' } | { type: 'value'; value: string };
 
 export function parseVoiceActions(transcript: string): VoiceAction[] {
   return transcript
-    .split(/(产品名称|产品名|品名|进价|售价|数量|其他费用|其它费用|新增)/)
+    .split(/(姓名|产品名称|产品名|品名|进价|售价|数量|其他费用|其它费用|新增|(?:切换到?|切到)?上一行)/)
     .flatMap((part): VoiceAction[] => {
       const value = part.replace(/^[\s，。！？、,:：!？?]+|[\s，。！？、,:：!？?]+$/g, '');
       if (!value) return [];
+      if (/^(?:切换到?|切到)?上一行$/.test(value)) return [{ type: 'previous' }];
       if (value === '新增') return [{ type: 'add' }];
       if (value in voiceFields) return [{ type: 'field', field: voiceFields[value as keyof typeof voiceFields] }];
       return [{ type: 'value', value }];

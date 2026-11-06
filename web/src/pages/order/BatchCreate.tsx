@@ -38,7 +38,13 @@ const createEmptyProduct = (): OrderProductInfo => ({
   tmpId: Date.now() + Math.random(),
 });
 
-const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderProductInfo[]) => void }) => {
+const EditTable = (props: {
+  value?: OrderProductInfo[];
+  onChange?: (val?: OrderProductInfo[]) => void;
+  activeFieldRef: { current: VoiceField };
+  onContactFocus: () => void;
+  onContactChange: (value: string) => void;
+}) => {
   const [productModalOpen, setProductModalOpen] = useState(false);
   // 默认提供一行，方便直接录入
   const [dataSource, setDataSource] = useState<OrderProductInfo[]>([createEmptyProduct()]);
@@ -48,7 +54,7 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
   rowsRef.current = dataSource;
   const editIndexRef = useRef(currentEditIndex);
   editIndexRef.current = currentEditIndex;
-  const activeFieldRef = useRef<VoiceField>('name');
+  const { activeFieldRef } = props;
   const inputRefs = useRef<Partial<Record<VoiceField, { focus: () => void } | null>>>({});
   const [focusRequest, setFocusRequest] = useState<{ field: VoiceField }>();
   const [productNames, setProductNames] = useState<string[]>([]);
@@ -76,6 +82,14 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
   }, []);
 
   const focusField = (field: VoiceField) => {
+    if (field === 'contact') {
+      activeFieldRef.current = field;
+      setProductDropdownOpen(false);
+      // 取消尚未执行的表格聚焦，避免抢回姓名输入框的焦点。
+      setFocusRequest(undefined);
+      props.onContactFocus();
+      return;
+    }
     const index = editIndexRef.current < 0 ? rowsRef.current.length - 1 : editIndexRef.current;
     if (index < 0) return;
     editIndexRef.current = index;
@@ -147,10 +161,30 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
     return true;
   };
 
+  const handlePreviousRow = () => {
+    const currentIndex = editIndexRef.current < 0 ? rowsRef.current.length - 1 : editIndexRef.current;
+    if (currentIndex <= 0) {
+      message.info('当前已是第一行，没有上一行');
+      return false;
+    }
+    editIndexRef.current = currentIndex - 1;
+    setCurrentEditIndex(currentIndex - 1);
+    setVoiceProductQuery(null);
+    setVoiceOptions(null);
+    setProductDropdownOpen(false);
+    focusField('name');
+    setVoiceHint(`已切换到第 ${currentIndex} 行`);
+    return true;
+  };
+
   const { listening, transcript, toggle } = useVoiceRecognition((text) => {
     for (const action of parseVoiceActions(text)) {
       if (action.type === 'field') {
         focusField(action.field);
+        continue;
+      }
+      if (action.type === 'previous') {
+        if (!handlePreviousRow()) break;
         continue;
       }
       if (action.type === 'add') {
@@ -159,6 +193,11 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       }
       const field = activeFieldRef.current;
       focusField(field);
+      if (field === 'contact') {
+        props.onContactChange(action.value);
+        setVoiceHint(`已填写姓名：${action.value}`);
+        continue;
+      }
       const index = editIndexRef.current;
       if (index < 0) continue;
       if (field === 'name') {
@@ -442,13 +481,13 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
           disabled={!productsReady}
           aria-pressed={listening}
           onClick={() => {
-            if (!listening) focusField('name');
+            if (!listening) focusField(activeFieldRef.current);
             toggle();
           }}
         >
           {listening ? '停止语音' : '语音录入'}
         </Button>
-        <span>说“产品名 / 进价 / 售价 / 数量 / 其他费用”切换列，说“新增”添加下一行</span>
+        <span>说“姓名 / 产品名 / 进价 / 售价 / 数量 / 其他费用”切换输入，说“上一行”切换，说“新增”添加下一行</span>
       </div>
       <div className={styles.voiceStatus} aria-live="polite">
         {listening && <span>正在聆听{transcript ? `：${transcript}` : '…'}</span>}
@@ -475,6 +514,8 @@ export default (props: Props) => {
   const [cachedData, setCachedData] = useState<any>(null);
   const hasRestoredRef = useRef(false);
   const contactInputRef = useRef<any>(null);
+  const activeFieldRef = useRef<VoiceField>('contact');
+  const [contactDropdownOpen, setContactDropdownOpen] = useState(false);
 
   const handleContactSelect = (val: Contact) => {
     formRef.setFieldsValue({
@@ -672,7 +713,17 @@ export default (props: Props) => {
                 },
               ]}
             >
-              <OrderContactInput ref={contactInputRef} placeholder="请输入姓名" />
+              <OrderContactInput
+                ref={contactInputRef}
+                placeholder="请输入姓名"
+                open={contactDropdownOpen}
+                onOpenChange={setContactDropdownOpen}
+                onFocus={() => {
+                  activeFieldRef.current = 'contact';
+                }}
+                onSearch={() => setContactDropdownOpen(true)}
+                onSelect={() => setContactDropdownOpen(false)}
+              />
             </Form.Item>
             <Button
               type="primary"
@@ -731,7 +782,16 @@ export default (props: Props) => {
           </>
         )}
         <Form.Item name="products">
-          <EditTable />
+          <EditTable
+            activeFieldRef={activeFieldRef}
+            onContactFocus={() => contactInputRef.current?.focus?.()}
+            onContactChange={(contact) => {
+              formRef.setFieldsValue({ contact });
+              setContactDropdownOpen(true);
+              // 程序赋值不会触发表单的 onValuesChange，需同步保存语音姓名。
+              saveDraft(formRef.getFieldsValue());
+            }}
+          />
         </Form.Item>
         <Form.Item>
           <Button htmlType="submit" type="primary">

@@ -47,3 +47,18 @@ test('拼音匹配允许同音词，返回完整歧义列表并去重', () => {
   assert.deepEqual(matchVoiceProducts(products, '香蕉'), []);
   assert.deepEqual(matchVoiceProducts(products, ''), []);
 });
+
+test('姓名、上一行和产品字段可在同一句中连续切换', () => {
+  assert.deepEqual(parseVoiceActions('姓名张三，上一行，进价十一点五'), [
+    { type: 'field', field: 'contact' },
+    { type: 'value', value: '张三' },
+    { type: 'previous' },
+    { type: 'field', field: 'buyPrice' },
+    { type: 'value', value: '十一点五' },
+  ]);
+  assert.deepEqual(parseVoiceActions('姓名。'), [{ type: 'field', field: 'contact' }]);
+  assert.deepEqual(parseVoiceActions('张三。'), [{ type: 'value', value: '张三' }]);
+  for (const command of ['上一行', '切换上一行', '切换到上一行', '切到上一行']) {
+    assert.deepEqual(parseVoiceActions(command), [{ type: 'previous' }], command);
+  }
+});
