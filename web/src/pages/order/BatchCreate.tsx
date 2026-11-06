@@ -1,5 +1,11 @@
-import { OrderContactInput, PinyinMatchInput, TextButton } from '@/components';
-import { createOrder, queryOrderById, queryProductsByOrders, updateOrder } from '@/services/order';
+import { PinyinMatchInput, TextButton } from '@/components';
+import {
+  createOrder,
+  queryOrderById,
+  queryContactsByOrders,
+  queryProductsByOrders,
+  updateOrder,
+} from '@/services/order';
 import { AudioOutlined, MinusCircleOutlined, PlusCircleOutlined, StopOutlined } from '@ant-design/icons';
 import { Button, DatePicker, Form, Input, message, Modal, Space, Table } from 'antd';
 import dayjs from 'dayjs';
@@ -9,7 +15,7 @@ import styles from './index.module.less';
 import ProductList from './ProductList';
 import { Contact, Order, Product } from '@/global';
 
-import { matchVoiceProducts, parseSpokenNumber, parseVoiceActions, toProductPinyin, VoiceField } from './voiceInput';
+import { matchVoiceNames, parseSpokenNumber, parseVoiceActions, toNamePinyin, VoiceField } from './voiceInput';
 import { useVoiceRecognition } from './useVoiceRecognition';
 
 const STORAGE_KEY = 'batch_order_form_draft';
@@ -44,6 +50,7 @@ const EditTable = (props: {
   activeFieldRef: { current: VoiceField };
   onContactFocus: () => void;
   onContactChange: (value: string) => void;
+  onVoiceContactSelect: (index: number) => void;
 }) => {
   const [productModalOpen, setProductModalOpen] = useState(false);
   // 默认提供一行，方便直接录入
@@ -60,7 +67,12 @@ const EditTable = (props: {
   const [productNames, setProductNames] = useState<string[]>([]);
   const [productsReady, setProductsReady] = useState(false);
   const [voiceProductQuery, setVoiceProductQuery] = useState<string | null>(null);
-  const [voiceOptions, setVoiceOptions] = useState<string[] | null>(null);
+  const [voiceOptions, updateVoiceOptions] = useState<string[] | null>(null);
+  const voiceOptionsRef = useRef<string[] | null>(null);
+  const setVoiceOptions = (options: string[] | null) => {
+    voiceOptionsRef.current = options;
+    updateVoiceOptions(options);
+  };
   const [productDropdownOpen, setProductDropdownOpen] = useState(false);
   const [voiceHint, setVoiceHint] = useState('');
 
@@ -183,6 +195,29 @@ const EditTable = (props: {
         focusField(action.field);
         continue;
       }
+      if (action.type === 'select') {
+        if (activeFieldRef.current === 'contact') {
+          props.onVoiceContactSelect(action.index);
+        } else if (activeFieldRef.current === 'name') {
+          const candidates = voiceOptionsRef.current;
+          if (!candidates || candidates.length < 2) {
+            setVoiceHint('当前没有待选产品');
+          } else if (!Number.isInteger(action.index) || action.index < 0 || action.index >= candidates.length) {
+            setVoiceHint(`请选择第 1 到第 ${candidates.length} 项`);
+          } else {
+            const name = candidates[action.index];
+            handleDataSourceChange(editIndexRef.current, 'name', name);
+            setVoiceProductQuery(null);
+            setVoiceOptions(null);
+            setProductDropdownOpen(false);
+            focusField('name');
+            setVoiceHint(`已选中：${name}`);
+          }
+        } else {
+          setVoiceHint('请先切换到姓名或产品名，再选择候选项');
+        }
+        continue;
+      }
       if (action.type === 'previous') {
         if (!handlePreviousRow()) break;
         continue;
@@ -195,23 +230,23 @@ const EditTable = (props: {
       focusField(field);
       if (field === 'contact') {
         props.onContactChange(action.value);
-        setVoiceHint(`已填写姓名：${action.value}`);
+        setVoiceHint('');
         continue;
       }
       const index = editIndexRef.current;
       if (index < 0) continue;
       if (field === 'name') {
-        const matches = matchVoiceProducts(productNames, action.value);
+        const matches = matchVoiceNames(productNames, action.value);
         setVoiceOptions(matches);
         setProductDropdownOpen(matches.length > 1);
         // 待确认结果只作为搜索词展示，不能作为已选产品提交。
-        setVoiceProductQuery(matches.length === 1 ? null : toProductPinyin(action.value));
+        setVoiceProductQuery(matches.length === 1 ? null : toNamePinyin(action.value));
         handleDataSourceChange(index, 'name', matches.length === 1 ? matches[0] : '');
         setVoiceHint(
           matches.length === 1
             ? `已选中：${matches[0]}`
             : matches.length
-              ? `匹配到 ${matches.length} 项，请选择产品`
+              ? `匹配到 ${matches.length} 项，可说“第几个”选择产品`
               : '没有匹配的产品，请重说或手动选择',
         );
       } else {
@@ -267,7 +302,10 @@ const EditTable = (props: {
                 inputRefs.current.name = input;
               }}
               value={voiceProductQuery ?? val}
-              options={(voiceOptions ?? productNames).map((name) => ({ value: name, label: name }))}
+              options={(voiceOptions ?? productNames).map((name, index) => ({
+                value: name,
+                label: voiceOptions && voiceOptions.length > 1 ? `${index + 1}. ${name}` : name,
+              }))}
               open={productDropdownOpen}
               onOpenChange={setProductDropdownOpen}
               onFocus={() => {
@@ -516,8 +554,36 @@ export default (props: Props) => {
   const contactInputRef = useRef<any>(null);
   const activeFieldRef = useRef<VoiceField>('contact');
   const [contactDropdownOpen, setContactDropdownOpen] = useState(false);
+  const [contactNames, setContactNames] = useState<string[] | null>(null);
+  const [voiceContactQuery, setVoiceContactQuery] = useState<string | null>(null);
+  const [voiceContactOptions, setVoiceContactOptions] = useState<string[] | null>(null);
+  const voiceContactOptionsRef = useRef<string[] | null>(null);
+  const [contactVoiceHint, setContactVoiceHint] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    queryContactsByOrders()
+      .then((names) => {
+        if (!cancelled) setContactNames([...new Set(names)]);
+      })
+      .catch(() => {
+        if (!cancelled) setContactVoiceHint('姓名列表加载失败，请重新打开页面后重试');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const clearContactSearch = () => {
+    setVoiceContactQuery(null);
+    setVoiceContactOptions(null);
+    voiceContactOptionsRef.current = null;
+    setContactVoiceHint('');
+  };
 
   const handleContactSelect = (val: Contact) => {
+    clearContactSearch();
+    setContactDropdownOpen(false);
     formRef.setFieldsValue({
       contact: val.realname,
       phone: val.phone,
@@ -702,6 +768,8 @@ export default (props: Props) => {
             <Form.Item
               label="姓名"
               name="contact"
+              getValueProps={(contact) => ({ value: voiceContactQuery ?? contact })}
+              extra={contactVoiceHint || undefined}
               style={{
                 width: '100%',
                 marginRight: '10px',
@@ -713,16 +781,24 @@ export default (props: Props) => {
                 },
               ]}
             >
-              <OrderContactInput
+              <PinyinMatchInput
                 ref={contactInputRef}
+                options={(voiceContactOptions ?? contactNames ?? []).map((name, index) => ({
+                  value: name,
+                  label: voiceContactOptions && voiceContactOptions.length > 1 ? `${index + 1}. ${name}` : name,
+                }))}
                 placeholder="请输入姓名"
                 open={contactDropdownOpen}
                 onOpenChange={setContactDropdownOpen}
                 onFocus={() => {
                   activeFieldRef.current = 'contact';
                 }}
+                onChange={clearContactSearch}
                 onSearch={() => setContactDropdownOpen(true)}
-                onSelect={() => setContactDropdownOpen(false)}
+                onSelect={() => {
+                  clearContactSearch();
+                  setContactDropdownOpen(false);
+                }}
               />
             </Form.Item>
             <Button
@@ -785,10 +861,43 @@ export default (props: Props) => {
           <EditTable
             activeFieldRef={activeFieldRef}
             onContactFocus={() => contactInputRef.current?.focus?.()}
-            onContactChange={(contact) => {
+            onContactChange={(spoken) => {
+              if (!contactNames) {
+                setContactVoiceHint('姓名列表尚未加载完成，请稍后重试');
+                return;
+              }
+              const matches = matchVoiceNames(contactNames, spoken);
+              voiceContactOptionsRef.current = matches;
+              setVoiceContactOptions(matches);
+              setVoiceContactQuery(matches.length === 1 ? null : toNamePinyin(spoken));
+              formRef.setFieldsValue({ contact: matches.length === 1 ? matches[0] : '' });
+              setContactDropdownOpen(matches.length > 1);
+              setContactVoiceHint(
+                matches.length === 1
+                  ? `已选中：${matches[0]}`
+                  : matches.length
+                    ? `匹配到 ${matches.length} 项，可说“第几个”选择`
+                    : '没有匹配的姓名，请重说或手动输入',
+              );
+              // 未确认的拼音只用于搜索，不写入草稿或提交数据。
+              saveDraft(formRef.getFieldsValue());
+            }}
+            onVoiceContactSelect={(index) => {
+              const candidates = voiceContactOptionsRef.current;
+              if (!candidates || candidates.length < 2) {
+                setContactVoiceHint('当前没有待选姓名');
+                return;
+              }
+              if (!Number.isInteger(index) || index < 0 || index >= candidates.length) {
+                setContactVoiceHint(`请选择第 1 到第 ${candidates.length} 项`);
+                return;
+              }
+              const contact = candidates[index];
               formRef.setFieldsValue({ contact });
-              setContactDropdownOpen(true);
-              // 程序赋值不会触发表单的 onValuesChange，需同步保存语音姓名。
+              clearContactSearch();
+              setContactDropdownOpen(false);
+              setContactVoiceHint(`已选中：${contact}`);
+              contactInputRef.current?.focus?.();
               saveDraft(formRef.getFieldsValue());
             }}
           />

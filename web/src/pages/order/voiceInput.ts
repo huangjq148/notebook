@@ -13,14 +13,22 @@ export const voiceFields = {
 } as const;
 export type VoiceField = (typeof voiceFields)[keyof typeof voiceFields];
 export type VoiceAction =
-  { type: 'field'; field: VoiceField } | { type: 'add' } | { type: 'previous' } | { type: 'value'; value: string };
+  | { type: 'field'; field: VoiceField }
+  | { type: 'add' }
+  | { type: 'previous' }
+  | { type: 'select'; index: number }
+  | { type: 'value'; value: string };
 
 export function parseVoiceActions(transcript: string): VoiceAction[] {
   return transcript
-    .split(/(姓名|产品名称|产品名|品名|进价|售价|数量|其他费用|其它费用|新增|(?:切换到?|切到)?上一行)/)
+    .split(
+      /(姓名|产品名称|产品名|品名|进价|售价|数量|其他费用|其它费用|新增|(?:切换到?|切到)?上一行|(?:选择|选)?第[\d零〇一二两三四五六七八九十百]+[个项])/,
+    )
     .flatMap((part): VoiceAction[] => {
       const value = part.replace(/^[\s，。！？、,:：!？?]+|[\s，。！？、,:：!？?]+$/g, '');
       if (!value) return [];
+      const ordinal = value.match(/^(?:选择|选)?第([\d零〇一二两三四五六七八九十百]+)[个项]$/);
+      if (ordinal) return [{ type: 'select', index: Number(parseSpokenNumber(ordinal[1])) - 1 }];
       if (/^(?:切换到?|切到)?上一行$/.test(value)) return [{ type: 'previous' }];
       if (value === '新增') return [{ type: 'add' }];
       if (value in voiceFields) return [{ type: 'field', field: voiceFields[value as keyof typeof voiceFields] }];
@@ -77,9 +85,9 @@ export function parseSpokenNumber(value: string): string | undefined {
   return `${negative ? '-' : ''}${total}${fraction === undefined ? '' : `.${convertDigits(fraction)}`}`;
 }
 
-export const toProductPinyin = (text: string) =>
+export const toNamePinyin = (text: string) =>
   pinyin(text, { toneType: 'none', type: 'array' }).join('').toLowerCase().replace(/\s/g, '');
-export function matchVoiceProducts(names: string[], spoken: string): string[] {
-  const query = toProductPinyin(spoken);
-  return query ? [...new Set(names)].filter((name) => toProductPinyin(name).includes(query)) : [];
+export function matchVoiceNames(names: string[], spoken: string): string[] {
+  const query = toNamePinyin(spoken);
+  return query ? [...new Set(names)].filter((name) => toNamePinyin(name).includes(query)) : [];
 }
