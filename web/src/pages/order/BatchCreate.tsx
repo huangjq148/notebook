@@ -1,6 +1,6 @@
-import { OrderContactInput, OrderProductInput, TextButton } from '@/components';
-import { createOrder, queryOrderById, updateOrder } from '@/services/order';
-import { DownOutlined, MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { OrderContactInput, PinyinMatchInput, TextButton } from '@/components';
+import { createOrder, queryOrderById, queryProductsByOrders, updateOrder } from '@/services/order';
+import { AudioOutlined, MinusCircleOutlined, PlusCircleOutlined, StopOutlined } from '@ant-design/icons';
 import { Button, DatePicker, Form, Input, message, Modal, Space, Table } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
@@ -8,6 +8,9 @@ import ContactList from './ContactList';
 import styles from './index.module.less';
 import ProductList from './ProductList';
 import { Contact, Order, Product } from '@/global';
+
+import { matchVoiceProducts, parseSpokenNumber, parseVoiceActions, toProductPinyin, VoiceField } from './voiceInput';
+import { useVoiceRecognition } from './useVoiceRecognition';
 
 const STORAGE_KEY = 'batch_order_form_draft';
 
@@ -41,6 +44,51 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
   const [dataSource, setDataSource] = useState<OrderProductInfo[]>([createEmptyProduct()]);
   const [currentEditIndex, setCurrentEditIndex] = useState(0);
 
+  const rowsRef = useRef(dataSource);
+  rowsRef.current = dataSource;
+  const editIndexRef = useRef(currentEditIndex);
+  editIndexRef.current = currentEditIndex;
+  const activeFieldRef = useRef<VoiceField>('name');
+  const inputRefs = useRef<Partial<Record<VoiceField, { focus: () => void } | null>>>({});
+  const [focusRequest, setFocusRequest] = useState<{ field: VoiceField }>();
+  const [productNames, setProductNames] = useState<string[]>([]);
+  const [productsReady, setProductsReady] = useState(false);
+  const [voiceProductQuery, setVoiceProductQuery] = useState<string | null>(null);
+  const [voiceOptions, setVoiceOptions] = useState<string[] | null>(null);
+  const [productDropdownOpen, setProductDropdownOpen] = useState(false);
+  const [voiceHint, setVoiceHint] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    queryProductsByOrders()
+      .then((names) => {
+        if (!cancelled) {
+          setProductNames([...new Set(names)]);
+          setProductsReady(true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setVoiceHint('产品列表加载失败，请重新打开页面后重试');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const focusField = (field: VoiceField) => {
+    const index = editIndexRef.current < 0 ? rowsRef.current.length - 1 : editIndexRef.current;
+    if (index < 0) return;
+    editIndexRef.current = index;
+    setCurrentEditIndex(index);
+    activeFieldRef.current = field;
+    if (field !== 'name') setProductDropdownOpen(false);
+    setFocusRequest({ field });
+  };
+
+  useEffect(() => {
+    if (focusRequest) inputRefs.current[focusRequest.field]?.focus();
+  }, [focusRequest, currentEditIndex]);
+
   // 同步外部 value 到内部 dataSource（用于数据回填）
   useEffect(() => {
     if (props.value && props.value.length > 0) {
@@ -68,60 +116,94 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
     }
   }, [props.value]);
 
-  const handleRecordRemove = (recordIndex: number) => {
-    setDataSource((val) => {
-      const newVal = val.filter((val, index: number) => {
-        return index != recordIndex;
-      });
-      return newVal;
-    });
+  const updateRows = (rows: OrderProductInfo[]) => {
+    rowsRef.current = rows;
+    setDataSource(rows);
   };
 
-  const handleDataSourceChange = (index: number, key: OrderProductInfoKey, newValue: any) => {
-    setDataSource((value: OrderProductInfo[]) => {
-      // @ts-ignore
-      value[index][key] = newValue;
-      props.onChange?.(
-        value.filter((item) => {
-          return item.name && item.number;
-        }),
-      );
-      return value;
-    });
+  const handleRecordRemove = (recordIndex: number) => {
+    updateRows(rowsRef.current.filter((_, index) => index !== recordIndex));
+    setVoiceProductQuery(null);
+    setVoiceOptions(null);
+  };
+
+  const handleDataSourceChange = (index: number, key: OrderProductInfoKey, newValue: string) => {
+    updateRows(rowsRef.current.map((row, rowIndex) => (rowIndex === index ? { ...row, [key]: newValue } : row)));
   };
 
   const handleDataAdd = () => {
-    setDataSource((val: OrderProductInfo[]) => {
-      // 检查之前的数据是否填写完整
-      const hasEmptyRow = val.some((item) => {
-        return !item.name || !item.buyPrice || !item.sellPrice || !item.number;
-      });
-
-      if (hasEmptyRow) {
-        message.warning('请先完成当前行的产品名、进价、售价、数量填写');
-        return val;
-      }
-
-      const newDataSource = [...val, createEmptyProduct()];
-      setCurrentEditIndex(newDataSource.length - 1);
-      return newDataSource;
-    });
+    if (rowsRef.current.some((item) => !item.name || !item.buyPrice || !item.sellPrice || !item.number)) {
+      message.warning('请先完成当前行的产品名、进价、售价、数量填写');
+      return false;
+    }
+    const rows = [...rowsRef.current, createEmptyProduct()];
+    updateRows(rows);
+    editIndexRef.current = rows.length - 1;
+    setCurrentEditIndex(rows.length - 1);
+    setVoiceProductQuery(null);
+    setVoiceOptions(null);
+    setProductDropdownOpen(false);
+    focusField('name');
+    return true;
   };
 
+  const { listening, transcript, toggle } = useVoiceRecognition((text) => {
+    for (const action of parseVoiceActions(text)) {
+      if (action.type === 'field') {
+        focusField(action.field);
+        continue;
+      }
+      if (action.type === 'add') {
+        if (!handleDataAdd()) break;
+        continue;
+      }
+      const field = activeFieldRef.current;
+      focusField(field);
+      const index = editIndexRef.current;
+      if (index < 0) continue;
+      if (field === 'name') {
+        const matches = matchVoiceProducts(productNames, action.value);
+        setVoiceOptions(matches);
+        setProductDropdownOpen(matches.length > 1);
+        // 待确认结果只作为搜索词展示，不能作为已选产品提交。
+        setVoiceProductQuery(matches.length === 1 ? null : toProductPinyin(action.value));
+        handleDataSourceChange(index, 'name', matches.length === 1 ? matches[0] : '');
+        setVoiceHint(
+          matches.length === 1
+            ? `已选中：${matches[0]}`
+            : matches.length
+              ? `匹配到 ${matches.length} 项，请选择产品`
+              : '没有匹配的产品，请重说或手动选择',
+        );
+      } else {
+        const number = parseSpokenNumber(action.value);
+        if (number === undefined) {
+          setVoiceHint('未识别到有效数字，请重说');
+          continue;
+        }
+        handleDataSourceChange(index, field, number);
+        setVoiceHint('');
+      }
+    }
+  });
+
   const handleProductSelect = (productInfo: Product) => {
-    setDataSource((val) => {
-      const newData = [...val];
-
-      newData[currentEditIndex] = {
-        ...val[currentEditIndex],
-        name: productInfo.name,
-        sellPrice: productInfo.sellPrice,
-        buyPrice: productInfo.buyPrice,
-        tmpId: Date.now(),
-      };
-
-      return newData;
-    });
+    const index = editIndexRef.current;
+    updateRows(
+      rowsRef.current.map((row, rowIndex) =>
+        rowIndex === index
+          ? {
+              ...row,
+              name: productInfo.name,
+              sellPrice: productInfo.sellPrice,
+              buyPrice: productInfo.buyPrice,
+            }
+          : row,
+      ),
+    );
+    setVoiceProductQuery(null);
+    setVoiceOptions(null);
+    setProductDropdownOpen(false);
 
     setProductModalOpen(false);
   };
@@ -141,9 +223,31 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
               gap: '5px',
             }}
           >
-            <OrderProductInput
-              value={val}
-              onChange={(value) => handleDataSourceChange(index, 'name', value)}
+            <PinyinMatchInput
+              ref={(input) => {
+                inputRefs.current.name = input;
+              }}
+              value={voiceProductQuery ?? val}
+              options={(voiceOptions ?? productNames).map((name) => ({ value: name, label: name }))}
+              open={productDropdownOpen}
+              onOpenChange={setProductDropdownOpen}
+              onFocus={() => {
+                activeFieldRef.current = 'name';
+              }}
+              onChange={(value) => {
+                setVoiceProductQuery(null);
+                handleDataSourceChange(index, 'name', value);
+              }}
+              onSearch={() => {
+                setVoiceOptions(null);
+                setProductDropdownOpen(true);
+              }}
+              onSelect={() => {
+                setVoiceProductQuery(null);
+                setVoiceOptions(null);
+                setProductDropdownOpen(false);
+                setVoiceHint('');
+              }}
               placeholder="产品名称"
             />
             <Button
@@ -168,7 +272,13 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       render: (val: any, record: any, index: number) => {
         return index == currentEditIndex ? (
           <Input
-            defaultValue={val}
+            ref={(input) => {
+              inputRefs.current.buyPrice = input;
+            }}
+            value={val}
+            onFocus={() => {
+              activeFieldRef.current = 'buyPrice';
+            }}
             onChange={(e) => {
               handleDataSourceChange(index, 'buyPrice', e.target.value);
             }}
@@ -187,7 +297,13 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       render: (val: any, record: any, index: number) => {
         return index == currentEditIndex ? (
           <Input
-            defaultValue={val}
+            ref={(input) => {
+              inputRefs.current.sellPrice = input;
+            }}
+            value={val}
+            onFocus={() => {
+              activeFieldRef.current = 'sellPrice';
+            }}
             onChange={(e) => {
               handleDataSourceChange(index, 'sellPrice', e.target.value);
             }}
@@ -206,7 +322,13 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       render: (val: any, record: any, index: number) => {
         return index == currentEditIndex ? (
           <Input
-            defaultValue={val}
+            ref={(input) => {
+              inputRefs.current.number = input;
+            }}
+            value={val}
+            onFocus={() => {
+              activeFieldRef.current = 'number';
+            }}
             onChange={(e) => {
               handleDataSourceChange(index, 'number', e.target.value);
             }}
@@ -225,7 +347,13 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       render: (val: any, record: any, index: number) => {
         return index == currentEditIndex ? (
           <Input
-            defaultValue={val}
+            ref={(input) => {
+              inputRefs.current.otherCost = input;
+            }}
+            value={val}
+            onFocus={() => {
+              activeFieldRef.current = 'otherCost';
+            }}
             onChange={(e) => {
               handleDataSourceChange(index, 'otherCost', e.target.value);
             }}
@@ -267,7 +395,16 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
               </>
             ) : (
               <>
-                <TextButton onClick={() => setCurrentEditIndex(index)}>编辑</TextButton>
+                <TextButton
+                  onClick={() => {
+                    editIndexRef.current = index;
+                    setCurrentEditIndex(index);
+                    setVoiceProductQuery(null);
+                    setVoiceOptions(null);
+                  }}
+                >
+                  编辑
+                </TextButton>
                 <TextButton onClick={() => handleRecordRemove(index)}>删除</TextButton>
               </>
             )}
@@ -297,6 +434,26 @@ const EditTable = (props: { value?: OrderProductInfo[]; onChange?: (val?: OrderP
       >
         <ProductList onRowSelect={handleProductSelect} />
       </Modal>
+      <div className={styles.voiceToolbar}>
+        <Button
+          icon={listening ? <StopOutlined /> : <AudioOutlined />}
+          type={listening ? 'primary' : 'default'}
+          danger={listening}
+          disabled={!productsReady}
+          aria-pressed={listening}
+          onClick={() => {
+            if (!listening) focusField('name');
+            toggle();
+          }}
+        >
+          {listening ? '停止语音' : '语音录入'}
+        </Button>
+        <span>说“产品名 / 进价 / 售价 / 数量 / 其他费用”切换列，说“新增”添加下一行</span>
+      </div>
+      <div className={styles.voiceStatus} aria-live="polite">
+        {listening && <span>正在聆听{transcript ? `：${transcript}` : '…'}</span>}
+        {voiceHint && <span>{voiceHint}</span>}
+      </div>
       <Table<OrderProductInfo> rowKey="tmpId" pagination={false} columns={columns} dataSource={dataSource}></Table>
       <div style={{ marginTop: 16, textAlign: 'center' }}>
         <Button type="dashed" onClick={handleDataAdd} icon={<PlusCircleOutlined />}>

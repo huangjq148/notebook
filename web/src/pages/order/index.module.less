@@ -27,3 +27,29 @@
     cursor: pointer;
   }
 }
+
+.voiceToolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+
+  > span {
+    color: #666;
+    font-size: 13px;
+  }
+}
+
+.voiceStatus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: #666;
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+
+  &:empty {
+    display: none;
+  }
+}
