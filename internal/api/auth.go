@@ -20,7 +20,7 @@ type Account struct {
 	Password string `db:"password" json:"password"`
 	// 对应rmb表字段
 	Status     string  `db:"status"`
-	UserId     string  `db:"userId"`
+	UserId     string  `db:"user_id"`
 	Roles      string  `db:"roles"`
 	CreateUser *string `db:"createUser"`
 	CreateTime string  `db:"createTime"`
@@ -40,9 +40,12 @@ func Login(c *fiber.Ctx) error {
 	// Keep the legacy lookup for existing plaintext-password accounts. Accounts
 	// bootstrapped or reset by the supported flow use bcrypt and are checked by
 	// loading the stored hash only when the legacy lookup does not match.
-	e := db.Get(&accountInfo, "select id,userId,username,roles from t_user_account where username=? and password=?", input.Username, input.Password)
+	// Alias the legacy camel-cased column to a sqlx-compatible name. Unsafe
+	// tolerates drivers that report the original name despite the SQL alias.
+	accountDB := db.Unsafe()
+	e := accountDB.Get(&accountInfo, "select id,userId AS user_id,username,roles from t_user_account where username=? and password=?", input.Username, input.Password)
 	if e != nil {
-		e = db.Get(&accountInfo, "select id,userId,username,roles,password from t_user_account where username=?", input.Username)
+		e = accountDB.Get(&accountInfo, "select id,userId AS user_id,username,roles,password from t_user_account where username=?", input.Username)
 		if e != nil || bcrypt.CompareHashAndPassword([]byte(accountInfo.Password), []byte(input.Password)) != nil {
 			return c.JSON(fiber.Map{"status": "error", "message": "用户名或密码错误"})
 		}
