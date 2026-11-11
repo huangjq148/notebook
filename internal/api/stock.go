@@ -6,11 +6,17 @@ import (
 	"hjq-notebook/internal/database"
 	"hjq-notebook/internal/model"
 	"hjq-notebook/internal/model/response"
+	"hjq-notebook/internal/oplog"
 	"hjq-notebook/internal/utils"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
+
+// 库存快照查询：number 在库里是 float，而 model.Stock.Number 是 string，
+// 直接 select * 会扫描失败，这里 CAST 成字符串（NULL 兜底为空串）后再进快照。
+const stockSnapshotSql = "select id,name,buyPrice,sellPrice,IFNULL(CAST(number AS CHAR),'') as number," +
+	"createUser,updateUser,createTime,updateTime from t_stock where id=?"
 
 type StockQueryCondition struct {
 	Table string `table:"t_stock"`
@@ -32,6 +38,12 @@ func CreateStock(c *fiber.Ctx) error {
 	if e != nil {
 		fmt.Println("err=", e)
 		return c.JSON(fiber.Map{"status": "error", "message": e.Error()})
+	}
+
+	// 操作日志：新增只记改后数据；能拿到自增主键就把它作为目标 ID
+	oplog.SetSnapshot(c, nil, stock)
+	if id, e := result.LastInsertId(); e == nil {
+		oplog.SetTargetID(c, id)
 	}
 
 	return c.JSON(fiber.Map{"status": "success", "message": "保存成功", "data": result})
@@ -84,6 +96,12 @@ func DeleteStock(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userId := utils.GetUserId(c)
 
+	// 操作日志：删除前保留旧库存
+	var before model.Stock
+	if e := db.Get(&before, stockSnapshotSql, id); e == nil {
+		oplog.SetSnapshot(c, before, nil)
+	}
+
 	result, e := db.Exec("delete from t_stock where 1=1 and createUser=? and id=?", userId, id)
 
 	if e != nil {
@@ -119,6 +137,14 @@ func UpdateStock(c *fiber.Ctx) error {
 	}
 
 	//database.GetById(stock)
+
+	// 操作日志：更新前取旧记录，和请求体形成改前/改后对照
+	var before model.Stock
+	if e := db.Get(&before, stockSnapshotSql, stock.Id); e == nil {
+		oplog.SetSnapshot(c, before, stock)
+	} else {
+		oplog.SetSnapshot(c, nil, stock)
+	}
 
 	result, e := db.Exec("update t_stock set name=?, buyPrice=?, sellPrice=?, number=? where id=?", stock.Name, stock.BuyPrice, stock.SellPrice, stock.Number, stock.Id)
 

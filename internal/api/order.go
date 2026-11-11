@@ -5,6 +5,7 @@ import (
 	"hjq-notebook/internal/database"
 	"hjq-notebook/internal/model"
 	"hjq-notebook/internal/model/response"
+	"hjq-notebook/internal/oplog"
 	"hjq-notebook/internal/services"
 	"hjq-notebook/internal/utils"
 	"strconv"
@@ -79,7 +80,14 @@ func CreateOrder(c *fiber.Ctx) error {
 		return err
 	}
 
-	database.Create(c, "t_order", order)
+	if err := database.Create(c, "t_order", order); err != nil {
+		// 订单没有落库：此时不能写改后快照，否则审计里会出现「不存在的新增」
+		return c.JSON(response.Error("创建订单失败"))
+	}
+
+	// 操作日志：订单已落库，先记录改后数据再扣库存。
+	// 这样即使 OutStock 失败（接口返回失败），也能回溯「创建了什么」。
+	oplog.SetSnapshot(c, nil, order)
 
 	if err := OutStock(order.StockId, order.Number); err != nil {
 		return c.JSON(response.Error(err.Error()))
@@ -98,7 +106,13 @@ func RevokeStockOrder(c *fiber.Ctx) error {
 		if err != nil {
 			return c.JSON(response.Error("id 错误"))
 		}
-		oldOrder, _ = services.GetOrderById(c, intId)
+		// 查不到旧记录时跳过快照，避免落一条零值快照（{"id":0,...}）误导排查
+		if order, e := services.GetOrderById(c, intId); e == nil {
+			oldOrder = order
+
+			// 操作日志：撤销即删除订单，记录被删掉的旧订单
+			oplog.SetSnapshot(c, oldOrder, nil)
+		}
 	}
 
 	err := OutStock(oldOrder.StockId, "-"+oldOrder.Number)
@@ -141,6 +155,12 @@ func QueryOrderList(c *fiber.Ctx) error {
 func DeleteOrder(c *fiber.Ctx) error {
 	id := c.Params("id")
 
+	// 操作日志：删除前先取旧记录，作为「改前」快照
+	var before model.Order
+	if e := database.DBConn.Get(&before, "select * from t_order where id=?", id); e == nil {
+		oplog.SetSnapshot(c, before, nil)
+	}
+
 	error := services.DeleteOrder(c, id)
 
 	if error != nil {
@@ -177,6 +197,14 @@ func UpdateOrder(c *fiber.Ctx) error {
 		return c.JSON(response.Error("参数格式错误" + err.Error()))
 	}
 
+	// 操作日志：更新前取旧记录，配合请求体形成「改前/改后」对照
+	var before model.Order
+	if e := database.DBConn.Get(&before, "select * from t_order where id=?", order.Id); e == nil {
+		oplog.SetSnapshot(c, before, order)
+	} else {
+		oplog.SetSnapshot(c, nil, order)
+	}
+
 	_, e := database.Update(c, "t_order", order)
 
 	if e != nil {
@@ -190,8 +218,8 @@ func UpdateOrder(c *fiber.Ctx) error {
 // ChangeStatus 修改订单状态
 func ChangeStatus(c *fiber.Ctx) error {
 	type OrderStatusChange struct {
-		Id     string `db:"id"`
-		Status string `db:"status"`
+		Id     string `db:"id" json:"id"`
+		Status string `db:"status" json:"status"`
 	}
 	status := c.Params("status")
 	id := c.Params("id")
@@ -199,6 +227,12 @@ func ChangeStatus(c *fiber.Ctx) error {
 	var newOrder OrderStatusChange
 	newOrder.Id = id
 	newOrder.Status = status
+
+	// 操作日志：状态变更同样保留旧值
+	var before model.Order
+	if e := database.DBConn.Get(&before, "select * from t_order where id=?", id); e == nil {
+		oplog.SetSnapshot(c, before, newOrder)
+	}
 
 	_, e := database.UpdateEntity(c, "t_order", newOrder)
 

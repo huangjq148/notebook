@@ -11,6 +11,7 @@ import (
 	"hjq-notebook/internal/database"
 	"hjq-notebook/internal/model"
 	"hjq-notebook/internal/model/response"
+	"hjq-notebook/internal/oplog"
 	"hjq-notebook/internal/services"
 	"hjq-notebook/internal/utils"
 
@@ -30,6 +31,11 @@ const (
 
 // ExportData 导出整个数据库的业务数据到一个 csv 文件中
 func ExportData(c *fiber.Ctx) error {
+	// 导出是 GET（默认不记录），但属于高危操作，显式要求留痕
+	oplog.ForceRecord(c)
+	oplog.SetAction(c, "other")
+	oplog.SetTargetID(c, "data/export")
+
 	content, err := services.BuildExportCSV()
 	if err != nil {
 		return c.JSON(response.Error(err.Error()))
@@ -44,6 +50,10 @@ func ExportData(c *fiber.Ctx) error {
 
 // SendDataSyncMail 手动将整个数据库的数据备份发送到配置的邮箱
 func SendDataSyncMail(c *fiber.Ctx) error {
+	// 高危操作：手动触发整库备份邮件
+	oplog.SetAction(c, "other")
+	oplog.SetTargetID(c, "data/mail")
+
 	if err := services.RunDataSyncMail(); err != nil {
 		return c.JSON(response.Error("发送失败: " + err.Error()))
 	}
@@ -87,6 +97,10 @@ func SaveDataSyncMailConfig(c *fiber.Ctx) error {
 		cfg.IsEnable = "0"
 	}
 
+	// 高危配置变更：mailAuthCode 由中间件按字段名脱敏成 ***
+	oplog.SetAction(c, "update")
+	oplog.SetTargetID(c, "data/mail/config")
+
 	if err := services.SaveDataSyncConfig(cfg); err != nil {
 		return c.JSON(response.Error("保存失败: " + err.Error()))
 	}
@@ -103,6 +117,10 @@ func ImportData(c *fiber.Ctx) error {
 	if err != nil {
 		return c.JSON(response.Error("请选择要导入的 CSV 文件"))
 	}
+
+	// 高危操作：整库导入（会先清空相关表），用上传文件名作为目标标识
+	oplog.SetAction(c, "other")
+	oplog.SetTargetID(c, fileHeader.Filename)
 
 	file, err := fileHeader.Open()
 	if err != nil {

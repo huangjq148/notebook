@@ -7,6 +7,7 @@ import (
 	"hjq-notebook/internal/database"
 	"hjq-notebook/internal/model"
 	"hjq-notebook/internal/model/response"
+	"hjq-notebook/internal/oplog"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -95,6 +96,9 @@ func CreateAlarm(c *fiber.Ctx) error {
 
 	database.Create(c, "t_alarm", alarm)
 
+	// 操作日志：新增只记改后数据
+	oplog.SetSnapshot(c, nil, alarm)
+
 	return c.JSON(response.Success(nil, "创建成功"))
 }
 
@@ -116,6 +120,15 @@ func UpdateAlarm(c *fiber.Ctx) error {
 	}
 
 	alarm.Id = intId
+
+	// 操作日志：更新前取旧记录，和请求体形成改前/改后对照
+	var before model.Alarm
+	if e := database.DBConn.Get(&before, "select * from t_alarm where id=?", intId); e == nil {
+		oplog.SetSnapshot(c, before, alarm)
+	} else {
+		oplog.SetSnapshot(c, nil, alarm)
+	}
+
 	database.Update(c, "t_alarm", alarm)
 
 	return c.JSON(response.Success(nil, "更新成功"))
@@ -136,6 +149,12 @@ func QueryAlarmList(c *fiber.Ctx) error {
 
 func DeleteAlarm(c *fiber.Ctx) error {
 	id := c.Params("id")
+
+	// 操作日志：删除前保留旧记录
+	var before model.Alarm
+	if e := database.DBConn.Get(&before, "select * from t_alarm where id=?", id); e == nil {
+		oplog.SetSnapshot(c, before, nil)
+	}
 
 	database.DeleteById(c, "t_alarm", id)
 

@@ -4,10 +4,12 @@ import { useState } from 'react';
 import { login } from '@/services/auth';
 import { setToken } from '@/utils/auth';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@/store';
 import styles from '../index.module.less';
 
 const Password = () => {
   const navigate = useNavigate();
+  const setRoles = useUser((state) => state.setRoles);
   const [loading, setLoading] = useState(false);
   const onFinish = async (values: { username: string; password: string }) => {
     setLoading(true);
@@ -19,6 +21,9 @@ const Password = () => {
         },
         values.username,
       );
+      // 角色与 token 同生命周期：写入 zustand（内部同时持久化到 localStorage）
+      // 老库无 roles 列时后端会回落为 user，因此这里不会出现「没有角色」的空态。
+      setRoles(result.roles);
       message.success('登录成功');
       navigate('/overview');
     } finally {

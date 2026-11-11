@@ -1,12 +1,16 @@
 import create from 'zustand';
 import { message } from 'antd';
 import { fetchUserInfo } from '@/services/user';
-import { removeToken } from '@/utils';
+import { getRoles, parseRoles, removeToken, setRoles as persistRoles } from '@/utils';
 import { UserInfo } from '@/global';
 
 export interface UserInfoModel {
   /** 用户信息 */
   userInfo: UserInfo;
+  /** 当前登录用户的角色（如 ['admin','user']），与 token 同生命周期 */
+  roles: string[];
+  /** 登录成功后写入角色（同时持久化，刷新页面不丢） */
+  setRoles: (raw?: string | null) => void;
   /** 获取用户信息 */
   getUserInfo: () => Promise<void>;
   /** 更新用户信息 */
@@ -26,6 +30,14 @@ export default create(
       updateTime: '',
     },
 
+    // 刷新页面后从 localStorage 恢复，保证菜单与路由守卫判断一致
+    roles: getRoles(),
+
+    setRoles: (raw?: string | null) => {
+      persistRoles(raw);
+      set({ roles: parseRoles(raw) });
+    },
+
     getUserInfo: async () => {
       const userInfo = await fetchUserInfo();
       set({
@@ -39,6 +51,7 @@ export default create(
 
     logout: () => {
       removeToken();
+      set({ roles: [] });
       window.location.reload();
     },
   }),

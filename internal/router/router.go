@@ -14,6 +14,10 @@ import (
 func SetupRoutes(app *fiber.App) {
 	apiRoot := app.Group("/api")
 
+	// 操作日志（审计日志）：只采集 /api 下的写操作与登录，GET 默认跳过。
+	// 必须挂在 Protected() 之前，才能记录「登录失败」这类还没有 token 的请求。
+	apiRoot.Use(middleware.OperationLog())
+
 	// Auth
 	authRouter := apiRoot.Group("/auth")
 	authRouter.Post("/login", api.Login)
@@ -97,4 +101,12 @@ func SetupRoutes(app *fiber.App) {
 	calculatorRouter.Post("", api.CreateCalculator)
 	calculatorRouter.Delete("/:id", api.DeleteCalculator)
 	calculatorRouter.Patch("/:id", api.UpdateCalculator)
+
+	// 操作日志查询（只看不改，接口本身不会被记录）
+	// 仅 admin 可访问：其余登录用户 403（roles 缺失/为空同样 403，安全优先）
+	operationLogRouter := authVerifyRouter.Group("/operation-log", middleware.AdminOnly())
+	operationLogRouter.Get("", api.QueryOperationLogList)
+	// options 必须注册在 /:id 之前，否则会被当成 id 参数
+	operationLogRouter.Get("/options", api.QueryOperationLogOptions)
+	operationLogRouter.Get("/:id", api.GetOperationLogById)
 }

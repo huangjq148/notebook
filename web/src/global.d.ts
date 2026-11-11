@@ -8,6 +8,8 @@ declare type Router = RouteObject & {
   icon?: React.ReactNode;
   flatMenu?: boolean;
   key?: string;
+  /** 可见/可访问所需角色；不填表示所有登录用户可用 */
+  roles?: string[];
 };
 
 declare interface CreateInfo {

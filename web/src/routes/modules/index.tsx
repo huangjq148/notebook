@@ -1,6 +1,7 @@
 import {
   ContactsOutlined,
   DashboardOutlined,
+  FileTextOutlined,
   OrderedListOutlined,
   ProductOutlined,
   StockOutlined,
@@ -8,6 +9,7 @@ import {
 import { Navigate } from 'react-router-dom';
 import { flattenMenu, generateMenuKeys } from '../utils';
 import lazyLoad from '../utils/lazyLoad';
+import AdminRoute from '@/components/AdminRoute';
 import { Router } from '@/global';
 
 const menuRoutes: Router[] = [
@@ -100,6 +102,14 @@ const menuRoutes: Router[] = [
   //     },
   //   ],
   // },
+  {
+    path: 'operation-log',
+    label: '操作日志',
+    icon: <FileTextOutlined />,
+    // 仅管理员可见/可进：菜单按 roles 过滤，直接访问 URL 由 AdminRoute 兜底显示 403
+    roles: ['admin'],
+    element: <AdminRoute>{lazyLoad('@/pages/operationLog')}</AdminRoute>,
+  },
   {
     path: '/',
     hideInMenu: true,

@@ -50,6 +50,12 @@ func ConnectDB() (string, bool) {
 	fmt.Println("connnect success")
 
 	fmt.Println("Connection Opened to Database")
+
+	// 兜底创建登录/用户信息依赖的基础表，避免线上库缺表
+	if err := EnsureSchema(); err != nil {
+		fmt.Println("[warn] ensure schema fail:", err)
+	}
+
 	// DB.AutoMigrate(&model.Product{}, &model.User{})
 	return "数据库链接成功", true
 }

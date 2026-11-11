@@ -5,6 +5,7 @@ import (
 	"hjq-notebook/internal/database"
 	"hjq-notebook/internal/model"
 	"hjq-notebook/internal/model/response"
+	"hjq-notebook/internal/oplog"
 	"hjq-notebook/internal/utils"
 	"time"
 
@@ -42,6 +43,12 @@ func CreateContact(c *fiber.Ctx) error {
 	if e != nil {
 		fmt.Println("err=", e)
 		return c.JSON(fiber.Map{"status": "error", "message": "参数格式错误"})
+	}
+
+	// 操作日志：新增只记改后数据；能拿到自增主键就把它作为目标 ID
+	oplog.SetSnapshot(c, nil, contact)
+	if id, e := result.LastInsertId(); e == nil {
+		oplog.SetTargetID(c, id)
 	}
 
 	return c.JSON(fiber.Map{"status": "success", "message": "保存成功", "data": result})
@@ -82,6 +89,12 @@ func DeleteContact(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userId := utils.GetUserId(c)
 
+	// 操作日志：删除前保留旧联系人
+	var before model.Contact
+	if e := db.Get(&before, "select * from t_contact where id=?", id); e == nil {
+		oplog.SetSnapshot(c, before, nil)
+	}
+
 	result, e := db.Exec("delete from t_contact where 1=1 and createUser=? and id=?", userId, id)
 
 	if e != nil {
@@ -114,6 +127,14 @@ func UpdateContact(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&contact); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
+	}
+
+	// 操作日志：更新前取旧记录，和请求体形成改前/改后对照
+	var before model.Contact
+	if e := db.Get(&before, "select * from t_contact where id=?", contact.Id); e == nil {
+		oplog.SetSnapshot(c, before, contact)
+	} else {
+		oplog.SetSnapshot(c, nil, contact)
 	}
 
 	result, e := db.Exec("update t_contact set realname=?, phone=?, address=? where id=?", contact.Name, contact.Phone, contact.Address, contact.Id)

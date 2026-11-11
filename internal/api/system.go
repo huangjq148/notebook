@@ -2,6 +2,7 @@ package api
 
 import (
 	"hjq-notebook/internal/database"
+	"hjq-notebook/internal/oplog"
 	"hjq-notebook/internal/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -22,6 +23,12 @@ func TransferData(c *fiber.Ctx) error {
 	if err := c.BodyParser(&dataTransfer); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "参数格式错误", "data": err})
 	}
+
+	// 操作日志：数据归属转移是高危写操作，必须能追溯「转给谁、转了哪些 ID」
+	oplog.SetModule(c, "system")
+	oplog.SetAction(c, "transfer")
+	oplog.SetTargetID(c, dataTransfer.UserId)
+	oplog.SetSnapshot(c, nil, dataTransfer)
 
 	if dataTransfer.Type == "order" {
 		tableName = "t_order"
