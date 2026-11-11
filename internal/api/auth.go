@@ -1,14 +1,18 @@
 package api
 
 import (
+	"crypto/subtle"
 	"fmt"
+	"strings"
+	"time"
+
 	"hjq-notebook/internal/config"
 	"hjq-notebook/internal/database"
 	"hjq-notebook/internal/utils"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Account struct {
@@ -38,14 +42,19 @@ func Login(c *fiber.Ctx) error {
 
 	var accountInfo Account
 
+	// 先按用户名取账号，再在 Go 侧校验密码：
+	//   * bcrypt 哈希（$2 前缀）：CompareHashAndPassword；
+	//   * 老库既有明文：常量时间比较，保证老账号原密码仍可直接登录。
+	// 这样数据库里既可以是 bcrypt，也可以是历史明文，且不会把密码拼进 SQL。
+	//
 	// roles 列在老库可能不存在：只有启动探测到该列时才查询，避免 Unknown column 直接 500。
 	// 探测结果由 database.EnsureRoleSupport() 在 main.go 里缓存。
-	loginSql := "select id,userId,username from t_user_account where username=? and password=?"
+	loginSql := "select id,userId,username,password from t_user_account where username=?"
 	if database.RoleColumnReady() {
-		loginSql = "select id,userId,username,roles from t_user_account where username=? and password=?"
+		loginSql = "select id,userId,username,password,roles from t_user_account where username=?"
 	}
 
-	e := db.Get(&accountInfo, loginSql, input.Username, input.Password)
+	e := db.Get(&accountInfo, loginSql, input.Username)
 
 	// 兜底：探测通过但列实际不存在（例如运行期被 DROP）时识别 MySQL 1054，
 	// 降级重试一次不带 roles 的 SQL，保证登录绝不 500。
@@ -53,11 +62,13 @@ func Login(c *fiber.Ctx) error {
 		database.MarkRoleColumnMissing()
 		fmt.Println("[warn] [角色] 查询 t_user_account.roles 失败（1054），已降级为无角色模式，" +
 			database.RoleColumnHint)
-		e = db.Get(&accountInfo, "select id,userId,username from t_user_account where username=? and password=?", input.Username, input.Password)
+		e = db.Get(&accountInfo, "select id,userId,username,password from t_user_account where username=?", input.Username)
 	}
 
-	if e != nil {
-		fmt.Println("err=", e)
+	if e != nil || !passwordMatches(accountInfo.Password, input.Password) {
+		if e != nil {
+			fmt.Println("err=", e)
+		}
 		return c.JSON(fiber.Map{"status": "error", "message": "用户名或密码错误"})
 	}
 
@@ -82,4 +93,15 @@ func Login(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 	return c.JSON(fiber.Map{"status": "success", "data": fiber.Map{"userId": userId, "access_token": t, "roles": roles}})
+}
+
+// passwordMatches 同时兼容 bcrypt 哈希与老库明文密码。
+func passwordMatches(stored, input string) bool {
+	if stored == "" {
+		return false
+	}
+	if strings.HasPrefix(stored, "$2") {
+		return bcrypt.CompareHashAndPassword([]byte(stored), []byte(input)) == nil
+	}
+	return subtle.ConstantTimeCompare([]byte(stored), []byte(input)) == 1
 }

@@ -5,10 +5,11 @@ services:
     image: mysql:8
     container_name: mysql_container
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      # 凭据只从环境变量/项目根目录 .env 读取，禁止提交明文密码
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请设置 MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: notebook
       MYSQL_USER: huangjq
-      MYSQL_PASSWORD: fright2014
+      MYSQL_PASSWORD: ${DB_PASSWORD:?请设置 DB_PASSWORD}
     ports:
       - "3306:3306"
     # volumes:

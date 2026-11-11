@@ -21,11 +21,11 @@ var baseTables = []string{
 	"CREATE TABLE IF NOT EXISTS `t_user_account` (" +
 		"`id` int NOT NULL AUTO_INCREMENT," +
 		"`username` varchar(30) DEFAULT NULL," +
-		"`password` varchar(30) DEFAULT NULL," +
+		"`password` varchar(255) DEFAULT NULL," +
 		"`userId` varchar(40) DEFAULT NULL," +
-		// roles：逗号分隔的角色串（如 "admin,user"）。只对新库生效；
-		// 已有库请执行 migration.sql 添加该列（老库缺列时服务会自动降级，不会 500）。
-		"`roles` varchar(200) NOT NULL DEFAULT 'user'," +
+		// roles 列由版本化迁移 migrations/0002_add_roles.up.sql 添加。
+		// 应用启动只做 CREATE TABLE IF NOT EXISTS 兜底，绝不对已有表执行隐式 ALTER；
+		// 老库缺列时服务自动降级（登录可用，操作日志对所有人 403）。
 		"`createUser` int DEFAULT 0," +
 		"`updateUser` int DEFAULT 0," +
 		"`createTime` varchar(20) DEFAULT NULL," +
@@ -122,7 +122,7 @@ func EnsureSchema() error {
 
 	var count int
 	if err := DBConn.Get(&count, "select count(*) from t_user_account"); err == nil && count == 0 {
-		fmt.Println("[warn] t_user_account 表为空，无法登录。请先导入账号数据（参考 resources/notebook.sql）")
+		fmt.Println("[warn] t_user_account 表为空，无法登录。请先执行 go run ./cmd/migrate up 初始化，或导入账号数据（参考 resources/notebook.sql）")
 	}
 	return nil
 }

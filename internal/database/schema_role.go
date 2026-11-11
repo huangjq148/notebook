@@ -17,7 +17,7 @@ import (
 
 const (
 	// RoleColumnHint 恢复功能的提示文案（日志与 result.md 共用）
-	RoleColumnHint = "请执行 migration.sql 添加 t_user_account.roles 列后重启服务"
+	RoleColumnHint = "请执行 go run ./cmd/migrate up 应用迁移（0002 添加 t_user_account.roles）后重启服务"
 )
 
 var roleColumnReady int32
