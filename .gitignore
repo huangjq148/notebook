@@ -22,5 +22,10 @@ dist-ssr
 *.sln
 *.sw?
 .DS_Store
-__debug_bin
+__debug_bin*
 dist
+
+# Local runtime configuration and secrets
+.env
+.env.*
+!.env.example
