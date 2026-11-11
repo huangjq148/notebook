@@ -7,6 +7,7 @@ declare type Router = RouteObject & {
   hideInMenu?: boolean;
   icon?: React.ReactNode;
   flatMenu?: boolean;
+  adminOnly?: boolean;
   key?: string;
 };
 

@@ -41,6 +41,7 @@ export function setAuthToken(token: TokenInterface) {
 
 export function removeToken() {
   localStorage.removeItem(accessTokenKey);
+  localStorage.removeItem('user-roles');
   return true;
 }
 

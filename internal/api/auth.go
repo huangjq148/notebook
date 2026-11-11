@@ -1,9 +1,9 @@
 package api
 
 import (
-	"fmt"
 	"hjq-notebook/internal/config"
 	"hjq-notebook/internal/database"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -36,12 +36,9 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	var accountInfo Account
-	fmt.Println("err=", c.BodyParser(accountInfo))
-
-	e := db.Get(&accountInfo, "select id,userId,username from t_user_account where username=? and password=?", input.Username, input.Password)
+	e := db.Get(&accountInfo, "select id,userId,username,roles from t_user_account where username=? and password=?", input.Username, input.Password)
 
 	if e != nil {
-		fmt.Println("err=", e)
 		return c.JSON(fiber.Map{"status": "error", "message": "用户名或密码错误"})
 	}
 
@@ -50,12 +47,23 @@ func Login(c *fiber.Ctx) error {
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = accountInfo.Username
 	claims["user_id"] = accountInfo.Id
+	claims["roles"] = splitRoles(accountInfo.Roles)
 	claims["exp"] = time.Now().Add(time.Hour * 24 * 30).Unix()
-	fmt.Println(config.Config("SECRET"))
 
 	t, err := token.SignedString([]byte(config.Config("SECRET")))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
-	return c.JSON(fiber.Map{"status": "success", "data": fiber.Map{"userId": accountInfo.UserId, "access_token": t}})
+	return c.JSON(fiber.Map{"status": "success", "data": fiber.Map{"userId": accountInfo.UserId, "access_token": t, "roles": splitRoles(accountInfo.Roles)}})
+}
+
+func splitRoles(raw string) []string {
+	var roles []string
+	for _, role := range strings.Split(raw, ",") {
+		role = strings.TrimSpace(role)
+		if role != "" {
+			roles = append(roles, role)
+		}
+	}
+	return roles
 }

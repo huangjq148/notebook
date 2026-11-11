@@ -7,6 +7,10 @@ import { UserInfo } from '@/global';
 export interface UserInfoModel {
   /** 用户信息 */
   userInfo: UserInfo;
+  /** 当前账号角色 */
+  roles: string[];
+  /** 保存当前账号角色 */
+  setRoles: (roles: string[]) => void;
   /** 获取用户信息 */
   getUserInfo: () => Promise<void>;
   /** 更新用户信息 */
@@ -14,6 +18,18 @@ export interface UserInfoModel {
   /** 登出 */
   logout: () => void;
 }
+
+const rolesStorageKey = 'user-roles';
+
+const getStoredRoles = (): string[] => {
+  try {
+    const storedRoles = localStorage.getItem(rolesStorageKey);
+    const parsed = storedRoles ? JSON.parse(storedRoles) : [];
+    return Array.isArray(parsed) ? parsed.filter((role): role is string => typeof role === 'string') : [];
+  } catch {
+    return [];
+  }
+};
 
 export default create(
   (set: (params: Partial<UserInfoModel>) => void, get: () => Required<UserInfoModel>): UserInfoModel => ({
@@ -24,6 +40,13 @@ export default create(
       updateUser: '',
       createTime: '',
       updateTime: '',
+    },
+    roles: getStoredRoles(),
+
+    setRoles: (roles: string[]) => {
+      const normalizedRoles = [...new Set(roles.map((role) => role.trim()).filter(Boolean))];
+      localStorage.setItem(rolesStorageKey, JSON.stringify(normalizedRoles));
+      set({ roles: normalizedRoles });
     },
 
     getUserInfo: async () => {
@@ -39,6 +62,7 @@ export default create(
 
     logout: () => {
       removeToken();
+      localStorage.removeItem(rolesStorageKey);
       window.location.reload();
     },
   }),

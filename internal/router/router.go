@@ -97,4 +97,7 @@ func SetupRoutes(app *fiber.App) {
 	calculatorRouter.Post("", api.CreateCalculator)
 	calculatorRouter.Delete("/:id", api.DeleteCalculator)
 	calculatorRouter.Patch("/:id", api.UpdateCalculator)
+
+	operationLogRouter := authVerifyRouter.Group("/operation-log", middleware.AdminOnly())
+	operationLogRouter.Get("", api.QueryOperationLogList)
 }

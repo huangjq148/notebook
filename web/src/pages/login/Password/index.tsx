@@ -4,10 +4,12 @@ import { useState } from 'react';
 import { login } from '@/services/auth';
 import { setToken } from '@/utils/auth';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@/store';
 import styles from '../index.module.less';
 
 const Password = () => {
   const navigate = useNavigate();
+  const setRoles = useUser((state) => state.setRoles);
   const [loading, setLoading] = useState(false);
   const onFinish = async (values: { username: string; password: string }) => {
     setLoading(true);
@@ -19,6 +21,7 @@ const Password = () => {
         },
         values.username,
       );
+      setRoles(result.roles ?? []);
       message.success('登录成功');
       navigate('/overview');
     } finally {

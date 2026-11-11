@@ -1,6 +1,7 @@
 import {
   ContactsOutlined,
   DashboardOutlined,
+  FileSearchOutlined,
   OrderedListOutlined,
   ProductOutlined,
   StockOutlined,
@@ -9,6 +10,7 @@ import { Navigate } from 'react-router-dom';
 import { flattenMenu, generateMenuKeys } from '../utils';
 import lazyLoad from '../utils/lazyLoad';
 import { Router } from '@/global';
+import AdminRoute from '@/routes/AdminRoute';
 
 const menuRoutes: Router[] = [
   {
@@ -40,6 +42,13 @@ const menuRoutes: Router[] = [
     label: '联系人',
     icon: <ContactsOutlined />,
     element: lazyLoad('@/pages/contact'),
+  },
+  {
+    path: 'operation-log',
+    label: '操作日志',
+    icon: <FileSearchOutlined />,
+    adminOnly: true,
+    element: <AdminRoute>{lazyLoad('@/pages/operationLog')}</AdminRoute>,
   },
   // {
   //   path: 'speak',

@@ -133,3 +133,13 @@ type DataSyncConfig struct {
 	SendHour   int    `db:"sendHour" json:"sendHour"`
 	UpdateTime string `db:"updateTime" json:"updateTime"`
 }
+
+type OperationLog struct {
+	Id         int    `db:"id" json:"id"`
+	Username   string `db:"username" json:"username"`
+	Method     string `db:"method" json:"method"`
+	Path       string `db:"path" json:"path"`
+	StatusCode int    `db:"statusCode" json:"statusCode"`
+	IP         string `db:"ip" json:"ip"`
+	CreateTime string `db:"createTime" json:"createTime"`
+}
