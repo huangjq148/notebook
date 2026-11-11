@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Account struct {
@@ -36,10 +37,15 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	var accountInfo Account
+	// Keep the legacy lookup for existing plaintext-password accounts. Accounts
+	// bootstrapped or reset by the supported flow use bcrypt and are checked by
+	// loading the stored hash only when the legacy lookup does not match.
 	e := db.Get(&accountInfo, "select id,userId,username,roles from t_user_account where username=? and password=?", input.Username, input.Password)
-
 	if e != nil {
-		return c.JSON(fiber.Map{"status": "error", "message": "用户名或密码错误"})
+		e = db.Get(&accountInfo, "select id,userId,username,roles,password from t_user_account where username=?", input.Username)
+		if e != nil || bcrypt.CompareHashAndPassword([]byte(accountInfo.Password), []byte(input.Password)) != nil {
+			return c.JSON(fiber.Map{"status": "error", "message": "用户名或密码错误"})
+		}
 	}
 
 	token := jwt.New(jwt.SigningMethodHS256)
