@@ -1,8 +1,7 @@
 import { DateRangePicker, OrderContactInput, OrderProductInput, SearchForm, TextButton, Table } from '@/components';
 import { useTable } from '@/hooks';
 import { deleteOrder, queryOrder, revokeStockOrder, statistics } from '@/services/order';
-import { PlusOutlined } from '@ant-design/icons';
-import { Button, FloatButton, Form, message, Modal, Space } from 'antd';
+import { Button, Form, message, Modal, Space } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import BatchCreate from './BatchCreate';
 import EditPage from './Edit';
@@ -246,7 +245,7 @@ export default () => {
     }, 300);
   };
 
-  const handleAfterCreate = () => {
+  const handleAfterEdit = () => {
     handleSearchForm();
     // 延迟关闭弹框，让表单有时间重置
     setTimeout(() => {
@@ -262,7 +261,8 @@ export default () => {
     handleSearchForm();
   };
 
-  const handleEditClick = (id = 0) => {
+  const handleEditClick = (id?: number) => {
+    if (!id) return;
     setModalOptions({
       id,
       open: true,
@@ -510,17 +510,6 @@ export default () => {
       </SearchForm>
 
       <div className={styles.tableWrapper}>
-        <FloatButton
-          icon={<PlusOutlined />}
-          type="primary"
-          shape="circle"
-          onClick={() => {
-            setModalOptions({
-              id: 0,
-              open: true,
-            });
-          }}
-        />
         <Table<Order>
           rowSelection={{
             type: 'checkbox' as const,
@@ -538,7 +527,7 @@ export default () => {
       <Modal
         destroyOnClose
         footer={null}
-        title={modalOptions.id ? '编辑' : '新增'}
+        title="编辑"
         open={modalOptions.open}
         onCancel={() =>
           setModalOptions({
@@ -547,7 +536,7 @@ export default () => {
           })
         }
       >
-        <EditPage onSubmit={handleAfterCreate} id={modalOptions.id} />
+        {modalOptions.id ? <EditPage onSubmit={handleAfterEdit} id={modalOptions.id} /> : null}
       </Modal>
 
       <Modal
