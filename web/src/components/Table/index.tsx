@@ -111,7 +111,7 @@ const Table = <T extends Record<string, any> = any>(props: Props<T>) => {
       rowKey={rowKey}
       columns={displayColumns}
       dataSource={innerDataSource}
-      scroll={{ x: 'max-content' }}
+      scroll={{ x: 'max-content', y: 'calc(100vh - 320px)' }}
       pagination={
         typeof pagination == 'object'
           ? {
