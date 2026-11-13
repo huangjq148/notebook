@@ -25,6 +25,13 @@ export default () => {
     searchForm();
   };
 
+  const handleEditClick = (id = 0) => {
+    setModalOptions({
+      id,
+      open: true,
+    });
+  };
+
   const columns = [
     {
       title: '产品名',
@@ -42,9 +49,9 @@ export default () => {
       title: '操作',
       key: 'operation',
       width: '160px',
-      render: (record: Product) => (
+      render: (_value: unknown, record: Product) => (
         <Space size="middle">
-          <TextButton onClick={() => handleEditClick(record.id)}>编辑</TextButton>
+          <TextButton onClick={() => handleEditClick(record.id ?? 0)}>编辑</TextButton>
           {/* <DeleteConfirmButton onConfirm={() => handleProductDelete(record.id)}>
             <TextButton>删除</TextButton>
           </DeleteConfirmButton> */}
@@ -64,13 +71,6 @@ export default () => {
       open: false,
     });
     searchForm();
-  };
-
-  const handleEditClick = (id = 0) => {
-    setModalOptions({
-      id,
-      open: true,
-    });
   };
 
   return (
