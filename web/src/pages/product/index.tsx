@@ -115,6 +115,7 @@ export default () => {
       <Modal
         destroyOnClose
         footer={null}
+        classNames={{ container: 'ant-modal-content' }}
         title={modalOptions.id ? '编辑' : '新增'}
         open={modalOptions.open}
         onCancel={() =>
