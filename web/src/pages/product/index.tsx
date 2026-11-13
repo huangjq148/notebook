@@ -1,5 +1,5 @@
 import { DEFAULT_TABLE_SCROLL, SearchForm, DeleteConfirmButton } from '@/components';
-import { useTable } from '@/hooks';
+import useTable from '@/hooks';
 import { deleteProduct, queryProduct } from '@/services/product';
 import { Button, Form, Input, message, Modal, Space, Table } from 'antd';
 import { useState } from 'react';

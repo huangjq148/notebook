@@ -1,5 +1,5 @@
 import { DEFAULT_TABLE_SCROLL, DeleteConfirmButton, OrderProductInput, SearchForm, TextButton } from '@/components';
-import { useTable } from '@/hooks';
+import useTable from '@/hooks';
 import StockSell from '@/pages/order/Edit';
 import { deleteStock, queryStock, statistics } from '@/services/stock';
 import { Button, Form, message, Modal, Space, Table } from 'antd';
