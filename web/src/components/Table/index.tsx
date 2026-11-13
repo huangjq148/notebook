@@ -5,6 +5,7 @@ import { Table as AntTable, TableColumnType as AntdTableColumnType, TablePaginat
 import classnames from 'classnames';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
+import { DEFAULT_TABLE_SCROLL } from './scroll';
 import styles from './index.module.less';
 
 export interface TableColumnType<T extends Record<string, any> = any> extends Omit<AntdTableColumnType<T>, 'fixed'> {
@@ -111,7 +112,7 @@ const Table = <T extends Record<string, any> = any>(props: Props<T>) => {
       rowKey={rowKey}
       columns={displayColumns}
       dataSource={innerDataSource}
-      scroll={{ x: 'max-content', y: 'calc(100vh - 320px)' }}
+      scroll={DEFAULT_TABLE_SCROLL}
       pagination={
         typeof pagination == 'object'
           ? {
@@ -125,5 +126,7 @@ const Table = <T extends Record<string, any> = any>(props: Props<T>) => {
     />
   );
 };
+
+export { DEFAULT_TABLE_SCROLL } from './scroll';
 
 export default Table;

@@ -1,4 +1,4 @@
-import { DeleteConfirmButton, OrderProductInput, SearchForm, TextButton } from '@/components';
+import { DEFAULT_TABLE_SCROLL, DeleteConfirmButton, OrderProductInput, SearchForm, TextButton } from '@/components';
 import { useTable } from '@/hooks';
 import StockSell from '@/pages/order/Edit';
 import { deleteStock, queryStock, statistics } from '@/services/stock';
@@ -176,6 +176,7 @@ export default () => {
       <div className={styles.tableWrapper}>
         <Table
           rowKey="id"
+          scroll={DEFAULT_TABLE_SCROLL}
           loading={loading}
           pagination={pagination}
           dataSource={dataSource}

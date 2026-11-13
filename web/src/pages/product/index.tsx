@@ -1,4 +1,4 @@
-import { SearchForm, DeleteConfirmButton } from '@/components';
+import { DEFAULT_TABLE_SCROLL, SearchForm, DeleteConfirmButton } from '@/components';
 import { useTable } from '@/hooks';
 import { deleteProduct, queryProduct } from '@/services/product';
 import { Button, Form, Input, message, Modal, Space, Table } from 'antd';
@@ -103,6 +103,7 @@ export default () => {
       <div className={styles.tableWrapper}>
         <Table
           rowKey="id"
+          scroll={DEFAULT_TABLE_SCROLL}
           loading={loading}
           pagination={pagination}
           onChange={handlePageChange}

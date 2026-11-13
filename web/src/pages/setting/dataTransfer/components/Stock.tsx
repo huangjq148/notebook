@@ -1,4 +1,4 @@
-import { Card, SearchForm } from '@/components';
+import { Card, DEFAULT_TABLE_SCROLL, SearchForm } from '@/components';
 import { useTable } from '@/hooks';
 import { queryStock } from '@/services/stock';
 import { Button, Form, Input, message, Space, Table } from 'antd';
@@ -77,6 +77,7 @@ const Stock = () => {
       </SearchForm>
 
       <Table
+        scroll={DEFAULT_TABLE_SCROLL}
         rowSelection={{
           type: 'checkbox',
           ...rowSelection,

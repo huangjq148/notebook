@@ -1,4 +1,4 @@
-import { SearchForm } from '@/components';
+import { DEFAULT_TABLE_SCROLL, SearchForm } from '@/components';
 import { useTable } from '@/hooks';
 import { deleteProduct, queryProduct } from '@/services/product';
 import { Button, Form, Input, message, Modal, Space, Table } from 'antd';
@@ -106,7 +106,14 @@ export default (props: Props) => {
         </Form>
       </SearchForm>
       <div className={styles.tableWrapper}>
-        <Table rowKey="id" size="small" loading={loading} dataSource={dataSource} columns={columns} />
+        <Table
+          rowKey="id"
+          scroll={DEFAULT_TABLE_SCROLL}
+          size="small"
+          loading={loading}
+          dataSource={dataSource}
+          columns={columns}
+        />
       </div>
 
       <Modal

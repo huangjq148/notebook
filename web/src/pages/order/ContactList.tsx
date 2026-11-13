@@ -1,4 +1,4 @@
-import { SearchForm, TextButton } from '@/components';
+import { DEFAULT_TABLE_SCROLL, SearchForm, TextButton } from '@/components';
 import { useTable } from '@/hooks';
 import { deleteContact, queryContact } from '@/services/contact';
 import { Button, Form, Input, message, Modal, Space, Table } from 'antd';
@@ -117,6 +117,7 @@ export default (props: Props) => {
       <div className={styles.tableWrapper}>
         <Table
           rowKey="id"
+          scroll={DEFAULT_TABLE_SCROLL}
           pagination={pagination}
           size="small"
           onChange={handlePageChange}

@@ -1,4 +1,4 @@
-import { DateRangePicker, SearchForm } from '@/components';
+import { DEFAULT_TABLE_SCROLL, DateRangePicker, SearchForm } from '@/components';
 import { useTable } from '@/hooks';
 import { queryOrder } from '@/services/order';
 import { Button, Form, Input, message, Space, Table } from 'antd';
@@ -122,6 +122,7 @@ const Order = () => {
         </Form>
       </SearchForm>
       <Table
+        scroll={DEFAULT_TABLE_SCROLL}
         rowSelection={{
           type: 'checkbox',
           ...rowSelection,

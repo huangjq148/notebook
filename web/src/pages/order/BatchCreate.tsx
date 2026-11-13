@@ -1,4 +1,4 @@
-import { PinyinMatchInput, TextButton } from '@/components';
+import { DEFAULT_TABLE_SCROLL, PinyinMatchInput, TextButton } from '@/components';
 import {
   createOrder,
   queryOrderById,
@@ -552,7 +552,13 @@ const EditTable = (props: {
         {listening && <span>正在聆听{transcript ? `：${transcript}` : '…'}</span>}
         {voiceHint && <span>{voiceHint}</span>}
       </div>
-      <Table<OrderProductInfo> rowKey="tmpId" pagination={false} columns={columns} dataSource={dataSource}></Table>
+      <Table<OrderProductInfo>
+        rowKey="tmpId"
+        scroll={DEFAULT_TABLE_SCROLL}
+        pagination={false}
+        columns={columns}
+        dataSource={dataSource}
+      />
       <div style={{ marginTop: 16, textAlign: 'center' }}>
         <Button type="dashed" onClick={handleDataAdd} icon={<PlusCircleOutlined />}>
           新增
