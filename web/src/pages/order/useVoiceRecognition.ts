@@ -11,32 +11,49 @@ type Recognition = {
   onend: (() => void) | null;
   start: () => void;
   abort: () => void;
+  stop: () => void;
 };
 type SpeechWindow = Window & {
   SpeechRecognition?: new () => Recognition;
   webkitSpeechRecognition?: new () => Recognition;
 };
 
-export function useVoiceRecognition(onTranscript: (text: string) => void) {
+export function useVoiceRecognition(onTranscript: (text: string) => void, onInterim: (text: string) => void) {
   const [listening, setListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const callbackRef = useRef(onTranscript);
   callbackRef.current = onTranscript;
+  const interimRef = useRef(onInterim);
+  interimRef.current = onInterim;
   const recognitionRef = useRef<Recognition | null>(null);
   const activeRef = useRef(false);
+  const finishingRef = useRef(false);
   const restartTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const stop = () => {
     activeRef.current = false;
+    finishingRef.current = false;
     clearTimeout(restartTimer.current);
+    restartTimer.current = undefined;
     recognitionRef.current?.abort();
     recognitionRef.current = null;
     setListening(false);
+    interimRef.current('');
   };
 
   const toggle = () => {
     if (activeRef.current) {
-      stop();
+      if (finishingRef.current) return;
+      if (restartTimer.current === undefined && recognitionRef.current) {
+        finishingRef.current = true;
+        try {
+          recognitionRef.current.stop();
+        } catch {
+          stop();
+        }
+      } else {
+        stop();
+      }
       return;
     }
     const speechWindow = window as SpeechWindow;
@@ -58,9 +75,13 @@ export function useVoiceRecognition(onTranscript: (text: string) => void) {
       for (let index = event.resultIndex; index < event.results.length; index++) {
         const result = event.results[index];
         setTranscript(result[0].transcript);
-        // 中间结果只展示，避免重复执行新增或反复覆盖输入。
         if (result.isFinal) callbackRef.current(result[0].transcript);
       }
+      const interim = Array.from(event.results)
+        .filter((result) => !result.isFinal)
+        .map((result) => result[0].transcript)
+        .join(' ');
+      interimRef.current(interim);
     };
     recognition.onerror = ({ error }) => {
       if (!activeRef.current || recognitionRef.current !== recognition || error === 'no-speech') return;
@@ -75,7 +96,13 @@ export function useVoiceRecognition(onTranscript: (text: string) => void) {
     };
     recognition.onend = () => {
       if (!activeRef.current || recognitionRef.current !== recognition) return;
+      if (finishingRef.current) {
+        stop();
+        return;
+      }
+      interimRef.current('');
       restartTimer.current = setTimeout(() => {
+        restartTimer.current = undefined;
         if (!activeRef.current || recognitionRef.current !== recognition) return;
         try {
           recognition.start();

@@ -49,6 +49,7 @@ const EditTable = (props: {
   onChange?: (val?: OrderProductInfo[]) => void;
   activeFieldRef: { current: VoiceField };
   onContactFocus: () => void;
+  onContactPreview: (value: string | undefined) => void;
   onContactChange: (value: string) => void;
   onVoiceContactSelect: (index: number) => void;
 }) => {
@@ -75,6 +76,7 @@ const EditTable = (props: {
   };
   const [productDropdownOpen, setProductDropdownOpen] = useState(false);
   const [voiceHint, setVoiceHint] = useState('');
+  const [voicePreview, setVoicePreview] = useState<Partial<Record<VoiceField, string>>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -189,77 +191,96 @@ const EditTable = (props: {
     return true;
   };
 
-  const { listening, transcript, toggle } = useVoiceRecognition((text) => {
-    for (const action of parseVoiceActions(text)) {
-      if (action.type === 'field') {
-        focusField(action.field);
-        continue;
-      }
-      if (action.type === 'select') {
-        if (activeFieldRef.current === 'contact') {
-          props.onVoiceContactSelect(action.index);
-        } else if (activeFieldRef.current === 'name') {
-          const candidates = voiceOptionsRef.current;
-          if (!candidates || candidates.length < 2) {
-            setVoiceHint('当前没有待选产品');
-          } else if (!Number.isInteger(action.index) || action.index < 0 || action.index >= candidates.length) {
-            setVoiceHint(`请选择第 1 到第 ${candidates.length} 项`);
-          } else {
-            const name = candidates[action.index];
-            handleDataSourceChange(editIndexRef.current, 'name', name);
-            setVoiceProductQuery(null);
-            setVoiceOptions(null);
-            setProductDropdownOpen(false);
-            focusField('name');
-            setVoiceHint(`已选中：${name}`);
-          }
-        } else {
-          setVoiceHint('请先切换到姓名或产品名，再选择候选项');
-        }
-        continue;
-      }
-      if (action.type === 'previous') {
-        if (!handlePreviousRow()) break;
-        continue;
-      }
-      if (action.type === 'add') {
-        if (!handleDataAdd()) break;
-        continue;
-      }
-      const field = activeFieldRef.current;
-      focusField(field);
-      if (field === 'contact') {
-        props.onContactChange(action.value);
-        setVoiceHint('');
-        continue;
-      }
-      const index = editIndexRef.current;
-      if (index < 0) continue;
-      if (field === 'name') {
-        const matches = matchVoiceNames(productNames, action.value);
-        setVoiceOptions(matches);
-        setProductDropdownOpen(matches.length > 1);
-        // 待确认结果只作为搜索词展示，不能作为已选产品提交。
-        setVoiceProductQuery(matches.length === 1 ? null : toNamePinyin(action.value));
-        handleDataSourceChange(index, 'name', matches.length === 1 ? matches[0] : '');
-        setVoiceHint(
-          matches.length === 1
-            ? `已选中：${matches[0]}`
-            : matches.length
-              ? `匹配到 ${matches.length} 项，可说“第几个”选择产品`
-              : '没有匹配的产品，请重说或手动选择',
-        );
-      } else {
-        const number = parseSpokenNumber(action.value);
-        if (number === undefined) {
-          setVoiceHint('未识别到有效数字，请重说');
+  const { listening, transcript, toggle } = useVoiceRecognition(
+    (text) => {
+      for (const action of parseVoiceActions(text)) {
+        if (action.type === 'field') {
+          focusField(action.field);
           continue;
         }
-        handleDataSourceChange(index, field, number);
-        setVoiceHint('');
+        if (action.type === 'select') {
+          if (activeFieldRef.current === 'contact') {
+            props.onVoiceContactSelect(action.index);
+          } else if (activeFieldRef.current === 'name') {
+            const candidates = voiceOptionsRef.current;
+            if (!candidates || candidates.length < 2) {
+              setVoiceHint('当前没有待选产品');
+            } else if (!Number.isInteger(action.index) || action.index < 0 || action.index >= candidates.length) {
+              setVoiceHint(`请选择第 1 到第 ${candidates.length} 项`);
+            } else {
+              const name = candidates[action.index];
+              handleDataSourceChange(editIndexRef.current, 'name', name);
+              setVoiceProductQuery(null);
+              setVoiceOptions(null);
+              setProductDropdownOpen(false);
+              focusField('name');
+              setVoiceHint(`已选中：${name}`);
+            }
+          } else {
+            setVoiceHint('请先切换到姓名或产品名，再选择候选项');
+          }
+          continue;
+        }
+        if (action.type === 'previous') {
+          if (!handlePreviousRow()) break;
+          continue;
+        }
+        if (action.type === 'add') {
+          if (!handleDataAdd()) break;
+          continue;
+        }
+        const field = activeFieldRef.current;
+        focusField(field);
+        if (field === 'contact') {
+          props.onContactChange(action.value);
+          setVoiceHint('');
+          continue;
+        }
+        const index = editIndexRef.current;
+        if (index < 0) continue;
+        if (field === 'name') {
+          const matches = matchVoiceNames(productNames, action.value);
+          setVoiceOptions(matches);
+          setProductDropdownOpen(matches.length > 1);
+          // 待确认结果只作为搜索词展示，不能作为已选产品提交。
+          setVoiceProductQuery(matches.length === 1 ? null : toNamePinyin(action.value));
+          handleDataSourceChange(index, 'name', matches.length === 1 ? matches[0] : '');
+          setVoiceHint(
+            matches.length === 1
+              ? `已选中：${matches[0]}`
+              : matches.length
+                ? `匹配到 ${matches.length} 项，可说“第几个”选择产品`
+                : '没有匹配的产品，请重说或手动选择',
+          );
+        } else {
+          const number = parseSpokenNumber(action.value);
+          if (number === undefined) {
+            setVoiceHint('未识别到有效数字，请重说');
+            continue;
+          }
+          handleDataSourceChange(index, field, number);
+          setVoiceHint('');
+        }
       }
-    }
-  });
+    },
+    (text) => {
+      const preview: Partial<Record<VoiceField, string>> = {};
+      let field = activeFieldRef.current;
+      for (const action of parseVoiceActions(text)) {
+        if (action.type === 'field') {
+          field = action.field;
+        } else if (action.type === 'value') {
+          preview[field] =
+            field === 'contact' || field === 'name' ? action.value : (parseSpokenNumber(action.value) ?? action.value);
+        } else {
+          // 行切换和候选选择会改变后续指令的目标，等最终结果再执行。
+          break;
+        }
+      }
+      props.onContactPreview(preview.contact);
+      setVoicePreview(preview);
+    },
+  );
 
   const handleProductSelect = (productInfo: Product) => {
     const index = editIndexRef.current;
@@ -301,7 +322,7 @@ const EditTable = (props: {
               ref={(input) => {
                 inputRefs.current.name = input;
               }}
-              value={voiceProductQuery ?? val}
+              value={voicePreview.name ?? voiceProductQuery ?? val}
               options={(voiceOptions ?? productNames).map((name, index) => ({
                 value: name,
                 label: voiceOptions && voiceOptions.length > 1 ? `${index + 1}. ${name}` : name,
@@ -352,7 +373,7 @@ const EditTable = (props: {
             ref={(input) => {
               inputRefs.current.buyPrice = input;
             }}
-            value={val}
+            value={voicePreview.buyPrice ?? val}
             onFocus={() => {
               activeFieldRef.current = 'buyPrice';
             }}
@@ -377,7 +398,7 @@ const EditTable = (props: {
             ref={(input) => {
               inputRefs.current.sellPrice = input;
             }}
-            value={val}
+            value={voicePreview.sellPrice ?? val}
             onFocus={() => {
               activeFieldRef.current = 'sellPrice';
             }}
@@ -402,7 +423,7 @@ const EditTable = (props: {
             ref={(input) => {
               inputRefs.current.number = input;
             }}
-            value={val}
+            value={voicePreview.number ?? val}
             onFocus={() => {
               activeFieldRef.current = 'number';
             }}
@@ -427,7 +448,7 @@ const EditTable = (props: {
             ref={(input) => {
               inputRefs.current.otherCost = input;
             }}
-            value={val}
+            value={voicePreview.otherCost ?? val}
             onFocus={() => {
               activeFieldRef.current = 'otherCost';
             }}
@@ -555,6 +576,7 @@ export default (props: Props) => {
   const activeFieldRef = useRef<VoiceField>('contact');
   const [contactDropdownOpen, setContactDropdownOpen] = useState(false);
   const [contactNames, setContactNames] = useState<string[] | null>(null);
+  const [contactPreview, setContactPreview] = useState<string>();
   const [voiceContactQuery, setVoiceContactQuery] = useState<string | null>(null);
   const [voiceContactOptions, setVoiceContactOptions] = useState<string[] | null>(null);
   const voiceContactOptionsRef = useRef<string[] | null>(null);
@@ -768,7 +790,7 @@ export default (props: Props) => {
             <Form.Item
               label="姓名"
               name="contact"
-              getValueProps={(contact) => ({ value: voiceContactQuery ?? contact })}
+              getValueProps={(contact) => ({ value: contactPreview ?? voiceContactQuery ?? contact })}
               extra={contactVoiceHint || undefined}
               style={{
                 width: '100%',
@@ -860,6 +882,7 @@ export default (props: Props) => {
         <Form.Item name="products">
           <EditTable
             activeFieldRef={activeFieldRef}
+            onContactPreview={setContactPreview}
             onContactFocus={() => contactInputRef.current?.focus?.()}
             onContactChange={(spoken) => {
               if (!contactNames) {
