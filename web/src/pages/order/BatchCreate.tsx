@@ -1,4 +1,4 @@
-import { DEFAULT_TABLE_SCROLL, PinyinMatchInput, TextButton } from '@/components';
+import { DeleteConfirmButton, DEFAULT_TABLE_SCROLL, PinyinMatchInput, TextButton } from '@/components';
 import {
   createOrder,
   queryOrderById,
@@ -503,7 +503,9 @@ const EditTable = (props: {
                 >
                   编辑
                 </TextButton>
-                <TextButton onClick={() => handleRecordRemove(index)}>删除</TextButton>
+                <DeleteConfirmButton onConfirm={() => handleRecordRemove(index)}>
+                  <TextButton danger>删除</TextButton>
+                </DeleteConfirmButton>
               </>
             )}
           </Space>

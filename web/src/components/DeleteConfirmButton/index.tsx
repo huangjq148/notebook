@@ -2,7 +2,7 @@ import React from 'react';
 import { Popconfirm } from 'antd';
 
 export type DeleteConfirmButtonProps = {
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   children: React.ReactNode;
 };
 
@@ -10,14 +10,12 @@ const DeleteConfirmButton: React.FC<DeleteConfirmButtonProps> = (props) => {
   return (
     <Popconfirm
       placement="topLeft"
-      title="确定删除当前数据"
-      onConfirm={() => {
-        props.onConfirm();
-      }}
-      okText="是的"
-      cancelText="点错了"
+      title="确定删除这条数据吗？"
+      onConfirm={props.onConfirm}
+      okText="删除"
+      cancelText="取消"
     >
-      {props.children}
+      <span style={{ display: 'inline-flex' }}>{props.children}</span>
     </Popconfirm>
   );
 };

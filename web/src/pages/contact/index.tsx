@@ -49,11 +49,9 @@ export default () => {
       render: (id: string) => (
         <Space size="middle">
           <TextButton onClick={() => handleEditClick(id)}>编辑</TextButton>
-          {/* <DeleteConfirmButton onConfirm={() => handleContactDelete(record.id as string)}> */}
-          <TextButton danger onClick={() => handleContactDelete(id)}>
-            删除
-          </TextButton>
-          {/* </DeleteConfirmButton> */}
+          <DeleteConfirmButton onConfirm={() => handleContactDelete(id)}>
+            <TextButton danger>删除</TextButton>
+          </DeleteConfirmButton>
         </Space>
       ),
     },

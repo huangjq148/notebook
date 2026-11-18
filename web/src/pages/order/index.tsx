@@ -1,4 +1,4 @@
-import { DateRangePicker, OrderContactInput, OrderProductInput, SearchForm, TextButton, Table } from '@/components';
+import { DeleteConfirmButton, DateRangePicker, OrderContactInput, OrderProductInput, SearchForm, TextButton, Table } from '@/components';
 import { useTable } from '@/hooks';
 import { deleteOrder, queryOrder, revokeStockOrder, statistics } from '@/services/order';
 import { Button, Form, message, Modal, Space } from 'antd';
@@ -305,10 +305,19 @@ export default () => {
     });
   };
 
-  const handleRevokeOutStock = async (order: Order) => {
-    await revokeStockOrder(order.id ?? 0);
-    handleSearchForm();
-    message.success('撤销库存订单成功');
+  const handleRevokeOutStock = (order: Order) => {
+    Modal.confirm({
+      title: '撤销出库',
+      content: `确认撤销“${order.name}”的库存出库？`,
+      okText: '撤销',
+      okButtonProps: { danger: true },
+      cancelText: '取消',
+      onOk: async () => {
+        await revokeStockOrder(order.id ?? 0);
+        handleSearchForm();
+        message.success('撤销库存订单成功');
+      },
+    });
   };
 
   const columns = [
@@ -398,14 +407,9 @@ export default () => {
               撤销出库
             </TextButton>
           ) : (
-            <TextButton
-              onClick={() => {
-                handleOrderDelete(record.id);
-              }}
-              danger
-            >
-              删除
-            </TextButton>
+            <DeleteConfirmButton onConfirm={() => handleOrderDelete(record.id)}>
+              <TextButton danger>删除</TextButton>
+            </DeleteConfirmButton>
           )}
         </Space>
       ),

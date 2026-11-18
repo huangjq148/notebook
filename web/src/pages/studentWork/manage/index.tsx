@@ -1,4 +1,4 @@
-import { Card, SearchForm, Table, TableColumnType, TextButton } from '@/components';
+import { DeleteConfirmButton, Card, SearchForm, Table, TableColumnType, TextButton } from '@/components';
 import { useTable } from '@/hooks';
 import { createStudentWork, deleteStudentWork, getStudentWorkList } from '@/services/studentWork';
 import { Button, DatePicker, Form, Input, message, Modal, Space } from 'antd';
@@ -51,16 +51,15 @@ const StudentWork = () => {
             >
               学科作业
             </TextButton>
-            <TextButton
-              danger
-              onClick={async () => {
+            <DeleteConfirmButton
+              onConfirm={async () => {
                 await deleteStudentWork(id);
                 message.success('删除成功');
                 searchForm();
               }}
             >
-              删除
-            </TextButton>
+              <TextButton danger>删除</TextButton>
+            </DeleteConfirmButton>
           </Space>
         );
       },

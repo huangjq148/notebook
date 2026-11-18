@@ -1,4 +1,4 @@
-import { SearchForm, TableColumnType, TextButton } from '@/components';
+import { DeleteConfirmButton, SearchForm, TableColumnType, TextButton } from '@/components';
 import { useTable } from '@/hooks';
 import { getCalculatorList, deleteCalculator } from '@/services/calculator';
 import { Button, Card, Input, message, Space } from 'antd';
@@ -30,9 +30,9 @@ const CalculatorManage = () => {
         return (
           <Space>
             <TextButton onClick={() => navigate(`/student-work/calculator-manage/${id}`)}>详情</TextButton>
-            <TextButton danger onClick={() => handleDelete(id)}>
-              删除
-            </TextButton>
+            <DeleteConfirmButton onConfirm={() => handleDelete(id)}>
+              <TextButton danger>删除</TextButton>
+            </DeleteConfirmButton>
           </Space>
         );
       },

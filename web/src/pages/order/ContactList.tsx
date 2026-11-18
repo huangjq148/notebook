@@ -1,4 +1,4 @@
-import { DEFAULT_TABLE_SCROLL, SearchForm, TextButton } from '@/components';
+import { DeleteConfirmButton, DEFAULT_TABLE_SCROLL, SearchForm, TextButton } from '@/components';
 import { useTable } from '@/hooks';
 import { deleteContact, queryContact } from '@/services/contact';
 import { Button, Form, Input, message, Modal, Space, Table } from 'antd';
@@ -57,7 +57,9 @@ export default (props: Props) => {
         <Space size="middle">
           <TextButton onClick={() => handleRowSelect(record)}>选中</TextButton>
           <TextButton onClick={() => handleEditClick(record.id as string)}>编辑</TextButton>
-          <TextButton onClick={() => handleContactDelete(record.id as string)}>删除</TextButton>
+          <DeleteConfirmButton onConfirm={() => handleContactDelete(record.id as string)}>
+            <TextButton danger>删除</TextButton>
+          </DeleteConfirmButton>
         </Space>
       ),
     },

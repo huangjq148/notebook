@@ -3,7 +3,7 @@ import styles from './index.module.less';
 import { Button, Form, Input, message, Modal, Radio, Select, Space, TimePicker } from 'antd';
 import { useState } from 'react';
 
-import { SearchForm, TextButton, Table, TableColumnType } from '@/components';
+import { DeleteConfirmButton, SearchForm, TextButton, Table, TableColumnType } from '@/components';
 import { useTable } from '@/hooks';
 import { createAlarm, deleteAlarm, queryAlarmList, sendMessageToWeChatWebhook, updateAlarm } from '@/services/alarm';
 import dayjs from 'dayjs';
@@ -82,16 +82,15 @@ const Alarm = () => {
             >
               编辑
             </TextButton>
-            <TextButton
-              danger
-              onClick={async () => {
+            <DeleteConfirmButton
+              onConfirm={async () => {
                 await deleteAlarm(id);
                 message.success('删除成功');
                 searchForm();
               }}
             >
-              删除
-            </TextButton>
+              <TextButton danger>删除</TextButton>
+            </DeleteConfirmButton>
           </Space>
         );
       },
