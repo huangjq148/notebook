@@ -446,7 +446,7 @@ export default () => {
   }, []);
 
   return (
-    <div>
+    <div className={styles.orderPage}>
       <SearchForm>
         <Form form={form} onFinish={handleFormSearch} onValuesChange={handleFormValuesChange} layout="inline">
           <Form.Item label="品名" name="name" className={styles.searchInput}>
@@ -509,8 +509,9 @@ export default () => {
         </div>
       </SearchForm>
 
-      <div className={styles.tableWrapper}>
+      <div className={`${styles.tableWrapper} ${styles.orderTable}`}>
         <Table<Order>
+          scroll={{ x: 'max-content', y: '100%' }}
           rowSelection={{
             type: 'checkbox' as const,
             ...rowSelection,
