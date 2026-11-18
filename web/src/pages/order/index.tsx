@@ -2,7 +2,7 @@ import { DateRangePicker, OrderContactInput, OrderProductInput, SearchForm, Text
 import { useTable } from '@/hooks';
 import { deleteOrder, queryOrder, revokeStockOrder, statistics } from '@/services/order';
 import { Button, Form, message, Modal, Space } from 'antd';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import BatchCreate from './BatchCreate';
 import EditPage from './Edit';
 import { copy } from '@/utils';
@@ -146,6 +146,42 @@ interface Statistics {
 
 export default () => {
   const [form] = Form.useForm();
+  const tableCardRef = useRef<HTMLDivElement>(null);
+  const [tableScrollHeight, setTableScrollHeight] = useState(1);
+
+  useLayoutEffect(() => {
+    const card = tableCardRef.current;
+    if (!card) return;
+    const table = card.querySelector<HTMLElement>('.ant-table');
+    const body = card.querySelector<HTMLElement>('.ant-table-body');
+    const pagination = card.querySelector<HTMLElement>('.ant-pagination');
+    if (!table || !body) return;
+
+    const updateHeight = () => {
+      const cardStyle = getComputedStyle(card);
+      const paginationStyle = pagination ? getComputedStyle(pagination) : null;
+      const paginationHeight = pagination
+        ? pagination.getBoundingClientRect().height +
+          parseFloat(paginationStyle!.marginTop) +
+          parseFloat(paginationStyle!.marginBottom)
+        : 0;
+      const tableChromeHeight = table.getBoundingClientRect().height - body.getBoundingClientRect().height;
+      const availableHeight =
+        card.clientHeight -
+        parseFloat(cardStyle.paddingTop) -
+        parseFloat(cardStyle.paddingBottom) -
+        paginationHeight -
+        tableChromeHeight;
+      setTableScrollHeight(Math.max(1, Math.floor(availableHeight)));
+    };
+
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(card);
+    observer.observe(table);
+    if (pagination) observer.observe(pagination);
+    return () => observer.disconnect();
+  });
   const [conditions, setConditions] = useState<Record<string, any>>({});
   const { dataSource, loading, searchForm, pagination, handlePageChange } = useTable<Order>({
     request: queryOrder,
@@ -509,9 +545,9 @@ export default () => {
         </div>
       </SearchForm>
 
-      <div className={`${styles.tableWrapper} ${styles.orderTable}`}>
+      <div ref={tableCardRef} className={`${styles.tableWrapper} ${styles.orderTable}`}>
         <Table<Order>
-          scroll={{ x: 'max-content', y: '100%' }}
+          scroll={{ x: 'max-content', y: tableScrollHeight }}
           rowSelection={{
             type: 'checkbox' as const,
             ...rowSelection,
