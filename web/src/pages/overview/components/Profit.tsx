@@ -1,29 +1,56 @@
-import { useEffect, useState } from 'react';
-import { getProfitStatistics } from '@/services/overview';
-import LineChart from '@/components/Charts/LineChart';
-import { Empty } from 'antd';
+import { Empty, Skeleton } from 'antd';
+import { LineChart } from 'echarts/charts';
+import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components';
+import { init, use, type EChartsType } from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
+import { useEffect, useRef } from 'react';
+import useElementResize from '@/hooks/useElementResize';
+import type { ProfitTrendItem } from '@/services/overview';
 
-export default function Charts() {
-  const [options, setOptions] = useState<{ xAxis: string[]; yAxis: string[] | number[] }>({ xAxis: [], yAxis: [] });
+use([LineChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer]);
 
-  const lodData = async () => {
-    const result: any = await getProfitStatistics();
-    setOptions({
-      xAxis: result.map((item: any) => item.orderTime),
-      yAxis: result.map((item: any) => item.profit),
-    });
-  };
-
+function Trend({ data }: { data: ProfitTrendItem[] }) {
+  const container = useRef<HTMLDivElement>(null);
+  const chart = useRef<EChartsType | null>(null);
+  const { width, height } = useElementResize(container);
   useEffect(() => {
-    lodData();
+    if (!container.current) return;
+    chart.current = init(container.current);
+    return () => {
+      chart.current?.dispose();
+      chart.current = null;
+    };
   }, []);
-
-  return options?.yAxis?.length ? (
-    <LineChart xAxis={options.xAxis} yAxis={options.yAxis} showLabel />
-  ) : (
-    <Empty
-      description="暂无数据"
-      style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-    />
-  );
+  useEffect(() => {
+    chart.current?.setOption(
+      {
+        color: ['#1677ff', '#bfbfbf'],
+        grid: { left: 16, right: 20, top: 48, bottom: 16, containLabel: true },
+        legend: { top: 0 },
+        tooltip: { trigger: 'axis', valueFormatter: (value: number) => `¥${Number(value).toFixed(2)}` },
+        xAxis: { type: 'category', data: data.map((item) => item.date), boundaryGap: false },
+        yAxis: { type: 'value' },
+        series: [
+          { name: '所选时段', type: 'line', showSymbol: false, data: data.map((item) => item.current) },
+          {
+            name: '上一等长周期',
+            type: 'line',
+            showSymbol: false,
+            lineStyle: { type: 'dashed' },
+            data: data.map((item) => item.compare),
+          },
+        ],
+      },
+      true,
+    );
+  }, [data]);
+  useEffect(() => {
+    chart.current?.resize();
+  }, [width, height]);
+  return <div ref={container} style={{ height: 300, width: '100%' }} />;
+}
+export default function Profit({ data, loading }: { data?: ProfitTrendItem[]; loading?: boolean }) {
+  if (loading) return <Skeleton active style={{ minHeight: 300 }} />;
+  if (!data?.length) return <Empty description="所选时段暂无数据" />;
+  return <Trend data={data} />;
 }

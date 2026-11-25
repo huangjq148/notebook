@@ -1,8 +1,8 @@
-import { SearchForm } from '@/components';
-import { getTop5Data, getCoreMetrics } from '@/services/overview';
-import { Button } from 'antd';
+import { getTop5Data, getCoreMetrics, getProfitTrend } from '@/services/overview';
+import type { CoreMetricsData, OverviewRankings, ProfitTrendItem } from '@/services/overview';
+import { Alert, Button, Card } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import ProfitCharts from './components/Profit';
 import Top5Product from './components/Top5Product';
 import CoreMetrics from './components/CoreMetrics';
@@ -10,150 +10,101 @@ import RefreshControl from './components/RefreshControl';
 import QuickDateFilter from './components/QuickDateFilter';
 import styles from './index.module.less';
 
-interface CoreMetricsData {
-  totalSales: number;
-  totalProfit: number;
-  orderCount: number;
-  avgProfitRate: number;
-  salesMoM: number;
-  profitMoM: number;
-  orderCountMoM: number;
-  avgProfitRateMoM: number;
+interface OverviewData {
+  rankings: OverviewRankings;
+  metrics: CoreMetricsData;
+  trend: ProfitTrendItem[];
 }
 
-export default () => {
-  const [topData, setTopData] = useState<any>([]);
-  const [coreMetrics, setCoreMetrics] = useState<CoreMetricsData>();
-  const [loading, setLoading] = useState(false);
+export default function Overview() {
+  const [data, setData] = useState<OverviewData>();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>();
-  const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([
-    dayjs().startOf('month'),
-    dayjs().endOf('month'),
-  ]);
-
-  const getDateConditions = () => {
-    const conditions: Record<string, string> = {};
-    if (dateRange[0]) {
-      conditions.startOrderTime = dateRange[0].format('YYYY-MM-DD');
-    }
-    if (dateRange[1]) {
-      conditions.endOrderTime = dateRange[1].format('YYYY-MM-DD');
-    }
-    return conditions;
-  };
-
-  const loadTopData = async () => {
-    const conditions = getDateConditions();
-    const result = (await getTop5Data(conditions)) as any;
-
-    const newData = [
-      {
-        label: '购买最多的产品',
-        data: result.top5BuyGoods || [],
-      },
-      {
-        label: '卖的最多的产品',
-        data: result.top5SellGoods || [],
-      },
-      {
-        label: '利润最高的产品',
-        data: result.top5ProfitGoods || [],
-      },
-      {
-        label: '利润最多的客户',
-        data: result.top5BuyCustomer || [],
-      },
-    ];
-    setTopData(newData);
-  };
-
-  const loadCoreMetrics = async () => {
-    const conditions = getDateConditions();
-    const result = await getCoreMetrics(conditions);
-    setCoreMetrics(result as CoreMetricsData);
-  };
+  const requestId = useRef(0);
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([dayjs().startOf('month'), dayjs()]);
+  const startTime = dateRange[0].format('YYYY-MM-DD');
+  const endTime = dateRange[1].format('YYYY-MM-DD');
 
   const loadAllData = useCallback(async () => {
+    const id = ++requestId.current;
     setLoading(true);
+    setError(false);
     try {
-      await Promise.all([loadTopData(), loadCoreMetrics()]);
+      const params = { startTime, endTime };
+      const [rankings, metrics, trend] = await Promise.all([
+        getTop5Data(params),
+        getCoreMetrics(params),
+        getProfitTrend(params),
+      ]);
+      if (id !== requestId.current) return;
+      setData({ rankings, metrics, trend });
       setLastUpdateTime(new Date());
-    } catch (error) {
-      console.error('加载数据失败:', error);
+    } catch {
+      if (id === requestId.current) setError(true);
     } finally {
-      setLoading(false);
+      if (id === requestId.current) setLoading(false);
     }
-  }, [dateRange]);
+  }, [startTime, endTime]);
 
   useEffect(() => {
-    loadAllData();
+    setData(undefined);
+    setLastUpdateTime(undefined);
+    void loadAllData();
+    return () => {
+      requestId.current += 1;
+    };
   }, [loadAllData]);
 
-  const handleDateChange = (dates: [Dayjs | null, Dayjs | null] | null) => {
-    if (dates && dates[0] && dates[1]) {
-      setDateRange(dates);
-    } else {
-      // 如果没有选择日期，默认使用本月
-      setDateRange([dayjs().startOf('month'), dayjs().endOf('month')]);
-    }
-  };
+  const rankings = [
+    { key: 'top5SellGoods', label: '销售额 TOP 5' },
+    { key: 'top5ProfitGoods', label: '产品利润 TOP 5' },
+    { key: 'top5BuyCustomer', label: '客户利润贡献 TOP 5' },
+    { key: 'top5BuyGoods', label: '已售商品成本 TOP 5' },
+  ] as const;
 
   return (
-    <div>
-      <SearchForm>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 16,
-          }}
-        >
-          <QuickDateFilter
-            value={dateRange as [Dayjs, Dayjs]}
-            onChange={handleDateChange}
-          />
-          <Button
-            htmlType="submit"
-            type="primary"
-            onClick={loadAllData}
-            loading={loading}
-          >
-            查询
-          </Button>
+    <div className={styles.overview}>
+      <div className={styles.pageHeading}>
+        <div>
+          <h2>经营概览</h2>
+          <p>查看销售表现、利润变化与主要贡献来源</p>
         </div>
-      </SearchForm>
-
-      <RefreshControl
-        onRefresh={loadAllData}
-        loading={loading}
-        lastUpdateTime={lastUpdateTime}
-      />
-
-      <CoreMetrics data={coreMetrics} loading={loading} />
-
-      <div className={styles.topListWrapper}>
-        {topData.map((topDataItem: any, index: number) => (
-          <div className={styles.topListItem} key={index}>
-            <Top5Product key={index} data={topDataItem} />
-          </div>
-        ))}
+        <span className={styles.periodLabel}>
+          {startTime} 至 {endTime}
+        </span>
       </div>
-
-      <SearchForm
-        style={{
-          height: '400px',
-          width: '100%',
-          marginTop: '16px',
-          marginBottom: 16,
-        }}
-      >
+      <div className={styles.toolbar}>
+        <QuickDateFilter value={dateRange} onChange={setDateRange} />
+        <RefreshControl onRefresh={loadAllData} loading={loading} lastUpdateTime={lastUpdateTime} />
+      </div>
+      {error && (
+        <Alert
+          type="error"
+          showIcon
+          title={data ? '刷新失败，当前显示上次成功加载的数据' : '数据加载失败，请重试'}
+          action={
+            <Button size="small" onClick={loadAllData} loading={loading}>
+              重试
+            </Button>
+          }
+        />
+      )}
+      {(!error || data) && (
         <>
-          <p>近14天利润</p>
-          <ProfitCharts />
+          <CoreMetrics data={data?.metrics} loading={loading} />
+          <Card title="利润趋势" extra={<span className={styles.unit}>单位：元</span>}>
+            <ProfitCharts data={data?.trend} loading={loading} />
+          </Card>
+          <div className={styles.topListWrapper}>
+            {rankings.map((item) => (
+              <Card key={item.key} loading={loading}>
+                <Top5Product title={item.label} data={data?.rankings[item.key] ?? []} />
+              </Card>
+            ))}
+          </div>
         </>
-      </SearchForm>
+      )}
     </div>
   );
-};
+}

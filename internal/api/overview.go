@@ -1,242 +1,257 @@
 package api
 
 import (
+	"fmt"
+	"math"
+	"strconv"
+	"time"
+
+	"github.com/gofiber/fiber/v2"
 	"hjq-notebook/internal/database"
 	"hjq-notebook/internal/model/response"
 	"hjq-notebook/internal/services"
-	"strconv"
-
-	"github.com/gofiber/fiber/v2"
+	"hjq-notebook/internal/utils"
 )
 
-func OverviewData(c *fiber.Ctx) error {
-	top5BuyGoods := services.GetTop5BuyGoods(c)
-	top5SellGoods := services.GetTop5SellGoods(c)
-	top5ProfitGoods := services.GetTop5ProfitGoods(c)
-	top5BuyCustomer := services.GetTop5BuyCustomer(c)
+const overviewDateFormat = "2006-01-02"
 
-	return c.JSON(response.Success(fiber.Map{
-		"top5BuyGoods":    top5BuyGoods,
-		"top5SellGoods":   top5SellGoods,
-		"top5ProfitGoods": top5ProfitGoods,
-		"top5BuyCustomer": top5BuyCustomer,
-	}, "查询成功"))
-}
-
-// CoreMetrics 核心指标数据
-type CoreMetrics struct {
-	TotalSales       float64 `json:"totalSales"`
-	TotalProfit      float64 `json:"totalProfit"`
-	OrderCount       int     `json:"orderCount"`
-	AvgProfitRate    float64 `json:"avgProfitRate"`
-	SalesMoM         float64 `json:"salesMoM"`         // 销售额环比
-	ProfitMoM        float64 `json:"profitMoM"`        // 利润环比
-	OrderCountMoM    float64 `json:"orderCountMoM"`    // 订单数环比
-	AvgProfitRateMoM float64 `json:"avgProfitRateMoM"` // 平均利润率环比
-}
-
-// CoreMetricsData 获取核心指标数据
-func CoreMetricsData(c *fiber.Ctx) error {
-	userId := c.Get("current_user_id")
-	startTime := c.Query("startTime")
-	endTime := c.Query("endTime")
-
-	// 获取当前周期数据
-	currentMetrics := getMetricsByTimeRange(userId, startTime, endTime)
-
-	// 计算上一周期（相同天数）
-	prevStartTime, prevEndTime := calculatePrevPeriod(startTime, endTime)
-	prevMetrics := getMetricsByTimeRange(userId, prevStartTime, prevEndTime)
-
-	// 计算环比
-	result := CoreMetrics{
-		TotalSales:       currentMetrics.TotalSales,
-		TotalProfit:      currentMetrics.TotalProfit,
-		OrderCount:       currentMetrics.OrderCount,
-		AvgProfitRate:    currentMetrics.AvgProfitRate,
-		SalesMoM:         calculateMoM(currentMetrics.TotalSales, prevMetrics.TotalSales),
-		ProfitMoM:        calculateMoM(currentMetrics.TotalProfit, prevMetrics.TotalProfit),
-		OrderCountMoM:    calculateMoM(float64(currentMetrics.OrderCount), float64(prevMetrics.OrderCount)),
-		AvgProfitRateMoM: calculateMoM(currentMetrics.AvgProfitRate, prevMetrics.AvgProfitRate),
+// overviewRange accepts the legacy parameter names used by the rankings too.
+func overviewRange(c *fiber.Ctx) (time.Time, time.Time, error) {
+	now := time.Now()
+	startText := c.Query("startTime", c.Query("startOrderTime", now.Format("2006-01")+"-01"))
+	endText := c.Query("endTime", c.Query("endOrderTime", now.Format(overviewDateFormat)))
+	start, err := time.Parse(overviewDateFormat, startText)
+	if err != nil {
+		return time.Time{}, time.Time{}, fmt.Errorf("开始日期格式应为 YYYY-MM-DD")
 	}
+	end, err := time.Parse(overviewDateFormat, endText)
+	if err != nil {
+		return time.Time{}, time.Time{}, fmt.Errorf("结束日期格式应为 YYYY-MM-DD")
+	}
+	if end.Before(start) || end.Sub(start).Hours()/24 > 3660 {
+		return time.Time{}, time.Time{}, fmt.Errorf("请选择有效日期范围（最多十年）")
+	}
+	return start, end, nil
+}
 
+func OverviewData(c *fiber.Ctx) error {
+	start, end, err := overviewRange(c)
+	if err != nil {
+		return c.Status(400).JSON(response.Error(err.Error()))
+	}
+	// Keep the rankings on exactly the same range as the other overview endpoints.
+	c.Request().URI().QueryArgs().Set("startOrderTime", start.Format(overviewDateFormat))
+	c.Request().URI().QueryArgs().Set("endOrderTime", end.Format(overviewDateFormat))
+	buy, err := services.GetTop5BuyGoods(c)
+	if err != nil {
+		return c.Status(500).JSON(response.Error("排行榜查询失败"))
+	}
+	sell, err := services.GetTop5SellGoods(c)
+	if err != nil {
+		return c.Status(500).JSON(response.Error("排行榜查询失败"))
+	}
+	profit, err := services.GetTop5ProfitGoods(c)
+	if err != nil {
+		return c.Status(500).JSON(response.Error("排行榜查询失败"))
+	}
+	customer, err := services.GetTop5BuyCustomer(c)
+	if err != nil {
+		return c.Status(500).JSON(response.Error("排行榜查询失败"))
+	}
+	return c.JSON(response.Success(fiber.Map{"top5BuyGoods": buy, "top5SellGoods": sell, "top5ProfitGoods": profit, "top5BuyCustomer": customer}, "查询成功"))
+}
+
+type CoreMetrics struct {
+	TotalSales       float64  `json:"totalSales" db:"totalSales"`
+	TotalProfit      float64  `json:"totalProfit" db:"totalProfit"`
+	OrderCount       int      `json:"orderCount" db:"orderCount"`
+	AvgProfitRate    float64  `json:"avgProfitRate"`
+	SalesMoM         *float64 `json:"salesMoM"`
+	ProfitMoM        *float64 `json:"profitMoM"`
+	OrderCountMoM    *float64 `json:"orderCountMoM"`
+	AvgProfitRateMoM *float64 `json:"avgProfitRateMoM"`
+	PreviousStart    string   `json:"previousStart"`
+	PreviousEnd      string   `json:"previousEnd"`
+}
+
+func CoreMetricsData(c *fiber.Ctx) error {
+	start, end, err := overviewRange(c)
+	if err != nil {
+		return c.Status(400).JSON(response.Error(err.Error()))
+	}
+	userID := utils.GetUserId(c)
+	result, err := getMetricsByTimeRange(userID, start.Format(overviewDateFormat), end.Format(overviewDateFormat))
+	if err != nil {
+		return c.Status(500).JSON(response.Error("核心指标查询失败"))
+	}
+	prevStart, prevEnd := calculatePrevPeriod(start.Format(overviewDateFormat), end.Format(overviewDateFormat))
+	prev, err := getMetricsByTimeRange(userID, prevStart, prevEnd)
+	if err != nil {
+		return c.Status(500).JSON(response.Error("对比指标查询失败"))
+	}
+	result.SalesMoM = calculateMoM(result.TotalSales, prev.TotalSales)
+	result.ProfitMoM = calculateMoM(result.TotalProfit, prev.TotalProfit)
+	result.OrderCountMoM = calculateMoM(float64(result.OrderCount), float64(prev.OrderCount))
+	if result.TotalSales > 0 && prev.TotalSales > 0 {
+		delta := result.AvgProfitRate - prev.AvgProfitRate
+		result.AvgProfitRateMoM = &delta // Percentage points, not relative percent.
+	}
+	result.PreviousStart, result.PreviousEnd = prevStart, prevEnd
 	return c.JSON(response.Success(result, "查询成功"))
 }
 
-// 根据时间范围获取指标
-func getMetricsByTimeRange(userId, startTime, endTime string) CoreMetrics {
-	type QueryResult struct {
-		TotalSales    float64 `db:"totalSales"`
-		TotalProfit   float64 `db:"totalProfit"`
-		OrderCount    int     `db:"orderCount"`
-		TotalBuyCost  float64 `db:"totalBuyCost"`
-	}
-
-	var result QueryResult
-	sql := `select 
-		IFNULL(sum(sellPrice*number),0) totalSales,
-		IFNULL(sum(sellPrice*number-buyPrice*number-otherCost),0) totalProfit,
-		IFNULL(sum(number),0) orderCount,
-		IFNULL(sum(buyPrice*number),0) totalBuyCost
-	from t_order 
-	where createUser=?`
-
-	params := []interface{}{userId}
-	if startTime != "" {
-		sql += " and orderTime>=?"
-		params = append(params, startTime)
-	}
-	if endTime != "" {
-		sql += " and orderTime<=?"
-		params = append(params, endTime)
-	}
-
-	database.DBConn.Get(&result, sql, params...)
-
-	// 计算平均利润率
-	avgProfitRate := float64(0)
+func getMetricsByTimeRange(userID, start, end string) (CoreMetrics, error) {
+	var result CoreMetrics
+	err := database.DBConn.Get(&result, `select
+ COALESCE(sum(sellPrice*number),0) totalSales,
+ COALESCE(sum(sellPrice*number-buyPrice*number-COALESCE(otherCost,0)),0) totalProfit,
+ count(*) orderCount
+ from t_order where createUser=? and orderTime>=? and orderTime<=?`, userID, start, end)
 	if result.TotalSales > 0 {
-		avgProfitRate = (result.TotalProfit / result.TotalSales) * 100
+		result.AvgProfitRate = result.TotalProfit / result.TotalSales * 100
 	}
-
-	return CoreMetrics{
-		TotalSales:    result.TotalSales,
-		TotalProfit:   result.TotalProfit,
-		OrderCount:    result.OrderCount,
-		AvgProfitRate: avgProfitRate,
-	}
+	return result, err
 }
 
-// 计算环比变化率
-func calculateMoM(current, previous float64) float64 {
+func calculateMoM(current, previous float64) *float64 {
 	if previous == 0 {
-		if current == 0 {
-			return 0
-		}
-		return 100
+		return nil
 	}
-	return ((current - previous) / previous) * 100
+	value := (current - previous) / math.Abs(previous) * 100
+	return &value
 }
 
-// 计算上一周期时间范围（简化版，相同天数）
-func calculatePrevPeriod(startTime, endTime string) (string, string) {
-	// 这里简化处理，实际应该解析日期并计算
-	// 返回空字符串表示不限制时间（全量对比）
-	return "", ""
+func calculatePrevPeriod(startText, endText string) (string, string) {
+	start, err := time.Parse(overviewDateFormat, startText)
+	if err != nil {
+		return "", ""
+	}
+	end, err := time.Parse(overviewDateFormat, endText)
+	if err != nil || end.Before(start) {
+		return "", ""
+	}
+	days := int(end.Sub(start).Hours()/24) + 1
+	return start.AddDate(0, 0, -days).Format(overviewDateFormat), start.AddDate(0, 0, -1).Format(overviewDateFormat)
 }
 
-// SalesDistribution 销售额分布统计
 type SalesDistributionItem struct {
 	Name  string  `json:"name" db:"name"`
 	Value float64 `json:"value" db:"value"`
 }
 
-// SalesDistribution 按产品名称统计销售额占比
 func SalesDistribution(c *fiber.Ctx) error {
-	userId := c.Get("current_user_id")
-	startTime := c.Query("startTime")
-	endTime := c.Query("endTime")
-
-	sql := `select 
-		name,
-		IFNULL(sum(sellPrice*number),0) as value
-	from t_order 
-	where createUser=?`
-
-	params := []interface{}{userId}
-	if startTime != "" {
-		sql += " and orderTime>=?"
-		params = append(params, startTime)
-	}
-	if endTime != "" {
-		sql += " and orderTime<=?"
-		params = append(params, endTime)
-	}
-	sql += " group by name order by value desc limit 10"
-
-	var result []SalesDistributionItem
-	err := database.DBConn.Select(&result, sql, params...)
+	start, end, err := overviewRange(c)
 	if err != nil {
-		return c.JSON(response.Error("查询失败: " + err.Error()))
+		return c.Status(400).JSON(response.Error(err.Error()))
 	}
-
+	result := []SalesDistributionItem{}
+	err = database.DBConn.Select(&result, `select COALESCE(name,'') name, COALESCE(sum(sellPrice*number),0) value
+ from t_order where createUser=? and orderTime>=? and orderTime<=?
+ group by name order by value desc limit 10`, utils.GetUserId(c), start.Format(overviewDateFormat), end.Format(overviewDateFormat))
+	if err != nil {
+		return c.Status(500).JSON(response.Error("销售分布查询失败"))
+	}
 	return c.JSON(response.Success(result, "查询成功"))
 }
 
-// ProfitTrendWithCompare 带对比的利润趋势
 type ProfitTrendItem struct {
 	Date         string  `json:"date" db:"date"`
 	Current      float64 `json:"current" db:"current"`
-	Compare      float64 `json:"compare" db:"compare"`
+	Compare      float64 `json:"compare"`
 	CompareLabel string  `json:"compareLabel"`
 }
 
-// ProfitTrendWithCompare 获取利润趋势（支持同比/环比）
-func ProfitTrendWithCompare(c *fiber.Ctx) error {
-	userId := c.Get("current_user_id")
-	compareType := c.Query("compareType", "month-over-month") // year-over-year, month-over-month
-	daysStr := c.Query("days", "14")
-	days, _ := strconv.Atoi(daysStr)
-
-	// 获取当前周期数据
-	currentData := getProfitTrend(userId, days)
-
-	var compareData []ProfitTrendItem
-	var compareLabel string
-
-	if compareType == "year-over-year" {
-		compareLabel = "去年同期"
-		// 这里简化处理，实际应该查询去年同期数据
-		compareData = currentData
-	} else {
-		compareLabel = "上期环比"
-		// 这里简化处理，实际应该查询上一周期数据
-		compareData = currentData
+func getProfitTrend(userID string, start, end time.Time) ([]ProfitTrendItem, error) {
+	rows := []ProfitTrendItem{}
+	err := database.DBConn.Select(&rows, `select orderTime as date,
+ COALESCE(sum(sellPrice*number-buyPrice*number-COALESCE(otherCost,0)),0) as current
+ from t_order where createUser=? and orderTime>=? and orderTime<=?
+ group by orderTime order by orderTime asc`, userID, start.Format(overviewDateFormat), end.Format(overviewDateFormat))
+	if err != nil {
+		return nil, err
 	}
-
-	// 合并数据
-	for i := range currentData {
-		currentData[i].CompareLabel = compareLabel
-		if i < len(compareData) {
-			currentData[i].Compare = compareData[i].Current
-		}
-	}
-
-	return c.JSON(response.Success(currentData, "查询成功"))
+	return fillProfitDates(rows, start, end), nil
 }
 
-// getProfitTrend 获取利润趋势数据
-func getProfitTrend(userId string, days int) []ProfitTrendItem {
-	sql := `select 
-		orderTime as date,
-		IFNULL(sum(sellPrice*number - buyPrice*number - otherCost),0) as current
-	from t_order 
-	where createUser=?
-	group by orderTime 
-	order by orderTime desc 
-	limit ?`
-
-	var result []ProfitTrendItem
-	database.DBConn.Select(&result, sql, userId, days)
-
-	// 反转结果，按时间正序排列
-	for i, j := 0, len(result)-1; i < j; i, j = i+1, j-1 {
-		result[i], result[j] = result[j], result[i]
+func fillProfitDates(rows []ProfitTrendItem, start, end time.Time) []ProfitTrendItem {
+	byDate := map[string]float64{}
+	for _, row := range rows {
+		byDate[row.Date] = row.Current
 	}
-
+	result := []ProfitTrendItem{}
+	for day := start; !day.After(end); day = day.AddDate(0, 0, 1) {
+		date := day.Format(overviewDateFormat)
+		result = append(result, ProfitTrendItem{Date: date, Current: byDate[date]})
+	}
 	return result
 }
 
-func ProfitStatic(c *fiber.Ctx) error {
-	type Result struct {
-		Profit    float32 `db:"profit" json:"profit"`
-		OrderTime string  `db:"orderTime" json:"orderTime"`
+func ProfitTrendWithCompare(c *fiber.Ctx) error {
+	start, end, err := overviewRange(c)
+	if err != nil {
+		return c.Status(400).JSON(response.Error(err.Error()))
 	}
-	userId := c.Get("current_user_id")
+	if c.Query("days") != "" {
+		days, err := strconv.Atoi(c.Query("days"))
+		if err != nil || days < 1 || days > 3660 {
+			return c.Status(400).JSON(response.Error("天数应为 1 到 3660"))
+		}
+		start = end.AddDate(0, 0, 1-days)
+	}
+	compareType := c.Query("compareType", "month-over-month")
+	if compareType != "month-over-month" && compareType != "year-over-year" {
+		return c.Status(400).JSON(response.Error("不支持的对比类型"))
+	}
+	userID := utils.GetUserId(c)
+	current, err := getProfitTrend(userID, start, end)
+	if err != nil {
+		return c.Status(500).JSON(response.Error("利润趋势查询失败"))
+	}
+	prevStart, prevEnd := start.AddDate(0, 0, -len(current)), start.AddDate(0, 0, -1)
+	label := "上一等长周期"
+	if compareType == "year-over-year" {
+		// Query the prior year, then align by calendar date (Feb 29 uses Feb 28).
+		prevStart, prevEnd = priorYearDate(start), priorYearDate(end)
+		label = "去年同期"
+	}
+	previous, err := getProfitTrend(userID, prevStart, prevEnd)
+	if err != nil {
+		return c.Status(500).JSON(response.Error("对比趋势查询失败"))
+	}
+	byDate := map[string]float64{}
+	for _, item := range previous {
+		byDate[item.Date] = item.Current
+	}
+	for i := range current {
+		day := start.AddDate(0, 0, i)
+		comparisonDay := prevStart.AddDate(0, 0, i)
+		if compareType == "year-over-year" {
+			comparisonDay = priorYearDate(day)
+		}
+		current[i].Compare = byDate[comparisonDay.Format(overviewDateFormat)]
+		current[i].CompareLabel = label
+	}
+	return c.JSON(response.Success(current, "查询成功"))
+}
 
-	result := []Result{}
-	sql := "select sum(sellPrice*number-buyPrice*number-otherCost) profit,orderTime from t_order where createUser=? group by orderTime order by orderTime desc limit 0,14"
-	database.DBConn.Select(&result, sql, userId)
+func priorYearDate(day time.Time) time.Time {
+	year, month, date := day.Date()
+	if month == time.February && date == 29 {
+		date = 28
+	}
+	return time.Date(year-1, month, date, 0, 0, 0, 0, day.Location())
+}
 
+// ProfitStatic retains the legacy response shape while using 14 calendar days.
+func ProfitStatic(c *fiber.Ctx) error {
+	end, _ := time.Parse(overviewDateFormat, time.Now().Format(overviewDateFormat))
+	rows, err := getProfitTrend(utils.GetUserId(c), end.AddDate(0, 0, -13), end)
+	if err != nil {
+		return c.Status(500).JSON(response.Error("利润趋势查询失败"))
+	}
+	result := []fiber.Map{}
+	for _, row := range rows {
+		result = append(result, fiber.Map{"orderTime": row.Date, "profit": row.Current})
+	}
 	return c.JSON(response.Success(result, "查询成功"))
 }

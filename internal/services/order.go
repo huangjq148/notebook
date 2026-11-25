@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"hjq-notebook/internal/database"
 	"hjq-notebook/internal/model"
 	"hjq-notebook/internal/utils"
@@ -13,7 +12,7 @@ import (
 
 type STATISTICS struct {
 	Name  string  `db:"name" json:"name"`
-	Money float32 `db:"money" json:"money"`
+	Money float64 `db:"money" json:"money"`
 }
 
 func handleTopDataCondition(c *fiber.Ctx) (string, []interface{}) {
@@ -40,72 +39,56 @@ func handleTopDataCondition(c *fiber.Ctx) (string, []interface{}) {
 	return whereSql + strings.Join(conditionNames, " "), conditions
 }
 
-func GetTop5BuyGoods(c *fiber.Ctx) []STATISTICS {
-	var top5BuyGoods []STATISTICS
-	// GoodsBuyTop5 进货最多的产品
-	sql := "select name,sum(buyPrice*number) money from t_order "
-	groupSql := " group by name order by money desc limit 5"
+func GetTop5BuyGoods(c *fiber.Ctx) ([]STATISTICS, error) {
+	top5BuyGoods := []STATISTICS{}
+	// Order costs for sold goods; this is not a stock purchase ranking.
+	sql := "select COALESCE(name,'') name,COALESCE(sum(buyPrice*number),0) money from t_order "
+	groupSql := " group by name order by money desc, name asc limit 5"
 	whereSql, conditions := handleTopDataCondition(c)
 	sql = sql + whereSql + groupSql
 
 	err := database.DBConn.Select(&top5BuyGoods, sql, conditions...)
 
-	if err != nil {
-		fmt.Println("查询失败", err.Error(), sql)
-	}
-
-	return top5BuyGoods
+	return top5BuyGoods, err
 }
 
-func GetTop5SellGoods(c *fiber.Ctx) []STATISTICS {
-	var top5SellGoods []STATISTICS
+func GetTop5SellGoods(c *fiber.Ctx) ([]STATISTICS, error) {
+	top5SellGoods := []STATISTICS{}
 	//  卖的最多 top 5
-	sql := "select  name,sum(sellPrice*number) money from t_order "
+	sql := "select COALESCE(name,'') name,COALESCE(sum(sellPrice*number),0) money from t_order "
 	whereSql, conditions := handleTopDataCondition(c)
-	groupSql := " group by name order by money desc limit 5"
+	groupSql := " group by name order by money desc, name asc limit 5"
 	sql = sql + whereSql + groupSql
 
 	err := database.DBConn.Select(&top5SellGoods, sql, conditions...)
 
-	if err != nil {
-		fmt.Println("查询失败", err.Error(), sql)
-	}
-
-	return top5SellGoods
+	return top5SellGoods, err
 }
 
-func GetTop5ProfitGoods(c *fiber.Ctx) []STATISTICS {
-	var top5ProfitGoods []STATISTICS
+func GetTop5ProfitGoods(c *fiber.Ctx) ([]STATISTICS, error) {
+	top5ProfitGoods := []STATISTICS{}
 	// GoodsProfitTop5 利润最高 top 5
-	sql := "select  name,sum(sellPrice*number - buyPrice*number - otherCost) money from t_order"
+	sql := "select COALESCE(name,'') name,COALESCE(sum(sellPrice*number - buyPrice*number - COALESCE(otherCost,0)),0) money from t_order"
 	whereSql, conditions := handleTopDataCondition(c)
-	groupSql := " group by name order by money desc limit 5"
+	groupSql := " group by name order by money desc, name asc limit 5"
 	sql = sql + whereSql + groupSql
 
 	err := database.DBConn.Select(&top5ProfitGoods, sql, conditions...)
 
-	if err != nil {
-		fmt.Println("查询失败", err.Error(), sql)
-	}
-
-	return top5ProfitGoods
+	return top5ProfitGoods, err
 }
 
-func GetTop5BuyCustomer(c *fiber.Ctx) []STATISTICS {
-	var top5BuyCustomers []STATISTICS
+func GetTop5BuyCustomer(c *fiber.Ctx) ([]STATISTICS, error) {
+	top5BuyCustomers := []STATISTICS{}
 	// ProfitTop5 赚的最多的客户
-	sql := "select contact name,sum(sellPrice*number - buyPrice*number - otherCost) money from t_order"
-	groupSql := " group by contact order by money desc limit 5"
+	sql := "select COALESCE(contact,'') name,COALESCE(sum(sellPrice*number - buyPrice*number - COALESCE(otherCost,0)),0) money from t_order"
+	groupSql := " group by contact order by money desc, contact asc limit 5"
 	whereSql, conditions := handleTopDataCondition(c)
 	sql = sql + whereSql + groupSql
 
 	err := database.DBConn.Select(&top5BuyCustomers, sql, conditions...)
 
-	if err != nil {
-		fmt.Println("查询失败", err.Error(), sql)
-	}
-
-	return top5BuyCustomers
+	return top5BuyCustomers, err
 }
 
 func GetOrderById(c *fiber.Ctx, id int) (model.Order, error) {
