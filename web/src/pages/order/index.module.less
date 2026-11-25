@@ -71,3 +71,30 @@
     display: none;
   }
 }
+
+.amount { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.batchSummary {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+  box-shadow: 0 -6px 12px rgba(0, 0, 0, 0.04);
+}
+.batchSummaryValues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  font-size: 14px;
+  strong { font-variant-numeric: tabular-nums; margin-left: 6px; }
+}
+.incompleteHint { color: #ad6800; font-size: 12px; }
+@media (max-width: 640px) {
+  .batchSummary { flex-wrap: wrap; }
+  .batchSummary > button { width: 100%; }
+}

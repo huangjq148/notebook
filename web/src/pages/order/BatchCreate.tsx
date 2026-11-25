@@ -1,6 +1,6 @@
 import { DeleteConfirmButton, DEFAULT_TABLE_SCROLL, PinyinMatchInput, TextButton } from '@/components';
 import {
-  createOrder,
+  createOrderBatch,
   queryOrderById,
   queryContactsByOrders,
   queryProductsByOrders,
@@ -17,12 +17,14 @@ import { Contact, Order, Product } from '@/global';
 
 import { matchVoiceNames, parseSpokenNumber, parseVoiceActions, toNamePinyin, VoiceField } from './voiceInput';
 import { useVoiceRecognition } from './useVoiceRecognition';
+import { batchTotals, isEmptyProduct, productError, rowAmounts } from './batchOrder';
 
 const STORAGE_KEY = 'batch_order_form_draft';
 
 type Props = {
   id?: number;
   onSubmit?: () => void;
+  onSubmittingChange?: (submitting: boolean) => void;
 };
 
 type OrderProductInfo = {
@@ -45,6 +47,7 @@ const createEmptyProduct = (): OrderProductInfo => ({
 });
 
 const EditTable = (props: {
+  disabled?: boolean;
   value?: OrderProductInfo[];
   onChange?: (val?: OrderProductInfo[]) => void;
   activeFieldRef: { current: VoiceField };
@@ -55,7 +58,7 @@ const EditTable = (props: {
 }) => {
   const [productModalOpen, setProductModalOpen] = useState(false);
   // 默认提供一行，方便直接录入
-  const [dataSource, setDataSource] = useState<OrderProductInfo[]>([createEmptyProduct()]);
+  const [dataSource, setDataSource] = useState<OrderProductInfo[]>(props.value ?? [createEmptyProduct()]);
   const [currentEditIndex, setCurrentEditIndex] = useState(0);
 
   const rowsRef = useRef(dataSource);
@@ -117,36 +120,20 @@ const EditTable = (props: {
     if (focusRequest) inputRefs.current[focusRequest.field]?.focus();
   }, [focusRequest, currentEditIndex]);
 
-  // 同步外部 value 到内部 dataSource（用于数据回填）
+  // Keep incomplete rows in the form and draft too; submission validates them.
   useEffect(() => {
-    if (props.value && props.value.length > 0) {
-      // 过滤掉空行后再比较，避免将用户正在编辑的空行误判为差异
-      const filteredDataSource = dataSource.filter((item) => item.name && item.number);
-
-      // 只有当外部 value 与当前 dataSource 不同时才同步
-      const isDifferent =
-        props.value.length !== filteredDataSource.length ||
-        props.value.some((item, index) => {
-          const current = filteredDataSource[index];
-          return !current || item.name !== current.name || item.number !== current.number;
-        });
-
-      if (isDifferent) {
-        setDataSource(
-          props.value.map((item) => ({
-            ...item,
-            tmpId: item.tmpId || Date.now() + Math.random(),
-          })),
-        );
-        // 回填的数据默认处于展示态，点击编辑后再修改
-        setCurrentEditIndex(-1);
-      }
+    if (props.value && JSON.stringify(props.value) !== JSON.stringify(rowsRef.current)) {
+      rowsRef.current = props.value;
+      setDataSource(props.value);
+      setCurrentEditIndex(props.value.length ? 0 : -1);
     }
   }, [props.value]);
 
   const updateRows = (rows: OrderProductInfo[]) => {
+    if (props.disabled) return;
     rowsRef.current = rows;
     setDataSource(rows);
+    props.onChange?.(rows);
   };
 
   const handleRecordRemove = (recordIndex: number) => {
@@ -160,7 +147,7 @@ const EditTable = (props: {
   };
 
   const handleDataAdd = () => {
-    if (rowsRef.current.some((item) => !item.name || !item.buyPrice || !item.sellPrice || !item.number)) {
+    if (rowsRef.current.some((item) => productError(item))) {
       message.warning('请先完成当前行的产品名、进价、售价、数量填写');
       return false;
     }
@@ -191,8 +178,9 @@ const EditTable = (props: {
     return true;
   };
 
-  const { listening, transcript, toggle } = useVoiceRecognition(
+  const { listening, transcript, toggle, stop } = useVoiceRecognition(
     (text) => {
+      if (props.disabled) return;
       for (const action of parseVoiceActions(text)) {
         if (action.type === 'field') {
           focusField(action.field);
@@ -282,7 +270,12 @@ const EditTable = (props: {
     },
   );
 
+  useEffect(() => {
+    if (props.disabled) stop();
+  }, [props.disabled]);
+
   const handleProductSelect = (productInfo: Product) => {
+    if (props.disabled) return;
     const index = editIndexRef.current;
     updateRows(
       rowsRef.current.map((row, rowIndex) =>
@@ -463,6 +456,28 @@ const EditTable = (props: {
       },
     },
     {
+      title: '销售金额',
+      key: 'sales',
+      width: 120,
+      render: (_: unknown, row: OrderProductInfo) => {
+        const value = rowAmounts(row).sales;
+        return <span className={styles.amount}>{value ? `¥${value.toFixed(2)}` : '—'}</span>;
+      },
+    },
+    {
+      title: '利润',
+      key: 'profit',
+      width: 120,
+      render: (_: unknown, row: OrderProductInfo) => {
+        const value = rowAmounts(row).profit;
+        return (
+          <span className={styles.amount} style={{ color: value?.isNegative() ? '#cf1322' : undefined }}>
+            {value ? `¥${value.toFixed(2)}` : '—'}
+          </span>
+        );
+      },
+    },
+    {
       title: (
         <>
           <PlusCircleOutlined onClick={handleDataAdd}>添加一行</PlusCircleOutlined>
@@ -479,7 +494,7 @@ const EditTable = (props: {
                 <TextButton
                   onClick={() => {
                     // 检查之前的数据是否填写完整
-                    const hasEmptyRow = !record.name || !record.buyPrice || !record.sellPrice || !record.number;
+                    const hasEmptyRow = productError(record);
 
                     if (hasEmptyRow) {
                       message.warning('请先完成当前行的产品名、进价、售价、数量填写');
@@ -513,14 +528,6 @@ const EditTable = (props: {
       },
     },
   ];
-
-  useEffect(() => {
-    props.onChange?.(
-      dataSource.filter((item) => {
-        return item.name && item.number;
-      }),
-    );
-  }, [dataSource]);
 
   return (
     <>
@@ -580,6 +587,12 @@ export default (props: Props) => {
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [cachedData, setCachedData] = useState<any>(null);
   const hasRestoredRef = useRef(false);
+  const submittingRef = useRef(false);
+  const [submitting, setSubmitting] = useState(false);
+  const pendingSubmissionRef = useRef<{ requestId: string; fingerprint: string } | undefined>(undefined);
+  const [initialValues] = useState(() => ({ orderTime: dayjs(), products: [createEmptyProduct()] }));
+  const products = Form.useWatch('products', formRef) as OrderProductInfo[] | undefined;
+  const totals = batchTotals(products ?? []);
   const contactInputRef = useRef<any>(null);
   const activeFieldRef = useRef<VoiceField>('contact');
   const [contactDropdownOpen, setContactDropdownOpen] = useState(false);
@@ -612,6 +625,7 @@ export default (props: Props) => {
   };
 
   const handleContactSelect = (val: Contact) => {
+    if (submittingRef.current) return;
     clearContactSearch();
     setContactDropdownOpen(false);
     formRef.setFieldsValue({
@@ -620,46 +634,63 @@ export default (props: Props) => {
       address: val.address,
     });
 
-    setContactModal({
-      open: false,
-    });
+    setContactModal({ open: false });
+    saveDraft(formRef.getFieldsValue());
   };
 
-  const handleFormSubmit = async (
-    values: Order & {
-      products: OrderProductInfo[];
-    },
-  ) => {
-    values.orderTime = dayjs(values.orderTime).format('YYYY-MM-DD');
-    if (props.id) {
-      await updateOrder({
-        ...oldData,
-        ...values,
-      });
-    } else {
-      const { products, ...restValues } = values;
-      const productsLength = values.products?.length;
-
-      if (!productsLength) {
-        message.error('未添加产品信息');
-        return;
-      }
-
-      for (let i = 0; i < productsLength; i++) {
-        const item = values.products[i];
-        const order = {
-          ...item,
-          ...restValues,
-          status: '1',
-          stockId: 0,
-        };
-        await createOrder(order);
-      }
+  const handleFormSubmit = async (values: Order & { products: OrderProductInfo[] }) => {
+    if (submittingRef.current) return;
+    const rows = values.products ?? [];
+    const filledRows = rows.filter((row) => !isEmptyProduct(row));
+    if (!filledRows.length) {
+      message.error('请至少填写一行商品');
+      return;
     }
-    // 提交成功后清除缓存
-    clearDraft();
-    message.success('保存成功');
-    props?.onSubmit?.();
+    const invalidIndex = rows.findIndex((row) => !isEmptyProduct(row) && productError(row));
+    if (invalidIndex >= 0) {
+      message.error(`第 ${invalidIndex + 1} 行：${productError(rows[invalidIndex])}`);
+      return;
+    }
+    submittingRef.current = true;
+    setSubmitting(true);
+    props.onSubmittingChange?.(true);
+    try {
+      if (props.id) {
+        await updateOrder({ ...oldData, ...values, orderTime: dayjs(values.orderTime).format('YYYY-MM-DD') });
+      } else {
+        const orders = filledRows.map((row) => ({
+          name: row.name.trim(),
+          buyPrice: row.buyPrice,
+          sellPrice: row.sellPrice,
+          number: row.number,
+          otherCost: row.otherCost || '0',
+          contact: values.contact.trim(),
+          phone: values.phone || '',
+          address: values.address || '',
+          remark: values.remark || '',
+          orderTime: dayjs(values.orderTime).format('YYYY-MM-DD'),
+        }));
+        const fingerprint = JSON.stringify(orders);
+        if (pendingSubmissionRef.current?.fingerprint !== fingerprint) {
+          // getRandomValues also works on local HTTP deployments without randomUUID.
+          const bytes = crypto.getRandomValues(new Uint8Array(16));
+          const requestId = Array.from(bytes, (value) => value.toString(16).padStart(2, '0')).join('');
+          pendingSubmissionRef.current = { requestId, fingerprint };
+        }
+        // Persist the receipt key BEFORE sending so a lost response / reload can retry safely.
+        saveDraft(values);
+        await createOrderBatch(pendingSubmissionRef.current.requestId, orders);
+      }
+      clearDraft();
+      message.success('保存成功');
+      props.onSubmit?.();
+    } catch {
+      message.error('保存未确认成功，录入内容已保留，请重试；同一提交不会重复创建');
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+      props.onSubmittingChange?.(false);
+    }
   };
 
   // 保存草稿到 localStorage
@@ -667,7 +698,7 @@ export default (props: Props) => {
     if (props.id) return; // 编辑模式不缓存
     if (!hasRestoredRef.current) return; // 数据回填完成前不保存
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...values, _submission: pendingSubmissionRef.current }));
     } catch (e) {
       console.error('保存草稿失败:', e);
     }
@@ -677,6 +708,7 @@ export default (props: Props) => {
   const restoreDraft = () => {
     if (cachedData) {
       // 将日期字符串转换回 dayjs 对象
+      pendingSubmissionRef.current = cachedData._submission;
       const restoredData = {
         ...cachedData,
         orderTime: cachedData.orderTime ? dayjs(cachedData.orderTime) : dayjs(),
@@ -701,6 +733,7 @@ export default (props: Props) => {
   const ignoreDraft = () => {
     hasRestoredRef.current = true;
     clearDraft();
+    pendingSubmissionRef.current = undefined;
     setIsRestoreModalOpen(false);
   };
 
@@ -760,184 +793,209 @@ export default (props: Props) => {
 
   return (
     <>
-      <Form onFinish={handleFormSubmit} form={formRef} onValuesChange={handleValuesChange}>
-        <Form.Item
-          name="orderTime"
-          label="日期"
-          style={{
-            width: '400px',
-          }}
-        >
-          <DatePicker
-            allowClear={false}
-            presets={[
-              {
-                label: '昨天',
-                value: dayjs().add(-1, 'day'),
-              },
-              {
-                label: '今天',
-                value: dayjs(),
-              },
-            ]}
-            defaultValue={dayjs(dayjs(), 'YYYY-MM-DD')}
-          />
-        </Form.Item>
-        <div
-          style={{
-            display: 'flex',
-            gap: 10,
-          }}
-        >
-          <div
+      <Form
+        onFinish={handleFormSubmit}
+        form={formRef}
+        onValuesChange={handleValuesChange}
+        disabled={submitting}
+        initialValues={initialValues}
+      >
+        <div inert={submitting}>
+          <Form.Item
+            name="orderTime"
+            label="日期"
             style={{
-              display: 'flex',
               width: '400px',
             }}
           >
-            <Form.Item
-              label="姓名"
-              name="contact"
-              getValueProps={(contact) => ({ value: contactPreview ?? voiceContactQuery ?? contact })}
-              extra={contactVoiceHint || undefined}
-              style={{
-                width: '100%',
-                marginRight: '10px',
-              }}
-              rules={[
+            <DatePicker
+              allowClear={false}
+              presets={[
                 {
-                  required: true,
-                  message: '请输入姓名',
+                  label: '昨天',
+                  value: dayjs().add(-1, 'day'),
+                },
+                {
+                  label: '今天',
+                  value: dayjs(),
                 },
               ]}
+            />
+          </Form.Item>
+          <div
+            style={{
+              display: 'flex',
+              gap: 10,
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                width: '400px',
+              }}
             >
-              <PinyinMatchInput
-                ref={contactInputRef}
-                options={(voiceContactOptions ?? contactNames ?? []).map((name, index) => ({
-                  value: name,
-                  label: voiceContactOptions && voiceContactOptions.length > 1 ? `${index + 1}. ${name}` : name,
-                }))}
-                placeholder="请输入姓名"
-                open={contactDropdownOpen}
-                onOpenChange={setContactDropdownOpen}
-                onFocus={() => {
-                  activeFieldRef.current = 'contact';
+              <Form.Item
+                label="姓名"
+                name="contact"
+                getValueProps={(contact) => ({ value: contactPreview ?? voiceContactQuery ?? contact })}
+                extra={contactVoiceHint || undefined}
+                style={{
+                  width: '100%',
+                  marginRight: '10px',
                 }}
-                onChange={clearContactSearch}
-                onSearch={() => setContactDropdownOpen(true)}
-                onSelect={() => {
-                  clearContactSearch();
-                  setContactDropdownOpen(false);
-                }}
-              />
-            </Form.Item>
-            <Button
-              type="primary"
-              onClick={() =>
-                setContactModal({
-                  open: true,
-                })
-              }
-            >
-              选择
-            </Button>
-          </div>
-          <Form.Item className={styles.toggleButton}>
-            <div onClick={() => setShowMoreInfoSetting((val) => !val)}>
-              {showMoreInfoSetting ? (
-                <>
-                  <MinusCircleOutlined /> 收起
-                </>
-              ) : (
-                <>
-                  <PlusCircleOutlined /> 更多
-                </>
-              )}
+                rules={[
+                  {
+                    required: true,
+                    message: '请输入姓名',
+                  },
+                ]}
+              >
+                <PinyinMatchInput
+                  ref={contactInputRef}
+                  options={(voiceContactOptions ?? contactNames ?? []).map((name, index) => ({
+                    value: name,
+                    label: voiceContactOptions && voiceContactOptions.length > 1 ? `${index + 1}. ${name}` : name,
+                  }))}
+                  placeholder="请输入姓名"
+                  open={contactDropdownOpen}
+                  onOpenChange={setContactDropdownOpen}
+                  onFocus={() => {
+                    activeFieldRef.current = 'contact';
+                  }}
+                  onChange={clearContactSearch}
+                  onSearch={() => setContactDropdownOpen(true)}
+                  onSelect={() => {
+                    clearContactSearch();
+                    setContactDropdownOpen(false);
+                  }}
+                />
+              </Form.Item>
+              <Button
+                type="primary"
+                onClick={() =>
+                  setContactModal({
+                    open: true,
+                  })
+                }
+              >
+                选择
+              </Button>
             </div>
+            <Form.Item className={styles.toggleButton}>
+              <div onClick={() => setShowMoreInfoSetting((val) => !val)}>
+                {showMoreInfoSetting ? (
+                  <>
+                    <MinusCircleOutlined /> 收起
+                  </>
+                ) : (
+                  <>
+                    <PlusCircleOutlined /> 更多
+                  </>
+                )}
+              </div>
+            </Form.Item>
+          </div>
+          {showMoreInfoSetting && (
+            <>
+              <Form.Item
+                label="电话"
+                name="phone"
+                style={{
+                  width: '400px',
+                }}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="地址"
+                name="address"
+                style={{
+                  width: '400px',
+                }}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="备注"
+                name="remark"
+                style={{
+                  width: '400px',
+                }}
+              >
+                <Input />
+              </Form.Item>
+            </>
+          )}
+          <Form.Item name="products">
+            <EditTable
+              disabled={submitting}
+              activeFieldRef={activeFieldRef}
+              onContactPreview={setContactPreview}
+              onContactFocus={() => contactInputRef.current?.focus?.()}
+              onContactChange={(spoken) => {
+                if (!contactNames) {
+                  setContactVoiceHint('姓名列表尚未加载完成，请稍后重试');
+                  return;
+                }
+                const matches = matchVoiceNames(contactNames, spoken);
+                voiceContactOptionsRef.current = matches;
+                setVoiceContactOptions(matches);
+                setVoiceContactQuery(matches.length === 1 ? null : toNamePinyin(spoken));
+                formRef.setFieldsValue({ contact: matches.length === 1 ? matches[0] : '' });
+                setContactDropdownOpen(matches.length > 1);
+                setContactVoiceHint(
+                  matches.length === 1
+                    ? `已选中：${matches[0]}`
+                    : matches.length
+                      ? `匹配到 ${matches.length} 项，可说“第几个”选择`
+                      : '没有匹配的姓名，请重说或手动输入',
+                );
+                // 未确认的拼音只用于搜索，不写入草稿或提交数据。
+                saveDraft(formRef.getFieldsValue());
+              }}
+              onVoiceContactSelect={(index) => {
+                const candidates = voiceContactOptionsRef.current;
+                if (!candidates || candidates.length < 2) {
+                  setContactVoiceHint('当前没有待选姓名');
+                  return;
+                }
+                if (!Number.isInteger(index) || index < 0 || index >= candidates.length) {
+                  setContactVoiceHint(`请选择第 1 到第 ${candidates.length} 项`);
+                  return;
+                }
+                const contact = candidates[index];
+                formRef.setFieldsValue({ contact });
+                clearContactSearch();
+                setContactDropdownOpen(false);
+                setContactVoiceHint(`已选中：${contact}`);
+                contactInputRef.current?.focus?.();
+                saveDraft(formRef.getFieldsValue());
+              }}
+            />
           </Form.Item>
         </div>
-        {showMoreInfoSetting && (
-          <>
-            <Form.Item
-              label="电话"
-              name="phone"
-              style={{
-                width: '400px',
-              }}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label="地址"
-              name="address"
-              style={{
-                width: '400px',
-              }}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label="备注"
-              name="remark"
-              style={{
-                width: '400px',
-              }}
-            >
-              <Input />
-            </Form.Item>
-          </>
-        )}
-        <Form.Item name="products">
-          <EditTable
-            activeFieldRef={activeFieldRef}
-            onContactPreview={setContactPreview}
-            onContactFocus={() => contactInputRef.current?.focus?.()}
-            onContactChange={(spoken) => {
-              if (!contactNames) {
-                setContactVoiceHint('姓名列表尚未加载完成，请稍后重试');
-                return;
-              }
-              const matches = matchVoiceNames(contactNames, spoken);
-              voiceContactOptionsRef.current = matches;
-              setVoiceContactOptions(matches);
-              setVoiceContactQuery(matches.length === 1 ? null : toNamePinyin(spoken));
-              formRef.setFieldsValue({ contact: matches.length === 1 ? matches[0] : '' });
-              setContactDropdownOpen(matches.length > 1);
-              setContactVoiceHint(
-                matches.length === 1
-                  ? `已选中：${matches[0]}`
-                  : matches.length
-                    ? `匹配到 ${matches.length} 项，可说“第几个”选择`
-                    : '没有匹配的姓名，请重说或手动输入',
-              );
-              // 未确认的拼音只用于搜索，不写入草稿或提交数据。
-              saveDraft(formRef.getFieldsValue());
-            }}
-            onVoiceContactSelect={(index) => {
-              const candidates = voiceContactOptionsRef.current;
-              if (!candidates || candidates.length < 2) {
-                setContactVoiceHint('当前没有待选姓名');
-                return;
-              }
-              if (!Number.isInteger(index) || index < 0 || index >= candidates.length) {
-                setContactVoiceHint(`请选择第 1 到第 ${candidates.length} 项`);
-                return;
-              }
-              const contact = candidates[index];
-              formRef.setFieldsValue({ contact });
-              clearContactSearch();
-              setContactDropdownOpen(false);
-              setContactVoiceHint(`已选中：${contact}`);
-              contactInputRef.current?.focus?.();
-              saveDraft(formRef.getFieldsValue());
-            }}
-          />
-        </Form.Item>
-        <Form.Item>
-          <Button htmlType="submit" type="primary">
-            保存
+        <div className={styles.batchSummary}>
+          <div className={styles.batchSummaryValues} aria-live="polite">
+            <span>
+              商品行数 <strong>{totals.count}</strong>
+            </span>
+            <span>
+              总金额 <strong>¥{totals.sales.toFixed(2)}</strong>
+            </span>
+            <span>
+              总利润{' '}
+              <strong style={{ color: totals.profit.isNegative() ? '#cf1322' : undefined }}>
+                ¥{totals.profit.toFixed(2)}
+              </strong>
+            </span>
+            {totals.invalid > 0 && (
+              <span className={styles.incompleteHint}>{totals.invalid} 行待完善，汇总仅计可计算金额</span>
+            )}
+          </div>
+          <Button htmlType="submit" type="primary" loading={submitting} disabled={submitting || totals.count === 0}>
+            {submitting ? '保存中…' : '保存订单'}
           </Button>
-        </Form.Item>
+        </div>
       </Form>
 
       <Modal

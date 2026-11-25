@@ -65,3 +65,16 @@ export const queryProductsByOrders = async (): Promise<string[]> => {
     method: 'Get',
   });
 };
+
+export type BatchOrderInput = Pick<Order, 'name' | 'contact' | 'buyPrice' | 'sellPrice' | 'number' | 'orderTime'> & {
+  phone: string;
+  address: string;
+  remark: string;
+  otherCost: string;
+};
+
+export const createOrderBatch = (requestId: string, orders: BatchOrderInput[]) =>
+  request<{ orderIds: number[]; replayed: boolean }>('/order/batch', {
+    method: 'POST',
+    data: { requestId, orders },
+  });

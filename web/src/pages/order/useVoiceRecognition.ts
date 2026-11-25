@@ -135,5 +135,5 @@ export function useVoiceRecognition(onTranscript: (text: string) => void, onInte
     [],
   );
 
-  return { listening, transcript, toggle };
+  return { listening, transcript, toggle, stop };
 }

@@ -34,6 +34,7 @@ func SetupRoutes(app *fiber.App) {
 	orderRouter := authVerifyRouter.Group("/order")
 	orderRouter.Delete("/revoke/stock/:id", api.RevokeStockOrder)
 	orderRouter.Get("/statistics", api.OrderStatistics)
+	orderRouter.Post("/batch", api.CreateOrderBatch)
 	orderRouter.Post("", api.CreateOrder)
 	orderRouter.Get("", api.QueryOrderList)
 	orderRouter.Get("/contacts", api.QueryContactsByOrders)

@@ -122,7 +122,7 @@ func EnsureSchema() error {
 
 	var count int
 	if err := DBConn.Get(&count, "select count(*) from t_user_account"); err == nil && count == 0 {
-		fmt.Println("[warn] t_user_account 表为空，无法登录。请先执行 go run ./cmd/migrate up 初始化，或导入账号数据（参考 resources/notebook.sql）")
+		fmt.Println("[warn] t_user_account 表为空，无法登录。请检查管理员初始化或导入账号数据（参考 resources/notebook.sql）")
 	}
 	return nil
 }

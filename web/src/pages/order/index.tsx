@@ -193,6 +193,7 @@ export default () => {
     open: false,
   });
   const [batchModalOpen, setBatchModalOpen] = useState(false);
+  const [batchSubmitting, setBatchSubmitting] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [generatedImageUrl, setGeneratedImageUrl] = useState('');
   const generatedImageUrlRef = useRef('');
@@ -586,9 +587,15 @@ export default () => {
         title={'批量新增'}
         open={batchModalOpen}
         width={1000}
-        onCancel={() => setBatchModalOpen(false)}
+        onCancel={() => {
+          if (!batchSubmitting) setBatchModalOpen(false);
+        }}
+        closable={!batchSubmitting}
+        keyboard={!batchSubmitting}
+        maskClosable={!batchSubmitting}
+        styles={{ body: { maxHeight: '75vh', overflowY: 'auto' } }}
       >
-        <BatchCreate onSubmit={handleAfterBatchCreate} />
+        <BatchCreate onSubmit={handleAfterBatchCreate} onSubmittingChange={setBatchSubmitting} />
       </Modal>
 
       <Modal

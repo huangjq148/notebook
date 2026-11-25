@@ -11,13 +11,13 @@ import (
 // 老库可能没有 t_user_account.roles 列（真实 DDL 里确实没有）。启动时探测一次并缓存：
 //   - 探测到：登录 SQL 带 roles，JWT 写入 roles，操作日志按角色鉴权；
 //   - 探测不到 / 探测失败：roles 一律视为 user → 操作日志对所有人 403，
-//     并打醒目 warn 提示执行 migration.sql。
+//     并记录角色列缺失的警告。
 //
 // 安全优先：宁可所有人都看不到审计日志，也不能因为角色信息缺失而放开访问。
 
 const (
-	// RoleColumnHint 恢复功能的提示文案（日志与 result.md 共用）
-	RoleColumnHint = "请执行 go run ./cmd/migrate up 应用迁移（0002 添加 t_user_account.roles）后重启服务"
+	// RoleColumnHint 恢复功能的提示文案。
+	RoleColumnHint = "请检查启动迁移日志及 t_user_account.roles 列状态"
 )
 
 var roleColumnReady int32

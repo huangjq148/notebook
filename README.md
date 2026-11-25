@@ -28,9 +28,5 @@
 
 # 数据库迁移
 
-数据库结构与管理员初始化使用版本化迁移，详见 [docs/database-migrations.md](docs/database-migrations.md)。
-
-```bash
-go run ./cmd/migrate up
-go run ./cmd/migrate down 0
-```
+应用启动时自动执行尚未应用的数据库迁移。首次启动且数据库中没有 `huangjq` 账号时，需设置 `ADMIN_INIT_PASSWORD`。
+迁移配置与维护命令见 [数据库迁移说明](docs/database-migrations.md)。

@@ -1,17 +1,20 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"hjq-notebook/internal/config"
 	"hjq-notebook/internal/database"
 	"hjq-notebook/internal/oplog"
 	"hjq-notebook/internal/router"
 	"hjq-notebook/internal/services"
+	"hjq-notebook/migrations"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -38,7 +41,17 @@ func main() {
 	message, isSuccess := database.ConnectDB()
 	if !isSuccess {
 		log.Fatal(message)
-		os.Exit(0)
+	}
+
+	migrationCtx, cancelMigrations := context.WithTimeout(context.Background(), 10*time.Minute)
+	err := migrations.Up(migrationCtx, database.DBConn.DB)
+	cancelMigrations()
+	if err != nil {
+		log.Fatal("启动时数据库迁移失败：", err)
+	}
+
+	if err := database.EnsureSchema(); err != nil {
+		log.Println("[warn] ensure schema fail:", err)
 	}
 
 	// 角色：探测 t_user_account.roles 是否存在（老库可能没有）。
